@@ -1,0 +1,60 @@
+services:
+  # Frontend service
+  frontend:
+    image: consumer-frontend:latest   # Replace with your frontend Docker image
+    ports:
+      - "3000:3000"                     # Maps port 3000 of the host to port 3000 of the container
+    networks:
+      - app-network
+    depends_on:
+      - backend
+
+  # Backend service
+  backend:
+    image: consumer-backend:latest    # Replace with your backend Docker image
+    ports:
+      - "7001:7001"                     # Maps port 7001 of the host to port 7001 of the container
+    networks:
+      - app-network
+    environment:
+      DB_HOST: sql                      # Referencing the SQL service by its container name
+    depends_on:
+      - sql
+
+  # SQL service
+  sql:
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: butt   # Set root password
+      MYSQL_DATABASE: butt             # Create a default database
+      MYSQL_USER: admin_user                     # Non-root user
+      MYSQL_PASSWORD: 4dm1n        # Non-root user password
+    ports:
+      - "3307:3306"                             # Maps host port 3307 to container port 3306 (MySQL)
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - app-network
+
+  # Nginx service
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"                                 # Maps port 80 of the host to port 80 of the container
+    networks:
+      - app-network
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf # Replace with your nginx configuration
+    depends_on:
+      - frontend
+      - backend
+
+# Define a common network for all services
+networks:
+  app-network:
+    driver: bridge
+
+# Define volumes for persistent storage
+volumes:
+  db_data:
+
