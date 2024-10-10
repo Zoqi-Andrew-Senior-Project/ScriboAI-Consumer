@@ -16,6 +16,8 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         script: |
-          cd ~ | date >> pipeline_test
-          echo Completed
+          cd ~/AI-Training-Consumer/
+          git pull
+          docker compose down
+          docker compose up
           
