@@ -15,4 +15,7 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
-        script: echo Hello World
+        script: |
+          cd ~ | date >> pipeline_test
+          echo Completed
+          
