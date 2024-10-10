@@ -18,8 +18,10 @@ jobs:
         script: |
           cd ~/AI-Training-Consumer/
           git pull
-          cd ~/AI-Training-Consumer/consumer_backend | docker build -t consumer-backend
-          cd ~/AI-Training-Consumer/consumder_frontend | docker build -t consumer-frontend
+          cd ~/AI-Training-Consumer/consumer_backend
+          docker build -t consumer-backend:latest
+          cd ~/AI-Training-Consumer/consumder_frontend
+          docker build -t consumer-frontend:latest
           cd ~/AI-Training-Consumer/
           docker compose down
           docker compose up -d
