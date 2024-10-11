@@ -28,12 +28,12 @@ jobs:
           echo "+++++++++++++++"
           
           cd ~/AI-Training-Consumer/consumer_backend
-          docker build -t consumer-backend:latest || { echo -e " ++++++++++++++++++++++++++++++++++++++++++++++++\n❌ Error building consumer-backend image! ❌ \n ++++++++++++++++++++++++++++++++++++++++++++++++"; exit 1; }
+          docker build -t consumer-backend:latest . || { echo -e " ++++++++++++++++++++++++++++++++++++++++++++++++\n❌ Error building consumer-backend image! ❌ \n ++++++++++++++++++++++++++++++++++++++++++++++++"; exit 1; }
           echo "+++++++++++++++"
           echo "🏗️ Building consumer-frontend image......."
           echo "+++++++++++++++"
           cd ~/AI-Training-Consumer/consumder_frontend
-          docker build -t consumer-frontend:latest || { echo -e " ++++++++++++++++++++++++\n❌ Error building consumer-frontend image! ❌ \n ++++++++++++++++++++++++"; exit 1; }
+          docker build -t consumer-frontend:latest . || { echo -e " ++++++++++++++++++++++++\n❌ Error building consumer-frontend image! ❌ \n ++++++++++++++++++++++++"; exit 1; }
 
           echo "+++++++++++++++"
           echo "🏗️ Composing docker setup......."
