@@ -16,13 +16,30 @@ jobs:
         password: ${{ secrets.PASSWORD }}
         port: ${{ secrets.PORT }}
         script: |
+          echo "+++++++++++++++"
+          echo "🛻 Pulling changes......."
+          echo "+++++++++++++++"
+          
           cd ~/AI-Training-Consumer/
-          git pull
+          git pull || echo "❌ Error: git pull failed ❌"
+          
+          echo "+++++++++++++++"
+          echo "🏗️ Building consumer-backend image......."
+          echo "+++++++++++++++"
+          
           cd ~/AI-Training-Consumer/consumer_backend
           docker build -t consumer-backend:latest
+
+          echo "+++++++++++++++"
+          echo "🏗️ Building consumer-frontend image......."
+          echo "+++++++++++++++"
           cd ~/AI-Training-Consumer/consumder_frontend
           docker build -t consumer-frontend:latest
-          cd ~/AI-Training-Consumer/
-          docker compose down
-          docker compose up -d
+
+          echo "+++++++++++++++"
+          echo "🏗️ Composing docker setup......."
+          echo "+++++++++++++++"
           
+          cd ~/AI-Training-Consumer/
+          docker compose down || echo "❌ Error: docker compose down failed ❌"
+          docker compose up -d || echo "❌ Error: docker compose up failed ❌"
