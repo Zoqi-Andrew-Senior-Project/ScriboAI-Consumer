@@ -1,6 +1,9 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
+import CreateCourse from './CreateCourse';
+
 
 function Navbar() {
   return (
@@ -13,7 +16,7 @@ function Navbar() {
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav ms-auto">
             <li className="nav-item">
-              <a className="nav-link" href="#">Home</a>
+              <Link className="nav-link" to="/">Home</Link>
             </li>
             <li className="nav-item">
               <a className="nav-link" href="#">Training Programs</a>
@@ -34,7 +37,7 @@ function Navbar() {
   );
 }
 
-function MainContent() {
+function Home() {
   return (
     <div className="container-fluid main-content d-flex align-items-center">
       <div className="row w-100">
@@ -47,7 +50,7 @@ function MainContent() {
 
         {/* Right Column: Buttons stacked on top of each other */}
         <div className="col-lg-6 d-flex flex-column align-items-center justify-content-center">
-          <button className="btn btn-primary btn-big mb-3 w-75">Create a Course</button>
+          <Link to="/create-course" className="btn btn-primary btn-big mb-3 w-75">Create a Course</Link>
           <button className="btn btn-primary btn-big mb-3 w-75">Employee Management</button>
           <button className="btn btn-primary btn-big w-75">Existing Courses</button>
         </div>
@@ -66,11 +69,16 @@ function Footer() {
 
 function App() {
   return (
-    <div className="app-container">
-      <Navbar />
-      <MainContent />
-      <Footer />
-    </div>
+    <Router>
+      <div className="app-container">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/create-course" element={<CreateCourse />} />
+        </Routes>
+        <Footer />
+      </div>
+    </Router>
   );
 }
 
