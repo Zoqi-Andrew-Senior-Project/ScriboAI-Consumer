@@ -100,6 +100,59 @@ textarea.form-control::placeholder {
   color: #888888; /* Light gray for placeholder text */
 }
 
+/* Spinner Styles */
+.spinner-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 50px;
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  color: #4E6E5D; /* Muted green for spinner */
+  margin-bottom: 50px;
+  animation: spin 1s linear infinite; /* Smooth spinning animation */
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner-container p {
+  font-size: 3rem;
+  color: #1E2F23; /* Dark greenish-black */
+}
+
+/* Submit Button Styles */
+.submit-btn {
+  display: block;
+  margin: 20px auto; 
+  padding: 25px 25px; 
+  font-size: 2rem; 
+  background-color: #4E6E5D; /* Muted green */
+  border: none;
+  color: #DCCCA3; /* Light beige text color */
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #5B7F6C; /* Slightly darker green on hover */
+}
+
+.submit-btn:disabled {
+  background-color: #A5B5AA; /* Grayish color when disabled */
+  cursor: not-allowed;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .logo-placeholder {
