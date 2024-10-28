@@ -19,7 +19,7 @@ function CreateCourse() {
       <h2>Insert Relevant Information Here for Scribo</h2>
       <textarea
         className="form-control mt-3"
-        rows="12"
+        rows="10"
         placeholder="Enter course information..."
       ></textarea>
 

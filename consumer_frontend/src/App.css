@@ -16,13 +16,13 @@ body, html {
 /* Navbar Styles */
 .navbar {
   background-color: #1c3122; /* Dark greenish-black */
-  font-size: 2rem;
+  font-size: 1.25rem;
 }
 
 .navbar .nav-link,
 .navbar-brand {
   color: #DCCCA3; /* Light beige */
-  font-size: 2.5rem;
+  font-size: 1.25rem;
 }
 
 .navbar .nav-link:hover {
@@ -33,31 +33,31 @@ body, html {
 .main-content {
   flex: 1;
   background-color: #DCCCA3; /* Light beige */
-  padding: 50px;
+  padding: 20px;
 }
 
 .logo-placeholder {
-  width: 300px;
-  height: 300px;
+  width: 100px;
+  height: 100px;
   background-color: #4E6E5D; /* Muted green */
   border-radius: 50%;
 }
 
 h1 {
-  font-size: 3rem;
-  margin-bottom: 40px;
+  font-size: 1.25rem;
+  margin-bottom: 20px;
 }
 
 p {
-  font-size: 3rem;
+  font-size: 1.25rem;
 }
 
 /* Button Styles */
 .btn-primary {
   background-color: #4E6E5D; /* Muted green */
   border-color: #4E6E5D;
-  padding: 50px 50px;
-  font-size: 3rem;
+  padding: 20px 20px;
+  font-size: 1.25rem;
 }
 
 .btn-primary:hover {
@@ -68,28 +68,28 @@ p {
 .footer {
   background-color: #1E2F23;
   color: white;
-  padding: 40px 0;
+  padding: 20px 0;
   text-align: center;
-  font-size: 2.5rem;
+  font-size: 1rem;
 }
 
 /* Create Course Page Styles */
 .container.mt-5 {
   background-color: #DCCCA3; 
-  padding: 40px;
+  padding: 20px;
   border-radius: 15px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
-  margin-top: 40px;
+  margin-top: 20px;
 }
 
 h2 {
-  font-size: 2.5rem;
+  font-size: 1.25rem;
   color: #1E2F23;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 textarea.form-control {
-  font-size: 2rem;
+  font-size: 1.25rem;
   padding: 20px;
   border: 2px solid #4E6E5D;
   border-radius: 10px;
@@ -109,10 +109,10 @@ textarea.form-control::placeholder {
 }
 
 .spinner-border {
-  width: 3rem;
-  height: 3rem;
+  width: 1.25rem;
+  height: 1.25rem;
   color: #4E6E5D; /* Muted green for spinner */
-  margin-bottom: 50px;
+  margin-bottom: 20px;
   animation: spin 1s linear infinite; /* Smooth spinning animation */
 }
 
@@ -126,7 +126,7 @@ textarea.form-control::placeholder {
 }
 
 .spinner-container p {
-  font-size: 3rem;
+  font-size: 1.25rem;
   color: #1E2F23; /* Dark greenish-black */
 }
 
@@ -134,8 +134,8 @@ textarea.form-control::placeholder {
 .submit-btn {
   display: block;
   margin: 20px auto; 
-  padding: 25px 25px; 
-  font-size: 2rem; 
+  padding: 10px 10px; 
+  font-size: 1.25rem; 
   background-color: #4E6E5D; /* Muted green */
   border: none;
   color: #DCCCA3; /* Light beige text color */
