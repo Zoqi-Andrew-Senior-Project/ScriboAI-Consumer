@@ -1,38 +1,193 @@
-.App {
-  text-align: center;
+/* Body and General Settings */
+body, html {
+  height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+.app-container {
+  display: flex;
+  flex-direction: column;
   min-height: 100vh;
+  background-color: #DCCCA3; /* Light beige */
+
+}
+
+/* Navbar Styles */
+.navbar {
+  background-color: #1c3122; /* Dark greenish-black */
+  font-size: 2rem;
+}
+
+.navbar .nav-link,
+.navbar-brand {
+  color: #DCCCA3; /* Light beige */
+  font-size: 2.5rem;
+}
+
+.navbar .nav-link:hover {
+  color: #f8f9fa; /* Lighter color on hover */
+}
+
+/* Main Content Area */
+.main-content {
+  flex: 1;
+  background-color: #DCCCA3; /* Light beige */
+  padding: 50px;
+}
+
+.logo-placeholder {
+  width: 300px;
+  height: 300px;
+  background-color: #4E6E5D; /* Muted green */
+  border-radius: 50%;
+}
+
+h1 {
+  font-size: 3rem;
+  margin-bottom: 40px;
+}
+
+p {
+  font-size: 3rem;
+}
+
+/* Button Styles */
+.btn-primary {
+  background-color: #4E6E5D; /* Muted green */
+  border-color: #4E6E5D;
+  padding: 50px 50px;
+  font-size: 3rem;
+}
+
+.btn-primary:hover {
+  background-color: #5B7F6C; /* Darker on hover */
+}
+
+/* Footer */
+.footer {
+  background-color: #1E2F23;
+  color: white;
+  padding: 40px 0;
+  text-align: center;
+  font-size: 2.5rem;
+}
+
+/* Create Course Page Styles */
+.container.mt-5 {
+  background-color: #DCCCA3; 
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  margin-top: 40px;
+}
+
+h2 {
+  font-size: 2.5rem;
+  color: #1E2F23;
+  margin-bottom: 30px;
+}
+
+textarea.form-control {
+  font-size: 2rem;
+  padding: 20px;
+  border: 2px solid #4E6E5D;
+  border-radius: 10px;
+  resize: vertical;
+}
+
+textarea.form-control::placeholder {
+  color: #888888; /* Light gray for placeholder text */
+}
+
+/* Spinner Styles */
+.spinner-container {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  margin-top: 50px;
 }
 
-.App-link {
-  color: #61dafb;
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+  color: #4E6E5D; /* Muted green for spinner */
+  margin-bottom: 50px;
+  animation: spin 1s linear infinite; /* Smooth spinning animation */
 }
 
-@keyframes App-logo-spin {
+@keyframes spin {
   from {
     transform: rotate(0deg);
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+.spinner-container p {
+  font-size: 3rem;
+  color: #1E2F23; /* Dark greenish-black */
+}
+
+/* Submit Button Styles */
+.submit-btn {
+  display: block;
+  margin: 20px auto; 
+  padding: 25px 25px; 
+  font-size: 2rem; 
+  background-color: #4E6E5D; /* Muted green */
+  border: none;
+  color: #DCCCA3; /* Light beige text color */
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.submit-btn:hover {
+  background-color: #5B7F6C; /* Slightly darker green on hover */
+}
+
+.submit-btn:disabled {
+  background-color: #A5B5AA; /* Grayish color when disabled */
+  cursor: not-allowed;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .logo-placeholder {
+    width: 150px; /* Smaller logo for mobile */
+    height: 150px;
+  }
+
+  .navbar, .navbar .nav-link, .navbar-brand {
+    font-size: 1.5rem; /* Smaller font size for mobile */
+  }
+
+  h1, h2 {
+    font-size: 2rem;
+  }
+
+  p {
+    font-size: 1.5rem;
+  }
+
+  .btn-primary {
+    font-size: 1.5rem;
+    padding: 20px;
+  }
+
+  .footer {
+    font-size: 1.5rem;
+    padding: 20px 0;
+  }
+
+  .container.mt-5 {
+    padding: 20px;
+  }
+
+  textarea.form-control {
+    font-size: 1.25rem;
+    padding: 15px;
   }
 }

@@ -13,11 +13,12 @@ services:
   backend:
     image: consumer-backend:latest    # Replace with your backend Docker image
     ports:
-      - "7001:7001"                     # Maps port 7001 of the host to port 7001 of the container
+      - "8000:8000"                     # Maps port 7001 of the host to port 7001 of the container
     networks:
       - app-network
     environment:
       DB_HOST: sql                      # Referencing the SQL service by its container name
+      DJANGO_SETTINGS_MODULE: mysite.mysite.settings
     depends_on:
       - sql
 
