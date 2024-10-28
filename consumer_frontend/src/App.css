@@ -1,89 +1,76 @@
-/* Global Styles */
+/* Body and General Settings */
 body, html {
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-  background-color: #DCCCA3; /* Light beige */
-  color: #1E2F23; /* Dark greenish-black */
   height: 100%;
+  margin: 0;
+  font-family: Arial, sans-serif;
 }
 
-.App {
+.app-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
 .navbar {
-  background-color: #4E6E5D; /* Muted green */
-  color: white;
-  padding: 1rem;
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-.main-content {
-  flex-grow: 1; /* Allow main content to grow */
-  display: flex;
-  justify-content: space-between; /* Distribute space between sections */
-  align-items: center; /* Center items vertically */
-  padding: 2rem;
-}
-
-.left-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 50%;
-  text-align: center;
-}
-
-.circular-logo {
-  width: 150px;
-  height: 150px;
-  border-radius: 50%;
-  margin-bottom: 1rem;
-}
-
-.greeting h2 {
-  margin: 0;
+  background-color: #1c3122; /* Dark greenish-black */
   font-size: 2rem;
 }
 
-.greeting p {
-  font-size: 1.2rem;
-  color: #1E2F23;
+.navbar .nav-link,
+.navbar-brand {
+  color: #DCCCA3; /* Light beige */
+  font-size: 2.5rem; 
 }
 
-.right-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 50%;
+.main-content {
+  flex: 1;
+  background-color: #DCCCA3; /* Light beige */
+  padding: 50px; 
 }
 
-.btn {
+.logo-placeholder {
+  width: 300px; 
+  height: 300px; 
   background-color: #4E6E5D; /* Muted green */
-  color: white;
-  border: none;
-  padding: 1rem 2rem;
-  margin: 1rem;
-  border-radius: 30px;
-  font-size: 1.2rem;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  border-radius: 50%;
 }
 
-.btn:hover {
-  background-color: #3C5B4B; /* Darker green on hover */
+h1 {
+  font-size: 3rem;
+  margin-bottom: 40px;
+}
+
+p {
+  font-size: 3rem; 
+}
+
+.btn-primary {
+  background-color: #4E6E5D; /* Muted green */
+  border-color: #4E6E5D;
+  padding: 50px 50px; 
+  font-size: 3rem; 
+}
+
+.btn-primary:hover {
+  background-color: #5B7F6C; /* Hover effect */
 }
 
 .footer {
-  background-color: #4A5899; /* Muted blue */
+  background-color: #1E2F23;
   color: white;
-  padding: 1rem;
+  padding: 40px 0; 
   text-align: center;
+  font-size: 2.5rem; 
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .logo-placeholder {
+    width: 100px; /* Adjusted for smaller screens */
+    height: 100px;
+  }
+  .btn-big {
+    font-size: 1.15rem;
+    padding: 10px 20px; /* Slightly smaller padding for mobile */
+  }
 }
