@@ -1,17 +1,29 @@
 import React, { useState } from 'react';
 import './App.css';
+import axios from 'axios';
 
 function CreateCourse() {
   const [isLoading, setIsLoading] = useState(false);
+    const [courseData, setCourseData] = useState({ title: '', description: '' });
 
-  const handleSubmit = () => {
-    setIsLoading(true);
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setCourseData((prevData) => ({ ...prevData, [name]: value }));
+    };
 
-    // Simulate an API call with a delay
-    setTimeout(() => {
-      setIsLoading(false);
-      alert("Course information submitted successfully!"); // This can be replaced with any other action after loading.
-    }, 3000); // 3 seconds delay
+    const handleSubmit = async () => {
+        setIsLoading(true);
+
+        try {
+            const response = await axios.post('http://137.184.77.182//api/courses/create/', courseData);
+            alert("Course created successfully!");
+            setCourseData({ title: '', description: '' }); // Reset form
+        } catch (error) {
+            console.error("Error creating course:", error);
+            alert("There was an error creating the course.");
+        } finally {
+            setIsLoading(false);
+        }
   };
 
   return (
