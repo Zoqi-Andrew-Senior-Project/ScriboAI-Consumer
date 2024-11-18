@@ -3,6 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import CreateCourse from './CreateCourse';
+import Signup from './Signup';
 
 
 function Navbar() {
@@ -73,7 +74,8 @@ function App() {
       <div className="app-container">
         <Navbar />
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Signup />} /> 
+          <Route path="/home" element={<Home />} /> 
           <Route path="/create-course" element={<CreateCourse />} />
         </Routes>
         <Footer />
