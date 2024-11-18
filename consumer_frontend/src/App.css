@@ -34,13 +34,17 @@ body, html {
   flex: 1;
   background-color: #DCCCA3; /* Light beige */
   padding: 20px;
+  min-height: 100vh;
 }
 
 .logo-placeholder {
-  width: 100px;
-  height: 100px;
+  
+
+  width: 150px;
+  height: 150px;
   background-color: #4E6E5D; /* Muted green */
   border-radius: 50%;
+  margin-bottom: 20px;
 }
 
 h1 {
@@ -115,6 +119,25 @@ textarea.form-control::placeholder {
   margin-bottom: 20px;
   animation: spin 1s linear infinite; /* Smooth spinning animation */
 }
+
+
+/* Style for the signup form container */
+.form-container {
+  border: 3px solid #31463b; /* Muted green border */
+  border-radius: 5px;
+  padding: 15px;
+  width: 80%;
+  max-width: 500px;
+  background-color: #DCCCA3; 
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Optional shadow for a card-like effect */
+  text-align: center;
+}
+
+.form-container h2 {
+  color: #1E2F23; /* Dark greenish-black */
+  margin-bottom: 20px;
+}
+
 
 @keyframes spin {
   from {
