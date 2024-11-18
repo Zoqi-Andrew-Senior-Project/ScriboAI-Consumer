@@ -9,69 +9,69 @@ body, html {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #DCCCA3; /* Light beige */
-
+  background-color: #70A9A1; /* Cornsilk */
 }
 
 /* Navbar Styles */
 .navbar {
-  background-color: #1c3122; /* Dark greenish-black */
+  background-color: #0B2027; /* Rich black */
   font-size: 1.25rem;
 }
 
 .navbar .nav-link,
 .navbar-brand {
-  color: #DCCCA3; /* Light beige */
+  color: #F6F1D1; /* Cornsilk */
   font-size: 1.25rem;
 }
 
 .navbar .nav-link:hover {
-  color: #f8f9fa; /* Lighter color on hover */
+  color: #70A9A1; /* Verdigris */
 }
 
 /* Main Content Area */
 .main-content {
   flex: 1;
-  background-color: #DCCCA3; /* Light beige */
+  background-color: #70A9A1; /* Cornsilk */
   padding: 20px;
   min-height: 100vh;
 }
 
 .logo-placeholder {
-  
-
   width: 150px;
   height: 150px;
-  background-color: #4E6E5D; /* Muted green */
+  background-color: #40798C; /* Cerulean */
   border-radius: 50%;
   margin-bottom: 20px;
 }
 
 h1 {
   font-size: 1.25rem;
+  color: #0B2027; /* Rich black */
   margin-bottom: 20px;
 }
 
 p {
   font-size: 1.25rem;
+  color: #0B2027; /* Rich black */
 }
 
 /* Button Styles */
 .btn-primary {
-  background-color: #4E6E5D; /* Muted green */
-  border-color: #4E6E5D;
+  background-color: #40798C; /* Cerulean */
+  border-color: #40798C;
+  color: #F6F1D1; /* Cornsilk */
   padding: 20px 20px;
   font-size: 1.25rem;
 }
 
 .btn-primary:hover {
-  background-color: #5B7F6C; /* Darker on hover */
+  background-color: #70A9A1; /* Verdigris */
 }
 
 /* Footer */
 .footer {
-  background-color: #1E2F23;
-  color: white;
+  background-color: #0B2027; /* Rich black */
+  color: #F6F1D1; /* Cornsilk */
   padding: 20px 0;
   text-align: center;
   font-size: 1rem;
@@ -79,7 +79,7 @@ p {
 
 /* Create Course Page Styles */
 .container.mt-5 {
-  background-color: #DCCCA3; 
+  background-color: #CFD7C7; /* Ash grey */
   padding: 20px;
   border-radius: 15px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
@@ -88,14 +88,14 @@ p {
 
 h2 {
   font-size: 1.25rem;
-  color: #1E2F23;
+  color: #0B2027; /* Rich black */
   margin-bottom: 20px;
 }
 
 textarea.form-control {
   font-size: 1.25rem;
   padding: 20px;
-  border: 2px solid #4E6E5D;
+  border: 2px solid #40798C; /* Cerulean */
   border-radius: 10px;
   resize: vertical;
 }
@@ -115,42 +115,67 @@ textarea.form-control::placeholder {
 .spinner-border {
   width: 1.25rem;
   height: 1.25rem;
-  color: #4E6E5D; /* Muted green for spinner */
+  color: #40798C; /* Cerulean */
   margin-bottom: 20px;
   animation: spin 1s linear infinite; /* Smooth spinning animation */
 }
 
-
 /* Style for the signup form container */
 .form-container {
-  border: 3px solid #31463b; /* Muted green border */
+  border: 3px solid #70A9A1; /* Verdigris border */
   border-radius: 5px;
   padding: 15px;
   width: 80%;
   max-width: 500px;
-  background-color: #DCCCA3; 
+  background-color: #CFD7C7; /* Ash grey */
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1); /* Optional shadow for a card-like effect */
   text-align: center;
 }
 
 .form-container h2 {
-  color: #1E2F23; /* Dark greenish-black */
+  color: #0B2027; /* Rich black */
   margin-bottom: 20px;
 }
 
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Button group styling */
+.btn-group {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  border-radius: 5px;
+  overflow: hidden; /* Ensures buttons look like a single unit */
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.spinner-container p {
-  font-size: 1.25rem;
-  color: #1E2F23; /* Dark greenish-black */
+.btn-group .btn {
+  flex: 1; /* Ensure both buttons take equal space */
+  padding: 10px 20px;
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.btn-group .btn-primary {
+  background-color: #40798C; /* Cerulean */
+  color: #F6F1D1; /* Cornsilk */
+  border: none;
+}
+
+.btn-group .btn-primary:hover {
+  background-color: #70A9A1; /* Verdigris */
+}
+
+.btn-group .btn-secondary {
+  background-color: #CFD7C7; /* Ash grey */
+  color: #0B2027; /* Rich black */
+  border: none;
+}
+
+.btn-group .btn-secondary:hover {
+  background-color: #40798C; /* Cerulean */
+  color: #F6F1D1; /* Cornsilk */
 }
 
 /* Submit Button Styles */
@@ -159,16 +184,16 @@ textarea.form-control::placeholder {
   margin: 20px auto; 
   padding: 10px 10px; 
   font-size: 1.25rem; 
-  background-color: #4E6E5D; /* Muted green */
+  background-color: #40798C; /* Cerulean */
   border: none;
-  color: #DCCCA3; /* Light beige text color */
+  color: #F6F1D1; /* Cornsilk */
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
 
 .submit-btn:hover {
-  background-color: #5B7F6C; /* Slightly darker green on hover */
+  background-color: #70A9A1; /* Verdigris */
 }
 
 .submit-btn:disabled {
