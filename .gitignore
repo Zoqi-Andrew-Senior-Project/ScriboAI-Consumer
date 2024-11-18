@@ -1,2 +1,4 @@
 consumer_frontend/node_modules
-
+consumer_backend/mysite/authentication/__pycache__
+consumer_backend/mysite/courses/__pycache__
+consumer_backend/mysite/mysite/__pycache__
