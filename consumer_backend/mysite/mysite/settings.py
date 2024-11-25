@@ -27,6 +27,11 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['137.184.77.182']
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://137.184.77.182/",  
+]
+
 # Application definition
 
 INSTALLED_APPS = [
