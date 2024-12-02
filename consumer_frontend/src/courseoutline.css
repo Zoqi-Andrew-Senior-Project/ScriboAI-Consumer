@@ -9,7 +9,7 @@ body {
 .course-outline {
     max-width: 800px;
     margin: 20px auto;
-    background-color: #fff; /* White background */
+    background-color: #CFD7C7; /* White background */
     border-radius: 8px; /* Rounded corners */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
     padding: 20px;
@@ -46,7 +46,7 @@ body {
 }
 
 .module {
-    background-color: #ecf0f1; /* Light gray-blue for modules */
+    background-color: #bfc7b8; /* Light gray-blue for modules */
     color: #2c3e50; /* Dark text for contrast */
     padding: 15px;
     border-radius: 8px;
@@ -99,7 +99,7 @@ color: #e74c3c;  Red on hover for features
 }
 
 .editable-line:hover {
-    background-color: #e4e4e4; /* Light grey */
+    background-color: #ffffff8a;
 }
 
 .editable-line textarea {
@@ -122,7 +122,57 @@ color: #e74c3c;  Red on hover for features
 .outline-menu {
     text-align: center;
 }
+
+.course-outline textarea {
+    padding: 10px;
+    resize: both;
+    height: auto;
+    width: 100%;
+    min-height: 80px;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
 .menu-buttons button {
     margin-left: 5%;
     margin-right: 5%;
+    border-radius: 20px;
+    text-align: center;
+}
+
+.button-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-left: 5%;
+    margin-right: 5%;
+  }
+  
+.tooltip {
+    position: absolute;
+    bottom: 125%; /* Position above the button */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 5px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    z-index: 1000;
+    opacity: 0.9;
+    font-size: 12px;
+}
+
+.tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%; /* Arrow pointing down */
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
 }
