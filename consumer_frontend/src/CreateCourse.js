@@ -1,40 +1,56 @@
 import React, { useState } from 'react';
 import './App.css';
 import axios from 'axios';
+import CourseOutlineRenderer from './loadCourseOutline';
+import CourseOutlineMenuRenderer from './courseOutlineMenu';
 
-function CreateCourse() {
-  const [isLoading, setIsLoading] = useState(false);
-    const [courseData, setCourseData] = useState({ title: '', description: '' });
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setCourseData((prevData) => ({ ...prevData, [name]: value }));
-    };
-
-    const handleSubmit = async () => {
-        setIsLoading(true);
-
-        try {
-            const response = await axios.post('http://137.184.77.182//api/courses/create/', courseData);
-            alert("Course created successfully!");
-            setCourseData({ title: '', description: '' }); // Reset form
-        } catch (error) {
-            console.error("Error creating course:", error);
-            alert("There was an error creating the course.");
-        } finally {
-            setIsLoading(false);
-        }
-  };
-
+const PromptMenu = ({ courseData, handleChange, handleSubmit, isLoading }) => {
   return (
-    <div className="container mt-5">
-      <h2>Insert Relevant Information Here for Scribo</h2>
-      <textarea
-        className="form-control mt-3"
-        rows="10"
-        placeholder="Enter course information..."
-      ></textarea>
-
+  <div className="container mt-5" id="initial form">
+    <h2>Insert Relevant Information Here for Scribo</h2>
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label>
+          Topic:
+          <input
+            type="text"
+            name="topic"
+            value={courseData.topic}
+            onChange={handleChange}
+            placeholder="Enter Topic"
+            required
+          />
+        </label>
+      </div>
+      <div>
+        <label>
+          Duration:
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="duration"
+                value="short"
+                checked={courseData.duration === "short"}
+                onChange={handleChange}
+              />
+              Short (up to 1 hour)
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="duration"
+                value="long"
+                checked={courseData.duration === "long"}
+                onChange={handleChange}
+              />
+              Long (more than 1 hour)
+            </label>
+          </div>
+        </label>
+      </div>
       <button
         className="submit-btn mt-4"
         onClick={handleSubmit}
@@ -42,6 +58,78 @@ function CreateCourse() {
       >
         Submit
       </button>
+    </form>
+  </div>
+  )
+}
+
+function CreateCourse() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [courseData, setCourseData] = useState({
+    topic: "",
+    duration: "short",
+  });
+  const [responseContent, setResponseContent] = useState(null);
+
+  const handleChange = (e) => {
+      const { name, value } = e.target;
+      setCourseData((prevData) => ({ ...prevData, [name]: value }));
+  };
+
+  const handleSubmit = async () => {
+      setIsLoading(true);
+
+      const url = "https://martinezjandrew-trainingcoursegen.hf.space/generate-outline"
+      const time = courseData.duration === "short" ? "up to one hour" : "between one and two hours"
+      const data = {
+        topic: courseData.topic,
+        time: time
+      }
+      try {
+          const response = await axios.post(url, data);
+          console.log(response);
+          alert(`Course created successfully! ${courseData.topic} ${courseData.duration}`);
+          setResponseContent(response.data);
+          //setCourseData({ title: '', description: '' }); // Reset form
+      } catch (error) {
+          console.error("Error creating course:", error);
+          alert("There was an error creating the course.");
+      } finally {
+          
+          setIsLoading(false);
+      }
+  };
+
+  const handleReset = () => {
+    setCourseData({
+      topic: "",
+      duration: "short",
+    });
+    setResponseContent(null);  // Hide the response content
+  };
+
+  return (
+    <div id="page">
+      {!responseContent && (
+        <PromptMenu
+          courseData={courseData}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+          isLoading={isLoading}
+        />
+      )}
+      
+      
+      <div className="response-container mt-5">
+        {responseContent ? (
+          <>
+            <CourseOutlineMenuRenderer data={courseData}/>
+            <CourseOutlineRenderer data={JSON.parse(responseContent.response.output_validator.valid_replies)} />
+          </>
+        ): (
+          <p></p>
+        )}
+      </div>
 
       {isLoading && (
         <div className="spinner-container">

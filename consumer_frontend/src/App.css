@@ -86,6 +86,8 @@ p {
   border-radius: 15px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   margin-top: 20px;
+  margin-bottom: 40px;
+  width: 50%;
 }
 
 h2 {
