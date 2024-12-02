@@ -62,7 +62,7 @@ function Home() {
 
 function Footer() {
   return (
-    <footer className="footer text-center">
+    <footer className="footer">
       <p>&copy; 2024 Scribo.AI | Corporate Training Platform</p>
     </footer>
   );

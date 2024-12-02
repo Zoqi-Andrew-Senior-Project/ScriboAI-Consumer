@@ -8,7 +8,6 @@ body, html {
 
 .app-container {
   display: flex;
-  
   flex-direction: column;
   min-height: 100vh;
   background-color: #70A9A1; /* Cornsilk */
@@ -71,12 +70,13 @@ p {
 }
 
 /* Footer */
-.footer {
+footer.footer p {
   background-color: #0B2027; /* Rich black */
   color: #F6F1D1; /* Cornsilk */
   padding: 20px 0;
   text-align: center;
-  font-size: 1rem;
+  font-size: 1.5rem;
+  margin-top: auto;
 }
 
 /* Create Course Page Styles */
