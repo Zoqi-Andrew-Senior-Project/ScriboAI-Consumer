@@ -38,11 +38,14 @@ body, html {
 }
 
 .logo-placeholder {
-  width: 150px;
-  height: 150px;
-  background-color: #40798C; /* Cerulean */
+  width: 200px;
+  height: 200px;
+  background-color: #40798C; /* Cerulean (fallback color) */
   border-radius: 50%;
-  margin-bottom: 20px;
+  background-image: url('/public/logo.png');
+  background-size: cover; /* Ensure the image covers the entire circle */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat; /* Prevent image repetition */
 }
 
 h1 {

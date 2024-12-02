@@ -1,4 +1,11 @@
-consumer_frontend/node_modules
-consumer_backend/mysite/authentication/__pycache__
-consumer_backend/mysite/courses/__pycache__
-consumer_backend/mysite/mysite/__pycache__
+*consumer_frontend/node_modules
+*consumer_backend/mysite/authentication/__pycache__
+*consumer_backend/mysite/courses/__pycache__
+*consumer_backend/mysite/mysite/__pycache__
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# Allow logo.png
+!public/logo.png
