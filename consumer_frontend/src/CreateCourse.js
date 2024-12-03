@@ -69,11 +69,17 @@ function CreateCourse() {
     topic: "",
     duration: "short",
   });
+  const [courseOutlineData, setCourseOutlineData] = useState(null);
   const [responseContent, setResponseContent] = useState(null);
 
   const handleChange = (e) => {
       const { name, value } = e.target;
       setCourseData((prevData) => ({ ...prevData, [name]: value }));
+  };
+
+  const handleRefresh = () => {
+    // Trigger a refresh by updating the courseOutlineData (re-fetch or reset)
+    setCourseData(courseOutlineData)
   };
 
   const handleSubmit = async () => {
@@ -89,7 +95,10 @@ function CreateCourse() {
           const response = await axios.post(url, data);
           console.log(response);
           alert(`Course created successfully! ${courseData.topic} ${courseData.duration}`);
+
           setResponseContent(response.data);
+          setCourseOutlineData(JSON.parse(response.data.response.output_validator.valid_replies))
+
           //setCourseData({ title: '', description: '' }); // Reset form
       } catch (error) {
           console.error("Error creating course:", error);
@@ -124,11 +133,20 @@ function CreateCourse() {
         {responseContent ? (
           <>
             <CourseOutlineMenuRenderer 
-              data={JSON.parse(responseContent.response.output_validator.valid_replies)} 
+              //data={JSON.parse(responseContent.response.output_validator.valid_replies)} 
+              data={courseOutlineData}
               handleReset={handleReset}
+              responseContent={responseContent}
               setResponseContent={setResponseContent}
+              setCourseOutlineData={setCourseOutlineData}
+              handleRefresh={handleRefresh}
             />
-            <CourseOutlineRenderer data={JSON.parse(responseContent.response.output_validator.valid_replies)} />
+            <CourseOutlineRenderer 
+              data={JSON.parse(responseContent.response.output_validator.valid_replies)}
+              editable={true}
+              courseOutlineData={courseOutlineData}
+              setCourseOutlineData={setCourseOutlineData}
+            />
           </>
         ): (
           <p></p>
