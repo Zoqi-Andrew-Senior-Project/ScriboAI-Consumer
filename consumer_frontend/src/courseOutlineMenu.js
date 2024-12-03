@@ -2,9 +2,10 @@ import React, { useState } from 'react'
 import './courseoutline.css'
 import './App.css'
 import PromptMenu from './CreateCourse'
+import axios from 'axios';
 
-const RegenerateDialog = ({ data, setRegenerateDialogPressed }) => {
-    const [notes, setNotes] = useState(null)
+const RegenerateDialog = ({ data, setRegenerateDialogPressed, setResponseContent }) => {
+    const [notes, setNotes] = useState("")
 
     const handleChange = (e) => {
         setNotes(e.target.value);
@@ -14,8 +15,31 @@ const RegenerateDialog = ({ data, setRegenerateDialogPressed }) => {
         setRegenerateDialogPressed(null)
     }
 
-    const onSubmit = () => {
-        console.log("saved: ", {notes, data})
+    const onSubmit = async () => {
+        const url = "https://martinezjandrew-trainingcoursegen.hf.space/update-outline"
+
+        const script = data
+        const requestData = {
+            notes,
+            script
+        }
+        console.log("sending...")
+
+        
+      try {
+        const response = await axios.post(url, requestData);
+        console.log(response);
+        alert(`Course created successfully!`);
+        setResponseContent(response.data);
+        //setCourseData({ title: '', description: '' }); // Reset form
+    } catch (error) {
+        console.error("Error creating course:", error);
+        alert("There was an error creating the course.");
+    } finally {
+        console.log("setIsLoading = false")
+        //setIsLoading(false);
+    }
+        
         console.log("insert api call here...")
     }
 
@@ -39,7 +63,7 @@ const RegenerateDialog = ({ data, setRegenerateDialogPressed }) => {
         </div>
     )
 }
-const CourseOutlineMenuRenderer = ({ data, handleReset }) => {
+const CourseOutlineMenuRenderer = ({ data, handleReset, setResponseContent }) => {
     const [outlineData] = useState(data)
     const [regenerateDialogPressed, setRegenerateDialogPressed] = useState(null)
     const [hoveredButton, setHoveredButton] = useState(null)
@@ -109,6 +133,7 @@ const CourseOutlineMenuRenderer = ({ data, handleReset }) => {
                 <RegenerateDialog
                     data = {outlineData}
                     setRegenerateDialogPressed = {setRegenerateDialogPressed}
+                    setResponseContent = {setResponseContent}
                 />
             )}
         </div>
