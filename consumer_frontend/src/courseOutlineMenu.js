@@ -2,9 +2,11 @@ import React, { useState } from 'react'
 import './courseoutline.css'
 import './App.css'
 import PromptMenu from './CreateCourse'
+import axios from 'axios';
 
-const RegenerateDialog = ({ data, setRegenerateDialogPressed }) => {
-    const [notes, setNotes] = useState(null)
+const RegenerateDialog = ({ data, setRegenerateDialogPressed, setResponseContent, handleRefresh, setCourseOutlineData, responseContent }) => {
+    const [isLoading, setIsLoading] = useState(false);
+    const [notes, setNotes] = useState("")
 
     const handleChange = (e) => {
         setNotes(e.target.value);
@@ -14,9 +16,32 @@ const RegenerateDialog = ({ data, setRegenerateDialogPressed }) => {
         setRegenerateDialogPressed(null)
     }
 
-    const onSubmit = () => {
-        console.log("saved: ", {notes, data})
-        console.log("insert api call here...")
+    const onSubmit = async () => {
+        setIsLoading(true);
+
+        const url = "https://martinezjandrew-trainingcoursegen.hf.space/update-outline"
+
+        const script = data
+        const requestData = {
+            notes,
+            script
+        }
+        console.log("sending...")
+
+        
+        try {
+            const response = await axios.post(url, requestData);
+            console.log("response from submit: ",response);
+            alert(`Course created successfully!`);
+            setResponseContent(response.data);
+            setCourseOutlineData(JSON.parse(response.data.response.output_validator.valid_replies))
+        } catch (error) {
+            console.error("Error creating course:", error);
+            alert("There was an error creating the course.");
+        } finally {
+            setIsLoading(false);
+            setRegenerateDialogPressed(null)
+        }
     }
 
     return (
@@ -35,11 +60,19 @@ const RegenerateDialog = ({ data, setRegenerateDialogPressed }) => {
                         <button className='btn-primary btn-group' onClick={onSubmit}>Submit</button>
                     </div>
                 </div>
+                {isLoading && (
+                    <div className="spinner-container">
+                    <div className="spinner-border" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p>Loading...</p>
+                    </div>
+                )}
             </div>
         </div>
     )
 }
-const CourseOutlineMenuRenderer = ({ data, handleReset }) => {
+const CourseOutlineMenuRenderer = ({ data, handleReset, responseContent, setResponseContent, handleRefresh, setCourseOutlineData }) => {
     const [outlineData] = useState(data)
     const [regenerateDialogPressed, setRegenerateDialogPressed] = useState(null)
     const [hoveredButton, setHoveredButton] = useState(null)
@@ -63,7 +96,8 @@ const CourseOutlineMenuRenderer = ({ data, handleReset }) => {
     }
     const onAccept = () => {
         console.log("accept")
-        console.log(outlineData)
+        console.log("courseoutline:", data)
+        console.log("responsecontent:", responseContent)
     }
 
     return (
@@ -107,8 +141,12 @@ const CourseOutlineMenuRenderer = ({ data, handleReset }) => {
             </div>
             {regenerateDialogPressed && (
                 <RegenerateDialog
-                    data = {outlineData}
+                    data = {data}
                     setRegenerateDialogPressed = {setRegenerateDialogPressed}
+                    setResponseContent = {setResponseContent}
+                    handleRefresh = {handleRefresh}
+                    setCourseOutlineData = {setCourseOutlineData}
+                    responseContent = {responseContent}
                 />
             )}
         </div>
