@@ -25,7 +25,16 @@ SECRET_KEY = 'django-insecure-z)h#$99stc5y98hy#od9r&u3v35adu*m6ofyedvu4if1@(st_0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['137.184.77.182']
+ALLOWED_HOSTS = ['137.184.77.182', 
+                 'http://localhost:3000',]
+
+#CORS_ALLOWED_ORIGINS = [
+#    "http://localhost:3000",
+#    "http://137.184.77.182/",  
+#]
+
+CORS_ALLOW_ALL_ORIGINS = True
+
 
 # Application definition
 
@@ -81,10 +90,18 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'djongo',
+        'NAME': 'scriboai_consumer',
+        'CLIENT': {
+            'host': 'mongo',
+            'port': 27017,
+            'username': 'root',
+            'password': 'butt',
+            'authSource': 'admin'
+        }
     }
 }
+
 
 
 # Password validation
