@@ -8,4 +8,4 @@ consumer_backend/mysite/mysite/__pycache__
 *.gif
 
 # Allow logo.png
-!public/logo.png
+!consumer_frontend/public/logo.png
