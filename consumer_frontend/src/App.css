@@ -80,6 +80,8 @@ footer.footer p {
   text-align: center;
   font-size: 1.5rem;
   margin-top: auto;
+  width: 100%;
+  margin-bottom: 0px;
 }
 
 /* Create Course Page Styles */
@@ -206,6 +208,11 @@ textarea.form-control::placeholder {
 .submit-btn:disabled {
   background-color: #A5B5AA; /* Grayish color when disabled */
   cursor: not-allowed;
+}
+
+.footer {
+  flex: 1;
+  display: flex;
 }
 
 /* Responsive Adjustments */
