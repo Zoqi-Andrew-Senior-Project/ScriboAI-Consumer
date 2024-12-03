@@ -123,7 +123,11 @@ function CreateCourse() {
       <div className="response-container mt-5">
         {responseContent ? (
           <>
-            <CourseOutlineMenuRenderer data={JSON.parse(responseContent.response.output_validator.valid_replies)} handleReset={handleReset}/>
+            <CourseOutlineMenuRenderer 
+              data={JSON.parse(responseContent.response.output_validator.valid_replies)} 
+              handleReset={handleReset}
+              setResponseContent={setResponseContent}
+            />
             <CourseOutlineRenderer data={JSON.parse(responseContent.response.output_validator.valid_replies)} />
           </>
         ): (
