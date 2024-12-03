@@ -133,7 +133,6 @@ const CourseOutlineRenderer = ({ data }) => {
                     />
                 ))}
             </div>
-            <button onClick={console.log("Hello!", courseData)}>hello</button>
         </div>
     )
 }
