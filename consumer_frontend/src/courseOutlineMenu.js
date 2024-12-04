@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import './courseoutline.css'
 import './App.css'
-import PromptMenu from './CreateCourse'
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 const RegenerateDialog = ({ data, setRegenerateDialogPressed, setResponseContent, handleRefresh, setCourseOutlineData, responseContent }) => {
     const [isLoading, setIsLoading] = useState(false);
@@ -76,6 +76,7 @@ const CourseOutlineMenuRenderer = ({ data, handleReset, responseContent, setResp
     const [outlineData] = useState(data)
     const [regenerateDialogPressed, setRegenerateDialogPressed] = useState(null)
     const [hoveredButton, setHoveredButton] = useState(null)
+    const navigate = useNavigate();
 
     const handleMouseEnter = (buttonName) => {
         setHoveredButton(buttonName);
@@ -98,6 +99,7 @@ const CourseOutlineMenuRenderer = ({ data, handleReset, responseContent, setResp
         console.log("accept")
         console.log("courseoutline:", data)
         console.log("responsecontent:", responseContent)
+        navigate('/accepted')
     }
 
     return (
