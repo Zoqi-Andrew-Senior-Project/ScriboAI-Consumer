@@ -9,3 +9,4 @@ pytz==2024.2
 sqlparse==0.2.4
 typing_extensions==4.12.2
 django-cors-headers==4.0.0
+
