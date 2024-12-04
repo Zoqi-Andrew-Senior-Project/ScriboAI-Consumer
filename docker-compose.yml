@@ -1,9 +1,9 @@
 services:
   # Frontend service
   frontend:
-    image: consumer-frontend:latest   # Replace with your frontend Docker image
+    image: consumer-frontend:latest # Replace with your frontend Docker image
     ports:
-      - "3000:3000"                     # Maps port 3000 of the host to port 3000 of the container
+      - "3000:3000" # Maps port 3000 of the host to port 3000 of the container
     networks:
       - app-network
     depends_on:
@@ -11,14 +11,14 @@ services:
 
   # Backend service
   backend:
-    image: consumer-backend:latest    # Replace with your backend Docker image
+    image: consumer-backend:latest # Replace with your backend Docker image
     ports:
-      - "8000:8000"                     # Maps port 7001 of the host to port 7001 of the container
+      - "8000:8000" # Maps port 7001 of the host to port 7001 of the container
     networks:
       - app-network
     environment:
-      DB_HOST: mongo                      # Referencing the Mongo service by its container name
-      DJANGO_SETTINGS_MODULE: mysite.mysite.settings
+      DB_HOST: mongo # Referencing the Mongo service by its container name
+      DJANGO_SETTINGS_MODULE: mysite.settings
     depends_on:
       - mongo
 
@@ -27,9 +27,9 @@ services:
     image: mongo:latest
     container_name: mongo-db
     ports:
-      - "27017:27017"                 # Maps port 27017 of the host to port 27017 of the container
+      - "27017:27017" # Maps port 27017 of the host to port 27017 of the container
     volumes:
-      - mongo_data:/data/db           # Persistent storage for MongoDB
+      - mongo_data:/data/db # Persistent storage for MongoDB
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: butt
@@ -41,7 +41,7 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - "80:80"                                 # Maps port 80 of the host to port 80 of the container
+      - "80:80" # Maps port 80 of the host to port 80 of the container
     networks:
       - app-network
     volumes:
@@ -58,4 +58,3 @@ networks:
 # Define volumes for persistent storage
 volumes:
   mongo_data:
-
