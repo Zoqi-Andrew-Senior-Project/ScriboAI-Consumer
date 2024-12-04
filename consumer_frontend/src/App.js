@@ -74,7 +74,8 @@ function App() {
       <div className="app-container">
         <Navbar />
         <Routes>
-          <Route path="/" element={<Signup />} /> 
+          <Route path="/" element={<Home />} /> 
+          <Route path="signup" element={<Signup/>} />
           <Route path="/home" element={<Home />} /> 
           <Route path="/create-course" element={<CreateCourse />} />
         </Routes>
