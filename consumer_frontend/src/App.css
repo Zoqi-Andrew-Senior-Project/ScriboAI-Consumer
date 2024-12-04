@@ -129,6 +129,11 @@ textarea.form-control::placeholder {
   animation: spin 1s linear infinite; /* Smooth spinning animation */
 }
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Style for the signup form container */
 .form-container {
   border: 3px solid #70A9A1; /* Verdigris border */
