@@ -1,49 +1,30 @@
-from rest_framework import status
+from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from .serializers import UserSerializer
-from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
-from .serializers import LoginSerializer
-from django.contrib.auth.models import User
-from django.contrib.auth.hashers import make_password, check_password
+from rest_framework import status
+from .models import User
+from .serializers import UserSerializer, LoginSerializer
+import bcrypt
 
-@api_view(['POST'])
-def register_user(request):
-    try:
-        username = request.data.get('username')
-        email = request.data.get('email')
-        password = request.data.get('password')
+class RegisterView(APIView):
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'User registered successfully!'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        if not username or not email or not password:
-            return Response({'error': 'All fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
+class LoginView(APIView):
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
 
-        if User.objects.filter(username=username).exists():
-            return Response({'error': 'Username already taken.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = User.objects.create(
-            username=username,
-            email=email,
-            password=make_password(password)
-        )
-        return Response({'message': 'User registered successfully!'}, status=status.HTTP_201_CREATED)
-
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-@api_view(['POST'])
-def login_user(request):
-    try:
-        username = request.data.get('username')
-        password = request.data.get('password')
-
-        if not username or not password:
-            return Response({'error': 'Both fields are required.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        user = User.objects.filter(username=username).first()
-        if user and check_password(password, user.password):
-            return Response({'message': 'Login successful!'}, status=status.HTTP_200_OK)
-        return Response({'error': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
-
-    except Exception as e:
-        return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            try:
+                user = User.objects.get(username=username)
+                if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+                    return Response({'message': 'Login successful!'}, status=status.HTTP_200_OK)
+                return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+            except User.DoesNotExist:
+                return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
