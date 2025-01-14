@@ -1,5 +1,19 @@
-from django.db import models
+from djongo import models
 from django.utils.translation import gettext_lazy as _
+import uuid
+import random
+
+def generate_user_id():
+    return str(uuid.uuid4())
+
+class FullNameField(models.CharField):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def pre_save(self, model_instance, add):
+        random_hex = ''.join([random.choice('0123456789abcdef') for _ in range(random.randint(3, 6))])
+        stripped_name = model_instance.last_name[:random.randint(3,6)]
+        return f"{stripped_name}{random_hex}"
 
 # Create your models here.
 
@@ -15,7 +29,8 @@ class Organization(models.Model):
 class Member(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    user_id = models.CharField(max_length=255)
+    id = models.CharField(max_length=36, primary_key=True, default=generate_user_id, editable=False)
+    user_name = FullNameField(max_length=255, unique=True)
     role = models.CharField(max_length=2,
                             choices=Roles.choices,
                             default=Roles.EMPLOYEE)
