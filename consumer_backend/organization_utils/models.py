@@ -4,9 +4,10 @@ from django.utils.translation import gettext_lazy as _
 # Create your models here.
 
 class Roles(models.TextChoices):
-    EMPLOYEE = "EM", _('Employee')
-    ADMIN = "AD", _('Admin')
-    OWNER = "OW", _('Owner')
+    EMPLOYEE = "EM", _('Employee') # default
+    ADMIN = "AD", _('Admin') # admin of the organization
+    OWNER = "OW", _('Owner') # owner of the organization
+    SUSPENDED = "SU", _('Suspended') # marked for removal
 
 class Organization(models.Model):
     name = models.CharField(max_length=255)
