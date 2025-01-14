@@ -40,6 +40,20 @@ def create_organization(request):
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
+def delete_organization(request):
+    """
+    Delete an organization.
+    """
+
+    request_id = request.data.get("id")
+    instance = Organization.objects.get(id=request_id)
+    if instance:
+        instance.delete()
+        return Response(f"{request_id} deleted successfully!", status=status.HTTP_201_CREATED)
+    
+    return Response("WHOOPS",status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["POST"])
 def create_member(request):
     """
     Create a new member for an organization.
