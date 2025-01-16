@@ -35,4 +35,5 @@ class Member(models.Model):
                             choices=Roles.choices,
                             default=Roles.EMPLOYEE)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    email = models.EmailField(max_length=255, unique=True)
 
