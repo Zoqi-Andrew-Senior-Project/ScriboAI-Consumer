@@ -9,4 +9,4 @@ class OrganizationSerializer(serializers.ModelSerializer):
 class MemberSerializer(serializers.ModelSerializer):
     class Meta:
         model = Member
-        fields = ['first_name', 'last_name', 'role', 'organization']
+        fields = ['first_name', 'last_name', 'role', 'organization', 'email']

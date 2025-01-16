@@ -7,37 +7,41 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import json
 # Create your views here.
-"""
-@swagger_auto_schema(
-        method='post',
-        operation_summary="Create a new organization",
-        operation_description="Endpoint to create a new organization with a name.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=['name'],
-            properties={
-                'name': openapi.Schema(type=openapi.TYPE_STRING, description="The name of the organization"),
-        },
-    ),
-    responses={
-        201: "Organization created successfully.",
-        400: "Invalid request data.",
-    },
-)
-"""
+
 @api_view(["POST"])
 def create_organization(request):
     """
     Create a new organization.
+
+    Parameters:
+    - name: string
+    - first_name: string
+    - last_name: string
+    - email: string
     """
 
-    serializer = OrganizationSerializer(data=request.data)
+    name = request.data.get("name")
+    first_name = request.data.get("first_name")
+    last_name = request.data.get("last_name")
+    email = request.data.get("email")
 
-    if serializer.is_valid():
-        organization = serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    organization_serializer = OrganizationSerializer(data={"name": name})
     
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if organization_serializer.is_valid():
+        organization = organization_serializer.save()
+        
+        member_serializer = MemberSerializer(data={
+            "first_name": first_name, 
+            "last_name": last_name, 
+            "email": email, 
+            "organization": organization.id,
+            "role": "OW"})
+        
+        if member_serializer.is_valid():
+            member = member_serializer.save()
+            return Response(member_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(member_serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
+    return Response(organization_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
 def delete_organization(request):
