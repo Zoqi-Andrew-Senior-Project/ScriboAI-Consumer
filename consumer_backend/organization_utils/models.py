@@ -1,6 +1,5 @@
 from djongo import models
 from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import User
 import uuid
 import random
 
@@ -31,10 +30,20 @@ class Member(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     id = models.CharField(max_length=36, primary_key=True, default=generate_user_id, editable=False)
-    user_name = FullNameField(max_length=255, unique=True)
+    user_name = FullNameField(max_length=255, unique=True, null=True)
     role = models.CharField(max_length=2,
                             choices=Roles.choices,
                             default=Roles.EMPLOYEE)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    email = models.EmailField(max_length=255, unique=True)
+    email = models.EmailField(max_length=255, unique=True, null=True)
+
+class Invitation(models.Model):
+    email = models.EmailField(unique=False, null=True)
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    verification_token = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.user_name
+    
 
