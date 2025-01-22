@@ -8,3 +8,4 @@ urlpatterns = [
     path("invite-member", views.invite_member, name="invite_member"),
     path("join-organization/<str:invitation_token>/", views.create_member_by_token, name='join-organization'),
 ]
+ 
