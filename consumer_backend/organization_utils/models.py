@@ -12,9 +12,12 @@ class FullNameField(models.CharField):
         super().__init__(*args, **kwargs)
 
     def pre_save(self, model_instance, add):
-        random_hex = ''.join([random.choice('0123456789abcdef') for _ in range(random.randint(3, 6))])
-        stripped_name = model_instance.last_name[:random.randint(3,6)]
-        return f"{stripped_name}{random_hex}"
+        if not model_instance.user_name:
+            random_hex = ''.join([random.choice('0123456789abcdef') for _ in range(random.randint(3, 6))])
+            stripped_name = model_instance.last_name[:random.randint(3,6)]
+            generated_username = f"{stripped_name}{random_hex}"
+            model_instance.user_name = generated_username
+        return model_instance.user_name
 
 # Create your models here.
 
@@ -42,7 +45,7 @@ class Member(models.Model):
     def save(self, *args, **kwargs):
         if not self.user_name:
             self.user_name = FullNameField().pre_save(self, True)
-        print("!!!\n!!!\n!!!\n",self.user_name)
+
         password = kwargs.pop("password", None)
         if not self.user:
             user = User.objects.create_user(
@@ -61,15 +64,13 @@ class Member(models.Model):
             self.user = user
         super().save(*args, **kwargs)
 
+    def delete(self, *args, **kwargs):
+        if self.user:
+            self.user.delete()
+        super().delete(*args, **kwargs)
+
     def __str__(self):
-        return f"""
-            "first_name": {self.first_name},
-            "last_name": {self.last_name},
-            "role": {self.role},
-            "organization": {self.organization.name},
-            "email": {self.email},
-            "user_name": {self.user_name},
-        """
+        return f"{self.first_name} {self.last_name} {self.user_name}"
 
 class Invitation(models.Model):
     email = models.EmailField(unique=False, null=True)

@@ -172,7 +172,7 @@ def complete_profile(request):
     organization: Organization = invitation.organization
     email = invitation.email
 
-    member_serializer = MemberSerializer.create(data={
+    member_serializer = MemberSerializer(data={
         "first_name": first_name, 
         "last_name": last_name, 
         "role": "EM", 
@@ -180,7 +180,7 @@ def complete_profile(request):
         "organization": organization.id, 
         "password": make_password(password),
     })
-    
+
     if member_serializer.is_valid():
         member = member_serializer.save()
         return Response(member_serializer.data, status=status.HTTP_201_CREATED)
