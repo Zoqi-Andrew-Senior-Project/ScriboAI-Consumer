@@ -1,14 +1,13 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
-from .models import Organization, Invitation
+from .models import Organization, Invitation, Member
 from .serializers import OrganizationSerializer, MemberSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-import json
-import requests
 from django.core.mail import send_mail
 import uuid
+from django.contrib.auth.hashers import make_password
 # Create your views here.
 
 @swagger_auto_schema(
@@ -42,10 +41,14 @@ import uuid
 )
 @api_view(["POST"])
 def create_organization(request):
+    """
+    Create a new organization.
+    """
     name = request.data.get("name")
     first_name = request.data.get("first_name")
     last_name = request.data.get("last_name")
     email = request.data.get("email")
+    password = request.data.get("password")
 
     organization_serializer = OrganizationSerializer(data={"name": name})
     
@@ -57,7 +60,9 @@ def create_organization(request):
             "last_name": last_name, 
             "email": email, 
             "organization": organization.id,
-            "role": "OW"})
+            "role": "OW",
+            "password": make_password(password),
+        })
         
         if member_serializer.is_valid():
             member = member_serializer.save()
@@ -95,6 +100,10 @@ def create_member(request):
 
 @api_view(["POST"])
 def create_member_by_token(request, invitation_token):
+    """
+    Create a new member for an organization by invitation token.
+    """
+
     try:
         invitation = Invitation.objects.get(verification_token=invitation_token)
 
@@ -125,6 +134,9 @@ def create_member_by_token(request, invitation_token):
 )
 @api_view(["POST"])
 def invite_member(request):
+    """
+    Send a user an invitation to join an organization.
+    """
     invitation_token = generate_invite_token()
     email = request.data.get("email")
     organization_id = request.data.get("organization_id")
@@ -141,7 +153,47 @@ def invite_member(request):
         [email]
     )"""
 
-    return Response(f"{invitation_token}", status=status.HTTP_200_OK)
+    return Response({"token": invitation_token}, status=status.HTTP_200_OK)
 
 def generate_invite_token():
     return str(uuid.uuid4())
+
+@api_view(["POST"])
+def complete_profile(request):
+    """
+    Complete a user's profile.
+    """
+    token = request.data.get("token")
+    first_name = request.data.get("first_name")
+    last_name = request.data.get("last_name")
+    password = request.data.get("password")
+
+    invitation = Invitation.objects.get(verification_token=token)
+    organization: Organization = invitation.organization
+    email = invitation.email
+
+    member_serializer = MemberSerializer.create(data={
+        "first_name": first_name, 
+        "last_name": last_name, 
+        "role": "EM", 
+        "email": email, 
+        "organization": organization.id, 
+        "password": make_password(password),
+    })
+    
+    if member_serializer.is_valid():
+        member = member_serializer.save()
+        return Response(member_serializer.data, status=status.HTTP_201_CREATED)
+    else:
+        return Response(member_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+@api_view(["POST"])
+def delete_member(request):
+    """
+    Delete a member from an organization.
+    """
+    member_id = request.data.get("member_id")
+    member = Member.objects.get(id=member_id)
+    member.delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)
