@@ -7,6 +7,22 @@ class OrganizationSerializer(serializers.ModelSerializer):
         fields = ['name']
 
 class MemberSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True)
+
     class Meta:
         model = Member
-        fields = ['first_name', 'last_name', 'role', 'organization', 'email']
+        fields = ['first_name', 'last_name', 'role', 'organization', 'email', "password"]
+    
+    def create(self, validated_data):
+        print("!!!\n!!!\n!!!\n Validated Data:\n",validated_data)
+        password = validated_data.pop('password')
+        member = Member(
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            email=validated_data['email'],
+            role=validated_data.get('role', 'EM'),  # Default to employee
+            organization=validated_data.get('organization'),  # Ensure organization is passed
+        )
+        print("!!!\n!!!\n!!!\n Member object:\n", str(member))
+        member.save(password=password)
+        return member

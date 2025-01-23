@@ -1,5 +1,6 @@
 from djongo import models
 from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import User
 import uuid
 import random
 
@@ -30,12 +31,45 @@ class Member(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     id = models.CharField(max_length=36, primary_key=True, default=generate_user_id, editable=False)
-    user_name = FullNameField(max_length=255, unique=True, null=True)
+    user_name = FullNameField(max_length=255, unique=True)
     role = models.CharField(max_length=2,
                             choices=Roles.choices,
                             default=Roles.EMPLOYEE)
     organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
     email = models.EmailField(max_length=255, unique=True, null=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.user_name:
+            self.user_name = FullNameField().pre_save(self, True)
+        print("!!!\n!!!\n!!!\n",self.user_name)
+        password = kwargs.pop("password", None)
+        if not self.user:
+            user = User.objects.create_user(
+                username=self.user_name,
+                email=self.email,
+                first_name=self.first_name,
+                last_name=self.last_name,
+            )
+
+            if password:
+                if password:
+                    user.set_password(password)
+                else:
+                    user.set_unusable_password()
+            user.save()
+            self.user = user
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"""
+            "first_name": {self.first_name},
+            "last_name": {self.last_name},
+            "role": {self.role},
+            "organization": {self.organization.name},
+            "email": {self.email},
+            "user_name": {self.user_name},
+        """
 
 class Invitation(models.Model):
     email = models.EmailField(unique=False, null=True)
