@@ -14,7 +14,6 @@ class MemberSerializer(serializers.ModelSerializer):
         fields = ['first_name', 'last_name', 'role', 'organization', 'email', "password"]
     
     def create(self, validated_data):
-        print("!!!\n!!!\n!!!\n Validated Data:\n",validated_data)
         password = validated_data.pop('password')
         member = Member(
             first_name=validated_data['first_name'],
@@ -23,6 +22,7 @@ class MemberSerializer(serializers.ModelSerializer):
             role=validated_data.get('role', 'EM'),  # Default to employee
             organization=validated_data.get('organization'),  # Ensure organization is passed
         )
-        print("!!!\n!!!\n!!!\n Member object:\n", str(member))
+
         member.save(password=password)
+        
         return member
