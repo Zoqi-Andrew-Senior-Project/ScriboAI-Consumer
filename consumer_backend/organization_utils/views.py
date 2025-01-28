@@ -36,6 +36,10 @@ from django.contrib.auth.hashers import make_password
                             type=openapi.TYPE_STRING,
                             description="The last name of the owner."
                             ),
+                        "password": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Password to authenticate the account."
+                            ),
                     }
         )
 )
@@ -70,6 +74,23 @@ def create_organization(request):
         return Response(member_serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
     return Response(organization_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@swagger_auto_schema(
+        method='post',
+        operation_summary="Deletes an organization.",
+        responses={
+            status.HTTP_201_CREATED: "Successfully deletes an organization.",
+            status.HTTP_400_BAD_REQUEST: "Invalid input."
+        },
+        request_body= openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "id": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The id of the organization."
+                            )
+                    }
+        )
+)
 @api_view(["POST"])
 def delete_organization(request):
     """
@@ -82,26 +103,29 @@ def delete_organization(request):
         instance.delete()
         return Response(f"{request_id} deleted successfully!", status=status.HTTP_201_CREATED)
     
-    return Response("WHOOPS",status=status.HTTP_400_BAD_REQUEST)
+    return Response("Invalid input.",status=status.HTTP_400_BAD_REQUEST)
 
+@swagger_auto_schema(
+        method='post',
+        operation_summary="Validates an invitation token.",
+        responses={
+            status.HTTP_201_CREATED: "Token is valid!",
+            status.HTTP_400_BAD_REQUEST: "Invalid input."
+        },
+        request_body= openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "invitation_token": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Token for the invitation."
+                            )
+                    }
+        )
+)
 @api_view(["POST"])
-def create_member(request):
+def validate_invite_token(request, invitation_token):
     """
-    Create a new member for an organization.
-    """
-
-    serializer = MemberSerializer(data=request.data)
-
-    if serializer.is_valid():
-        member = serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(["POST"])
-def create_member_by_token(request, invitation_token):
-    """
-    Create a new member for an organization by invitation token.
+    Validates an invitation token.
     """
 
     try:
@@ -155,9 +179,42 @@ def invite_member(request):
 
     return Response({"token": invitation_token}, status=status.HTTP_200_OK)
 
+# generates an invite token
 def generate_invite_token():
     return str(uuid.uuid4())
 
+@swagger_auto_schema(
+        method='post',
+        operation_summary="Completes profile created from invitation token.",
+        responses={
+            status.HTTP_200_OK: "Successfully sent an email to the user."
+        },
+        request_body= openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "token": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The invitation token."
+                            ),
+                        "first_name": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The first name of the owner."
+                            ),
+                        "last_name": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The last name of the owner."
+                            ),
+                        "email": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The last name of the owner."
+                            ),
+                        "password": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Password to authenticate the account."
+                            ),
+                    }
+        )
+)
 @api_view(["POST"])
 def complete_profile(request):
     """
@@ -187,7 +244,22 @@ def complete_profile(request):
     else:
         return Response(member_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-
+@swagger_auto_schema(
+        method='post',
+        operation_summary="Deletes a member from an organization.",
+        responses={
+            status.HTTP_200_OK: "Successfully sent an email to the user."
+        },
+        request_body= openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "member_id": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The ID of the member to delete."
+                            ),
+                    }
+        )
+)
 @api_view(["POST"])
 def delete_member(request):
     """
