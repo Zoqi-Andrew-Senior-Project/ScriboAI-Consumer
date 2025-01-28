@@ -65,8 +65,10 @@ class Member(models.Model):
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
+        print(f"Deleting member {self.user}")
         if self.user:
-            self.user.delete()
+            print(f"Deleting user {self.user}")
+            User.objects.get(username=self.user_name).delete()
         super().delete(*args, **kwargs)
 
     def __str__(self):
