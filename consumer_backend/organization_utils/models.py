@@ -23,7 +23,7 @@ class FullNameField(models.CharField):
 
 class Roles(models.TextChoices):
     EMPLOYEE = "EM", _('Employee') # default
-    ADMIN = "AD", _('Admin') # admin of the organization
+    ADMIN = "AD", _('Admin') # admin of the organization also means training manager
     OWNER = "OW", _('Owner') # owner of the organization
     SUSPENDED = "SU", _('Suspended') # marked for removal
 
