@@ -47,7 +47,26 @@ from django.contrib.auth.hashers import make_password
 def create_organization(request):
     """
     Create a new organization.
+
+    ### Request:
+    - name: The name of the organization.
+    - first_name: The first name of the owner.
+    - last_name: The last name of the owner.
+    - email: The email of the owner.
+    - password: The password to authenticate the account.
+
+    ### Response:
+    - 201: Successfully created a new organization.
+    - 400: Invalid input.
+
+    ### Actions:
+    - Creates an organization model.
+    - Creates a member model.
+        - role: "OW" Owner
+        - organization: The organization id.    
     """
+
+    # assigns variables from request body
     name = request.data.get("name")
     first_name = request.data.get("first_name")
     last_name = request.data.get("last_name")
@@ -94,7 +113,20 @@ def create_organization(request):
 @api_view(["POST"])
 def delete_organization(request):
     """
-    Delete an organization.
+    Deletes an  organization.
+
+    ### Request:
+    - id: The id of the organization.
+
+    ### Response:
+    - 201: Successfully deleted the organization.
+    - 400: Invalid input.
+
+    ### Actions:
+    - Creates an organization model.
+    - Creates a member model.
+        - role: "OW" Owner
+        - organization: The organization id.    
     """
 
     request_id = request.data.get("id")
