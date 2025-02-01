@@ -26,3 +26,10 @@ class MemberSerializer(serializers.ModelSerializer):
         member.save(password=password)
         
         return member
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        data.pop('password', None)
+        
+        return data

@@ -141,19 +141,25 @@ def delete_organization(request):
     - 400: Invalid input.
 
     ### Actions:
-    - Creates an organization model.
-    - Creates a member model.
-        - role: "OW" Owner
-        - organization: The organization id.    
+    - Deletes an organization model.
     """
 
     request_id = request.data.get("id")
     instance = Organization.objects.get(id=request_id)
     if instance:
         instance.delete()
-        return Response(f"{request_id} deleted successfully!", status=status.HTTP_201_CREATED)
+        return Response({
+            "status": "success",
+            "message": f"Organization {request_id}, {instance.name} deleted successfully!",
+        }, status=status.HTTP_200_OK)
     
-    return Response("Invalid input.",status=status.HTTP_400_BAD_REQUEST)
+    return Response({
+        "status": "error",
+        "message": "Invalid input.",
+        "errors": {
+            "id": "Organization does not exist."
+        }
+    },status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(
         method='post',
@@ -181,7 +187,14 @@ def validate_invite_token(request, invitation_token):
     try:
         invitation = Invitation.objects.get(verification_token=invitation_token)
 
-        return Response(f"Success! Welcome {invitation.email} to {invitation.organization.name}", status=status.HTTP_202_ACCEPTED)
+        return Response({
+            "status": "success",
+            "message": "Token is valid!",
+            "data": {
+                "email": invitation.email,
+                "organization": invitation.organization.name
+            }
+        }, status=status.HTTP_202_ACCEPTED)
 
     except Invitation.DoesNotExist:
         return Response("Invalid invitation token.", status=status.HTTP_400_BAD_REQUEST)
@@ -290,9 +303,17 @@ def complete_profile(request):
 
     if member_serializer.is_valid():
         member = member_serializer.save()
-        return Response(member_serializer.data, status=status.HTTP_201_CREATED)
+        return Response({
+            "status": "success",
+            "message": "Profile created successfully!",
+            "data": member_serializer.data
+        }, status=status.HTTP_201_CREATED)
     else:
-        return Response(member_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response({
+            "status": "error",
+            "message": "Invalid input.",
+            "data": member_serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
     
 @swagger_auto_schema(
         method='post',
