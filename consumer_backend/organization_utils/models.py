@@ -30,6 +30,11 @@ class Roles(models.TextChoices):
 class Organization(models.Model):
     name = models.CharField(max_length=255)
 
+    def delete(self, *args, **kwargs):
+        for member in Member.objects.filter(organization=self):
+            member.delete()
+        super().delete(*args, **kwargs)
+
 class Member(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
@@ -38,7 +43,7 @@ class Member(models.Model):
     role = models.CharField(max_length=2,
                             choices=Roles.choices,
                             default=Roles.EMPLOYEE)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, on_delete=models.DO_NOTHING)
     email = models.EmailField(max_length=255, unique=True, null=True)
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
 
