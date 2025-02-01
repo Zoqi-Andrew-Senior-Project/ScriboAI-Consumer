@@ -89,9 +89,27 @@ def create_organization(request):
         
         if member_serializer.is_valid():
             member = member_serializer.save()
-            return Response(member_serializer.data, status=status.HTTP_201_CREATED)
-        return Response(member_serializer.errors, status=status.HTTP_400_BAD_REQUEST)    
-    return Response(organization_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response({
+                "status": "success",
+                "message": "Organization created successfully!",
+                "data": {
+                    "organization": organization_serializer.data,
+                    "member": member_serializer.data
+                }
+            }, status=status.HTTP_201_CREATED)
+        
+        return Response({
+            "status": "error",
+            "message": "Invalid input.",
+            "data": member_serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)  
+      
+    return Response({
+        "status": "error",
+        "message": "Invalid input.",
+        "data": organization_serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(
         method='post',
