@@ -1,5 +1,6 @@
 from djongo import models
 from enum import Enum
+from organization_utils.models import Organization
 
 
 class FeatureEnum(Enum):
@@ -24,3 +25,4 @@ class CourseOutline(models.Model):
     duration = models.CharField(max_length=50)
     modules = models.ArrayField(model_container=Module)
     summary = models.TextField()
+    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, default=1)
