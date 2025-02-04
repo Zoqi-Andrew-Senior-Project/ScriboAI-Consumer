@@ -6,6 +6,6 @@ consumer_backend/mysite/mysite/__pycache__
 *.jpg
 *.jpeg
 *.gif
-
+.env
 # Allow logo.png
 !consumer_frontend/public/logo.png
