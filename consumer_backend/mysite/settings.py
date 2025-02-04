@@ -25,7 +25,13 @@ SECRET_KEY = "django-insecure-pkj6jtmucq6f2@)4wj*4$s#95r1psb-ve*3+^!*a^wkyl#=g0!
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["137.184.77.182", "localhost", "127.0.0.1"]
+ALLOWED_HOSTS = [
+    "137.184.77.182",
+    "localhost",
+    "127.0.0.1",
+    "scriboai.tech",
+    "www.scriboai.tech",
+]
 
 
 # Application definition
@@ -38,7 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework_swagger",
-    'drf_yasg',
+    "drf_yasg",
     "course_utils",
     "authentication",
     "organization_utils",
