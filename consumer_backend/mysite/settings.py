@@ -83,19 +83,11 @@ WSGI_APPLICATION = "mysite.wsgi.application"
 # Database (Using MongoEngine instead)
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#    "default": {
-#        "ENGINE": "djongo",
-#        "NAME": "scriboai_consumer",
-#        "CLIENT": {
-#            "host": "mongodb://localhost/",
-#            "port": 27017,
-#            "username": os.getenv("DB_USERNAME"),
-#            "password": os.getenv("DB_PASSWORD"),
-#            "authSource": "admin",
-#        },
-#    }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.dummy',
+    }
+}
 
 # MongoEngine
 
