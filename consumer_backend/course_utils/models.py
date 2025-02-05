@@ -1,4 +1,4 @@
-from djongo import models
+from mongoengine import Document, EmbeddedDocument, StringField, ListField, EmbeddedDocumentField, ReferenceField, EnumField
 from enum import Enum
 from organization_utils.models import Organization
 
@@ -9,20 +9,25 @@ class FeatureEnum(Enum):
     INTERACTIVE = "interactive"
 
 
-class Module(models.Model):
-    name = models.CharField(max_length=255)
-    duration = models.CharField(max_length=50)
-    subtopics = models.JSONField()
-    features = models.JSONField()
+class Module(EmbeddedDocument):
+    name = StringField(max_length=255)
+    duration = StringField(max_length=50)
+    sub_topics = ListField(StringField())
+    features = ListField(EnumField(FeatureEnum))
 
-    class Meta:
-        abstract = True
+    
+    meta = {
+        "indexes": ["name", "duration", "sub_topics", "features"]
+    }
 
+class CourseOutline(Document):
+    title = StringField(max_length=255)
+    objectives = ListField(StringField())
+    duration = StringField(max_length=50)
+    modules = ListField(EmbeddedDocumentField('Module'))
+    summary = StringField()
+    organization = ReferenceField(Organization, reverse_delete_rule='CASCADE', default=1)
 
-class CourseOutline(models.Model):
-    title = models.CharField(max_length=255)
-    objectives = models.JSONField()
-    duration = models.CharField(max_length=50)
-    modules = models.ArrayField(model_container=Module)
-    summary = models.TextField()
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE, default=1)
+    meta = {
+        "indexes": ["title", "objectives", "duration", "modules", "summary"]
+    }

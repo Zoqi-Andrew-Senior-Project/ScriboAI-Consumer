@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 from .models import Organization, Invitation, Member
-from .serializers import OrganizationSerializer, MemberSerializer
+from .serializers import OrganizationSerializer, MemberSerializer, InviteMemberSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.core.mail import send_mail
@@ -74,15 +74,18 @@ def create_organization(request):
     password = request.data.get("password")
 
     organization_serializer = OrganizationSerializer(data={"name": name})
-    
+    print(organization_serializer.is_valid())
     if organization_serializer.is_valid():
+        print("valid")
         organization = organization_serializer.save()
-        
+        print(organization)
+        print(organization.uuid)
+        print(Organization.objects(uuid=organization.uuid))
         member_serializer = MemberSerializer(data={
             "first_name": first_name, 
             "last_name": last_name, 
             "email": email, 
-            "organization": organization.id,
+            "organization": organization.uuid,
             "role": "OW",
             "password": make_password(password),
         })
@@ -101,13 +104,12 @@ def create_organization(request):
         
         return Response({
             "status": "error",
-            "message": "Invalid input.",
+            "message": "Invalid input. Member",
             "data": member_serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)  
-      
+        }, status=status.HTTP_400_BAD_REQUEST)
     return Response({
         "status": "error",
-        "message": "Invalid input.",
+        "message": "Invalid input. Organization",
         "data": organization_serializer.errors
     }, status=status.HTTP_400_BAD_REQUEST)
 
@@ -145,7 +147,7 @@ def delete_organization(request):
     """
 
     request_id = request.data.get("id")
-    instance = Organization.objects.get(id=request_id)
+    instance = Organization.objects.get(uuid=request_id)
     if instance:
         instance.delete()
         return Response({
@@ -224,27 +226,30 @@ def invite_member(request):
     """
     Send a user an invitation to join an organization.
     """
-    invitation_token = generate_invite_token()
-    email = request.data.get("email")
-    organization_id = request.data.get("organization_id")
-    organization = Organization.objects.get(id=organization_id)
-    Invitation.objects.create(email=email, verification_token=invitation_token, organization=organization)
 
-    subject = "You're invited to ScriboAI!"
-    message = f"You've been invited to join {organization.name}.\n\nClick here to accept the invitation: {invitation_token}"
+    serializer = InviteMemberSerializer(data=request.data)
 
-    """send_mail(
-        subject, 
-        message, 
-        "martinezjandrew@gmail.com", 
-        [email]
-    )"""
+    if serializer.is_valid():
+        invitation_token = serializer.save()
 
-    return Response({"token": invitation_token}, status=status.HTTP_200_OK)
 
-# generates an invite token
-def generate_invite_token():
-    return str(uuid.uuid4())
+        subject = "You're invited to ScriboAI!"
+        message = f"You've been invited to join {request.data['organization_id']}.\n\nClick here to accept the invitation: {invitation_token}"
+
+        """send_mail(
+            subject, 
+            message, 
+            "martinezjandrew@gmail.com", 
+            [email]
+        )"""
+
+        return Response({"token": invitation_token.verification_token}, status=status.HTTP_200_OK)
+    
+    return Response({
+        "status": "error",
+        "message": "Invalid input. Organization",
+        "data": serializer.errors
+    }, status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(
         method='post',
@@ -288,32 +293,39 @@ def complete_profile(request):
     last_name = request.data.get("last_name")
     password = request.data.get("password")
 
-    invitation = Invitation.objects.get(verification_token=token)
-    organization: Organization = invitation.organization
-    email = invitation.email
+    try:
+        invitation = Invitation.objects.get(verification_token=token)
+        organization: Organization = invitation.organization.uuid
+        email = invitation.email
 
-    member_serializer = MemberSerializer(data={
-        "first_name": first_name, 
-        "last_name": last_name, 
-        "role": "EM", 
-        "email": email, 
-        "organization": organization.id, 
-        "password": make_password(password),
-    })
+        member_serializer = MemberSerializer(data={
+            "first_name": first_name, 
+            "last_name": last_name,
+            "email": email, 
+            "organization": organization, 
+            "password": password,
+        })
 
-    if member_serializer.is_valid():
-        member = member_serializer.save()
-        return Response({
-            "status": "success",
-            "message": "Profile created successfully!",
-            "data": member_serializer.data
-        }, status=status.HTTP_201_CREATED)
-    else:
+        if member_serializer.is_valid():
+            member = member_serializer.save()
+            return Response({
+                "status": "success",
+                "message": "Profile created successfully!",
+                "data": member_serializer.data
+            }, status=status.HTTP_201_CREATED)
+        else:
+            return Response({
+                "status": "error",
+                "message": "Invalid input.",
+                "data": member_serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+    except Invitation.DoesNotExist:
         return Response({
             "status": "error",
-            "message": "Invalid input.",
+            "message": "Invalid token.",
             "data": member_serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
+        }, status=status.HTTP_404_NOT_FOUND)
+
     
 @swagger_auto_schema(
         method='post',
@@ -336,7 +348,7 @@ def delete_member(request):
     """
     Delete a member from an organization.
     """
-    member_id = request.data.get("member_id")
-    member = Member.objects.get(id=member_id)
+    username = request.data.get("member_username")
+    member = Member.objects.get(user_name=username)
     member.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)

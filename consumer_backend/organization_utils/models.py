@@ -1,91 +1,131 @@
-from djongo import models
-from django.utils.translation import gettext_lazy as _
-from django.contrib.auth.models import User
 import uuid
 import random
+from django.forms import ValidationError
+from mongoengine import Document, StringField, EmailField, ReferenceField, CASCADE, DO_NOTHING, DateTimeField
+from django.utils.translation import gettext_lazy as _
+from authentication.models import AuthProfile
+from authentication.serializers import AuthProfileSerializer
 
 def generate_user_id():
     return str(uuid.uuid4())
 
-class FullNameField(models.CharField):
+class UserNameField(StringField):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
     def pre_save(self, model_instance, add):
         if not model_instance.user_name:
             random_hex = ''.join([random.choice('0123456789abcdef') for _ in range(random.randint(3, 6))])
-            stripped_name = model_instance.last_name[:random.randint(3,6)]
+            stripped_name = model_instance.last_name[:random.randint(2,6)]
             generated_username = f"{stripped_name}{random_hex}"
             model_instance.user_name = generated_username
         return model_instance.user_name
+    
+class OrganizationUniqueField(StringField):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-# Create your models here.
+    def pre_save(self, model_instance, add):
+        if not model_instance.uuid:
+            while True:
+                random_hex = ''.join([random.choice('0123456789abcdef') for _ in range(random.randint(9, 18))])
+                stripped_name = model_instance.name[:random.randint(1,6)]
+                generated_uuid = f"{stripped_name}{random_hex}"
+                model_instance.uuid = generated_uuid
 
-class Roles(models.TextChoices):
-    EMPLOYEE = "EM", _('Employee') # default
-    ADMIN = "AD", _('Admin') # admin of the organization also means training manager
-    OWNER = "OW", _('Owner') # owner of the organization
-    SUSPENDED = "SU", _('Suspended') # marked for removal
+                # Check if this uuid is already taken by another organization
+                if not Organization.objects(uuid=generated_uuid):
+                    model_instance.uuid = generated_uuid
+                    break  # Exit the loop when we have a unique uuid
+                else:
+                    # If duplicate uuid found, regenerate
+                    continue
+        return model_instance.uuid
 
-class Organization(models.Model):
-    name = models.CharField(max_length=255)
+class Roles:
+    EMPLOYEE = "EM"
+    ADMIN = "AD"
+    OWNER = "OW"
+    choices = [
+        (EMPLOYEE, _('Employee')),
+        (ADMIN, _('Admin')),
+        (OWNER, _('Owner')),
+    ]
+
+class Statuses:
+    ACTIVE = "AC"
+    INACTIVE = "IN"
+    PENDING = "PE"
+    SUSPENDED = "SU"
+    choices = [
+        (ACTIVE, _('Active')),
+        (INACTIVE, _('Inactive')),
+        (PENDING, _('Pending')),
+        (SUSPENDED, _('Suspended')),
+    ]
+
+class Organization(Document):
+    name = StringField(max_length=255)
+    uuid = OrganizationUniqueField(unique=True)
+
+    meta = {
+        "indexes": ["name", "uuid"]
+    }
+
+    def save(self, *args, **kwargs):
+        if not self.uuid:
+            self.uuid = OrganizationUniqueField().pre_save(self, True)
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        for member in Member.objects.filter(organization=self):
+        for member in Member.objects(organization=self):
             member.delete()
         super().delete(*args, **kwargs)
 
-class Member(models.Model):
-    first_name = models.CharField(max_length=255)
-    last_name = models.CharField(max_length=255)
-    id = models.CharField(max_length=36, primary_key=True, default=generate_user_id, editable=False)
-    user_name = FullNameField(max_length=255, unique=True)
-    role = models.CharField(max_length=2,
-                            choices=Roles.choices,
-                            default=Roles.EMPLOYEE)
-    organization = models.ForeignKey(Organization, on_delete=models.DO_NOTHING)
-    email = models.EmailField(max_length=255, unique=True, null=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+class Member(Document):
+    first_name = StringField(max_length=255)
+    last_name = StringField(max_length=255)
+    user_name = UserNameField(max_length=255, unique=True)
+    role = StringField(max_length=2, choices=Roles.choices, default=Roles.EMPLOYEE)
+    status = StringField(max_length=2, choices=Statuses.choices, default=Statuses.PENDING)
+    organization = ReferenceField(Organization, reverse_delete_rule=DO_NOTHING)
+    email = EmailField(max_length=255, null=False)
+    user = ReferenceField(AuthProfile, reverse_delete_rule=CASCADE, null=True, blank=True)
+    
+    meta = {
+        "indexes": ["user_name", "role", "status", ("first_name", "last_name")]
+    }
 
     def save(self, *args, **kwargs):
         if not self.user_name:
-            self.user_name = FullNameField().pre_save(self, True)
+            self.user_name = UserNameField().pre_save(self, True)
 
         password = kwargs.pop("password", None)
         if not self.user:
-            user = User.objects.create_user(
-                username=self.user_name,
-                email=self.email,
-                first_name=self.first_name,
-                last_name=self.last_name,
-            )
+            authprofileserializer = AuthProfileSerializer(data={
+                "username": self.user_name,
+                "password": password
+            })
+            if authprofileserializer.is_valid():
+                self.user = authprofileserializer.save()
+            else:
+                raise ValidationError(authprofileserializer.errors)
 
-            if password:
-                if password:
-                    user.set_password(password)
-                else:
-                    user.set_unusable_password()
-            user.save()
-            self.user = user
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         print(f"Deleting member {self.user}")
-        if self.user:
-            print(f"Deleting user {self.user}")
-            User.objects.get(username=self.user_name).delete()
+        self.user.delete()
         super().delete(*args, **kwargs)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name} {self.user_name}"
 
-class Invitation(models.Model):
-    email = models.EmailField(unique=False, null=True)
-    organization = models.ForeignKey(Organization, on_delete=models.CASCADE)
-    verification_token = models.CharField(max_length=255, unique=True)
-    created_at = models.DateTimeField(auto_now_add=True)
+class Invitation(Document):
+    email = EmailField(unique=False, null=True)
+    organization = ReferenceField(Organization, reverse_delete_rule=CASCADE)
+    verification_token = StringField(max_length=255, unique=True)
+    created_at = DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.user.user_name
-    
-
+        return self.verification_token

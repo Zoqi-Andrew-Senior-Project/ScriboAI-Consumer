@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from mongoengine import connect
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,18 +25,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-pkj6jtmucq6f2@)4wj*4$s#95r1psb-ve*3+^!*a^wkyl#=g0!"
+SECRET_KEY = os.environ["DJANGO_SECRET"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "False") == "True"
 
-ALLOWED_HOSTS = [
-    "137.184.77.182",
-    "localhost",
-    "127.0.0.1",
-    "scriboai.tech",
-    "www.scriboai.tech",
-]
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
 
 
 # Application definition
@@ -81,24 +80,25 @@ TEMPLATES = [
 WSGI_APPLICATION = "mysite.wsgi.application"
 
 
-# Database
+# Database (Using MongoEngine instead)
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
-        "ENGINE": "djongo",
-        "NAME": "scriboai_consumer",
-        "CLIENT": {
-            "host": "mongodb://localhost/",
-            "port": 27017,
-            "username": "root",
-            "password": "butt",
-            "authSource": "admin",
-        },
+    'default': {
+        'ENGINE': 'django.db.backends.dummy',
     }
 }
 
+# MongoEngine
 
+connect(
+    db=os.getenv("DB_NAME"),
+    username=os.getenv("DB_USERNAME"),
+    password=os.getenv("DB_PASSWORD"),
+    host=os.getenv("DB_HOST"),
+    port=int(os.getenv("DB_PORT")),
+    authentication_source="admin",
+)
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 

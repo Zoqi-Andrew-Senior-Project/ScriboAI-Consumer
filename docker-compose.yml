@@ -16,6 +16,7 @@ services:
       - "8000:8000" # Maps port 7001 of the host to port 7001 of the container
     networks:
       - app-network
+    env_file: .env
     environment:
       DB_HOST: mongo # Referencing the Mongo service by its container name
       DJANGO_SETTINGS_MODULE: mysite.settings
@@ -31,9 +32,9 @@ services:
     volumes:
       - mongo_data:/data/db # Persistent storage for MongoDB
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: butt
-      MONGO_INITDB_DATABASE: scriboai_consumer
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${DB_NAME}
     networks:
       - app-network
 
