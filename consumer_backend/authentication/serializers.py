@@ -1,23 +1,38 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
+from .models import AuthProfile
+from werkzeug.security import generate_password_hash, check_password_hash
 
-# deprecated
-# class UserSerializer(serializers.ModelSerializer):
-#     password = serializers.CharField(write_only=True)
+class AuthProfileSerializer(serializers.Serializer):
+    username = serializers.CharField(required=True)
+    password = serializers.CharField(write_only=True, required=True)
 
-#     class Meta:
-#         model = User
-#         fields = ['username', 'password', 'email']
+    def create(self, validated_data):
+        username = validated_data.pop('username')
+        password = validated_data.pop('password')
 
-#     def create(self, validated_data):
-#         user = User(
-#             email=validated_data['email'],
-#             username=validated_data['username']
-#         )
-#         user.set_password(validated_data['password'])
-#         user.save()
-#         return user
+        auth_profile = AuthProfile(
+            username=username,
+            password_hash=generate_password_hash(password)
+        )
+        
+        auth_profile.save()
+
+        return auth_profile
     
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+    def authenticate(self, data):
+        username = data.get('username')
+        password = data.get('password')
+
+        # Fetch the AuthProfile based on the provided username
+        auth_profile = AuthProfile.objects(username=username).first()
+
+        if not auth_profile:
+            raise serializers.ValidationError("Invalid credentials")
+
+        # Check if the password matches
+        if not check_password_hash(auth_profile.password_hash, password):
+            raise serializers.ValidationError("Invalid credentials")
+
+        # Update last active time on successful login
+        auth_profile.update_last_active()  # This assumes you have the `update_last_active` method
+        return auth_profile

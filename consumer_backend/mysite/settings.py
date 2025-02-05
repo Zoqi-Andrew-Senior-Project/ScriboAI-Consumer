@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from mongoengine import connect
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -79,24 +80,33 @@ TEMPLATES = [
 WSGI_APPLICATION = "mysite.wsgi.application"
 
 
-# Database
+# Database (Using MongoEngine instead)
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "djongo",
-        "NAME": "scriboai_consumer",
-        "CLIENT": {
-            "host": "mongodb://localhost/",
-            "port": 27017,
-            "username": os.getenv("DB_USERNAME"),
-            "password": os.getenv("DB_PASSWORD"),
-            "authSource": "admin",
-        },
-    }
-}
+# DATABASES = {
+#    "default": {
+#        "ENGINE": "djongo",
+#        "NAME": "scriboai_consumer",
+#        "CLIENT": {
+#            "host": "mongodb://localhost/",
+#            "port": 27017,
+#            "username": os.getenv("DB_USERNAME"),
+#            "password": os.getenv("DB_PASSWORD"),
+#            "authSource": "admin",
+#        },
+#    }
+# }
 
+# MongoEngine
 
+connect(
+    db=os.getenv("DB_NAME"),
+    username=os.getenv("DB_USERNAME"),
+    password=os.getenv("DB_PASSWORD"),
+    host=os.getenv("DB_HOST"),
+    port=int(os.getenv("DB_PORT")),
+    authentication_source="admin",
+)
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
