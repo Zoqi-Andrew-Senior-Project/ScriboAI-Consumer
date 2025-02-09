@@ -24,8 +24,8 @@ function Signup() {
 
         try {
             const endpoint = isSignup
-                ? 'http://137.184.77.182/api/authentication/register/' 
-                : 'http://137.184.77.182/api/authentication/login/';    
+                ? process.env.BACKEND_ADDRESS + '/api/authentication/register/' 
+                : process.env.BACKEND_ADDRESS + '/api/authentication/login/';    
 
             const data = isSignup ? formData : loginData;
 

@@ -19,28 +19,29 @@ class MemberSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=255)
     last_name = serializers.CharField(max_length=255)
     email = serializers.EmailField(max_length=255)
-    organization = serializers.CharField(max_length=255)
-
     role = serializers.CharField(max_length=2, allow_blank=True, allow_null=True, required=False )
     password = serializers.CharField(write_only=True)
 
     def validate_role(self, value):
-        if value is not None and value not in Roles.choices:
+        if value is not None and value not in Roles.valid_roles:
             raise ValidationError(f"Role must be one of {Roles.choices} or null.")
         return value
 
 
     def create(self, data):
-        print("creating")
+        org_uuid = data.pop('organization')
 
-        org = Organization.objects.get(uuid=data['organization'])
+        try:
+            org = Organization.objects.get(uuid=org_uuid)
+        except Organization.DoesNotExist:
+            raise serializers.ValidationError(f"Organization with UUID {org_uuid} does not exist.")
 
         try:
             member = Member(
                 first_name=data['first_name'],
                 last_name=data['last_name'],
                 email=data['email'],
-                role=data.get('role', None),  # Default to employee
+                role=data.get('role'),  # Default to employee
                 organization=org,            
             )
             member.save(password=data['password'])

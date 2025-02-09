@@ -51,6 +51,7 @@ class Roles:
         (ADMIN, _('Admin')),
         (OWNER, _('Owner')),
     ]
+    valid_roles = [role_code for role_code, _ in choices]
 
 class Statuses:
     ACTIVE = "AC"

@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
-from .models import Organization, Invitation, Member
+from .models import Organization, Invitation, Member, Roles
 from .serializers import OrganizationSerializer, MemberSerializer, InviteMemberSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -73,45 +73,44 @@ def create_organization(request):
     email = request.data.get("email")
     password = request.data.get("password")
 
-    organization_serializer = OrganizationSerializer(data={"name": name})
-    print(organization_serializer.is_valid())
-    if organization_serializer.is_valid():
-        print("valid")
-        organization = organization_serializer.save()
-        print(organization)
-        print(organization.uuid)
-        print(Organization.objects(uuid=organization.uuid))
-        member_serializer = MemberSerializer(data={
-            "first_name": first_name, 
-            "last_name": last_name, 
-            "email": email, 
-            "organization": organization.uuid,
-            "role": "OW",
-            "password": make_password(password),
-        })
-        
-        if member_serializer.is_valid():
-            member = member_serializer.save()
+     # Validate member data first
+    member_serializer = MemberSerializer(data={
+        "first_name": first_name, 
+        "last_name": last_name, 
+        "email": email, 
+        "role": Roles.OWNER,
+        "password": make_password(password),
+    })
 
-            return Response({
-                "status": "success",
-                "message": "Organization created successfully!",
-                "data": {
-                    "organization": organization_serializer.data,
-                    "member": member_serializer.data
-                }
-            }, status=status.HTTP_201_CREATED)
-        
+    if not member_serializer.is_valid():
         return Response({
             "status": "error",
-            "message": "Invalid input. Member",
+            "message": "Invalid input for Member.",
             "data": member_serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+    
+    # Validate organization data
+    organization_serializer = OrganizationSerializer(data={"name": name})
+    if not organization_serializer.is_valid():
+        return Response({
+            "status": "error",
+            "message": "Invalid input for Organization.",
+            "data": organization_serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    organization = organization_serializer.save()
+
+    member_serializer.validated_data["organization"] = organization.uuid
+    member=member_serializer.save()
+
     return Response({
-        "status": "error",
-        "message": "Invalid input. Organization",
-        "data": organization_serializer.errors
-    }, status=status.HTTP_400_BAD_REQUEST)
+        "status": "success",
+        "message": "Organization created successfully!",
+        "data": {
+            "organization": organization_serializer.data,
+            "member": member_serializer.data
+        }
+    }, status=status.HTTP_201_CREATED)
 
 @swagger_auto_schema(
         method='post',
