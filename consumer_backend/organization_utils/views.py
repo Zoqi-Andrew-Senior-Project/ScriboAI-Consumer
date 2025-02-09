@@ -79,7 +79,7 @@ def create_organization(request):
         "last_name": last_name, 
         "email": email, 
         "role": Roles.OWNER,
-        "password": make_password(password),
+        "password": password,
     })
 
     if not member_serializer.is_valid():

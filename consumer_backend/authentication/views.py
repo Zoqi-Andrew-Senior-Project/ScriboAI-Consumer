@@ -10,11 +10,10 @@ class LoginView(APIView):
 
         auth_profile = AuthProfile.objects(username=username).first()
 
-        if auth_profile and auth_profile.check_password(password):
-            auth_profile.update_last_active()  # Update last activity timestamp
-            return Response(
-                {"message": "Login successful", "last_active_at": auth_profile.last_active_at},
-                status=status.HTTP_200_OK
-            )
+        if not auth_profile:
+            return Response({"message": "Bad username"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if not  auth_profile.check_password(password):        
+            return Response({"message": "Bad password"}, status=status.HTTP_401_UNAUTHORIZED)
         
-        return Response({"message": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({"message": "Login successful"}, status=status.HTTP_200_OK)
