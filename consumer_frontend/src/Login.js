@@ -19,7 +19,11 @@ function Login() {
         try {
             console.log(process.env.REACT_APP_BACKEND_ADDRESS);
             const endpoint = process.env.REACT_APP_BACKEND_ADDRESS + '/api/authentication/login/';
-            const response = await axios.post(endpoint, loginData);
+            const response = await axios.post(endpoint, loginData, {
+                withCredentials: true,
+                headers: { 'Content-Type': 'application/json' },
+
+            });
             setMessage('Login successful!');
             setLoginData({ username: '', password: '' });
         } catch (error) {

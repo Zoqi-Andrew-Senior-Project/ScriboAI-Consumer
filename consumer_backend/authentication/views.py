@@ -15,9 +15,9 @@ class LoginView(APIView):
         if auth_profile and auth_profile.check_password(password):
             request.session["auth_profile_id"] = str(auth_profile.id)
             request.session.set_expiry(3600)  # Set session expiry to 1 hour
-            return Response({"message": "Login successful"}, status=status.HTTP_200_OK)
+            return Response({"message": "Login successful", "logged_in": True}, status=status.HTTP_200_OK)
         else:
-            return Response({"error": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"error": "Invalid credentials", "logged_in": False}, status=status.HTTP_401_UNAUTHORIZED)
         
 class ProfileView(APIView):
     def get(self, request):
@@ -35,6 +35,8 @@ class ProfileView(APIView):
     
 class LogoutView(APIView):
     def post(self, request):
+        print(str(request.session.get("session_data")))
+        print(request.session.get("auth_profile_id"))
         auth_profile_id = request.session.get("auth_profile_id")
         if not auth_profile_id:
             return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
