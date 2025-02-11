@@ -91,7 +91,7 @@ class Member(Document):
     status = StringField(max_length=2, choices=Statuses.choices, default=Statuses.PENDING)
     organization = ReferenceField(Organization, reverse_delete_rule=DO_NOTHING)
     email = EmailField(max_length=255, null=False)
-    user = ReferenceField(AuthProfile, reverse_delete_rule=CASCADE, null=True)
+    authuser = ReferenceField(AuthProfile, reverse_delete_rule=CASCADE, null=True)
     
     meta = {
         "indexes": ["user_name", "role", "status", ("first_name", "last_name")]
@@ -103,21 +103,21 @@ class Member(Document):
 
         password = kwargs.pop("password", None)
 
-        if not self.user:
+        if not self.authuser:
             authprofileserializer = AuthProfileSerializer(data={
                 "username": self.user_name,
                 "password": password
             })
             if authprofileserializer.is_valid():
-                self.user = authprofileserializer.save()
+                self.authuser = authprofileserializer.save()
             else:
                 raise ValidationError(authprofileserializer.errors)
 
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        print(f"Deleting member {self.user}")
-        self.user.delete()
+        print(f"Deleting member {self.authuser}")
+        self.authuser.delete()
         super().delete(*args, **kwargs)
 
     def __str__(self):

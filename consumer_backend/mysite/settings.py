@@ -158,3 +158,9 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "authentication.authentication_engine.MongoEngineSessionAuthentication",  # Enable Django session authentication
+    ],
+}

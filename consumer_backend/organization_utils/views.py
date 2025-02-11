@@ -1,13 +1,15 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from rest_framework import status
 from .models import Organization, Invitation, Member, Roles
 from .serializers import OrganizationSerializer, MemberSerializer, InviteMemberSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.core.mail import send_mail
-import uuid
-from django.contrib.auth.hashers import make_password
+from rest_framework.permissions import IsAuthenticated
+from .permissions import *
+
 # Create your views here.
 
 @swagger_auto_schema(
@@ -45,6 +47,7 @@ from django.contrib.auth.hashers import make_password
 )
 @api_view(["POST"])
 def create_organization(request):
+
     """
     Create a new organization.
 
@@ -65,7 +68,6 @@ def create_organization(request):
         - role: "OW" Owner
         - organization: The organization id.    
     """
-
     # assigns variables from request body
     name = request.data.get("name")
     first_name = request.data.get("first_name")
@@ -88,8 +90,7 @@ def create_organization(request):
             "message": "Invalid input for Member.",
             "data": member_serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
-    
-    # Validate organization data
+      # Validate organization data
     organization_serializer = OrganizationSerializer(data={"name": name})
     if not organization_serializer.is_valid():
         return Response({
@@ -351,3 +352,27 @@ def delete_member(request):
     member = Member.objects.get(user_name=username)
     member.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
+    
+class MemberView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """
+        Returns profile details of the member.
+        """
+        user = request.user
+
+        try:
+            member: Member = Member.objects.get(user_name=user.username)
+
+            return Response({
+                "first_name": member.first_name,
+                "last_name": member.last_name,
+                "email": member.email,
+                "role": member.role,
+                "organization": member.organization.name,
+                "status": member.status,
+                "email": member.email
+            }, status=status.HTTP_200_OK)
+        except Member.DoesNotExist:
+            return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)
