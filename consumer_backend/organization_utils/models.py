@@ -51,6 +51,7 @@ class Roles:
         (ADMIN, _('Admin')),
         (OWNER, _('Owner')),
     ]
+    valid_roles = [role_code for role_code, _ in choices]
 
 class Statuses:
     ACTIVE = "AC"
@@ -90,7 +91,7 @@ class Member(Document):
     status = StringField(max_length=2, choices=Statuses.choices, default=Statuses.PENDING)
     organization = ReferenceField(Organization, reverse_delete_rule=DO_NOTHING)
     email = EmailField(max_length=255, null=False)
-    user = ReferenceField(AuthProfile, reverse_delete_rule=CASCADE, null=True, blank=True)
+    user = ReferenceField(AuthProfile, reverse_delete_rule=CASCADE, null=True)
     
     meta = {
         "indexes": ["user_name", "role", "status", ("first_name", "last_name")]
@@ -101,6 +102,7 @@ class Member(Document):
             self.user_name = UserNameField().pre_save(self, True)
 
         password = kwargs.pop("password", None)
+
         if not self.user:
             authprofileserializer = AuthProfileSerializer(data={
                 "username": self.user_name,

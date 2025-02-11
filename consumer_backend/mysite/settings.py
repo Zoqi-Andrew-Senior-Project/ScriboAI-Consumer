@@ -44,6 +44,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework_swagger",
     "drf_yasg",
+    "django_mongoengine",
+    "corsheaders",
     "course_utils",
     "authentication",
     "organization_utils",
@@ -57,6 +59,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
+    "django.middleware.common.CommonMiddleware",
 ]
 
 ROOT_URLCONF = "mysite.urls"
@@ -91,14 +95,22 @@ DATABASES = {
 
 # MongoEngine
 
-connect(
-    db=os.getenv("DB_NAME"),
-    username=os.getenv("DB_USERNAME"),
-    password=os.getenv("DB_PASSWORD"),
-    host=os.getenv("DB_HOST"),
-    port=int(os.getenv("DB_PORT")),
-    authentication_source="admin",
-)
+MONGODB_DATABASES = {
+    "default": {
+        "name": os.getenv("DB_NAME"),
+        "host": os.getenv("DB_HOST"),
+        "port": int(os.getenv("DB_PORT")),
+        "username": os.getenv("DB_USERNAME"),
+        "password": os.getenv("DB_PASSWORD"),
+        "authentication_source": "admin",
+    }
+}
+
+SESSION_ENGINE = 'django_mongoengine.sessions'
+SESSION_SERIALIZER = 'django_mongoengine.sessions.BSONSerializer'
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 7
+SESSION_SAVE_EVERY_REQUEST = True
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -139,3 +151,10 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+CORS_ALLOW_CREDENTIALS = True

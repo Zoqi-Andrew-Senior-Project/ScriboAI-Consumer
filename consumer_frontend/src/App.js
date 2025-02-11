@@ -3,8 +3,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
 import CreateCourse from './CreateCourse';
-import Signup from './Signup';
-
+import Login from './Login';
+import Logout from './Logout';
+import CreateOrganization from './CreateOrganization';
 
 function Navbar() {
   return (
@@ -35,6 +36,23 @@ function Navbar() {
         </div>
       </div>
     </nav>
+  );
+}
+
+function Welcome() {
+  return (
+    <div className="container-fluid main-content d-flex align-items-center">
+      <div className="row w-100">
+        {/* Left Column: Logo and Welcome Message */}
+        <div className="d-flex flex-column align-items-center justify-content-center text-center mb-4">
+          <div className="logo-placeholder mb-3"></div> {/* Placeholder for circular logo */}
+          <h1>Hello from Scribo!</h1>
+          <p>All of your training problems solved with just a few clicks!</p>
+          <Link to="/create-organization" className="btn btn-primary btn-big mb-3 w-75">Create an Organization</Link>
+          <Link to="/signup" className="btn btn-primary btn-big mb-3 w-75">Log in</Link>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -74,9 +92,12 @@ function App() {
       <div className="app-container">
         <Navbar />
         <Routes>
-          <Route path="/" element={<Signup />} /> 
+          <Route path="/" element={<Welcome />} /> 
           <Route path="/home" element={<Home />} /> 
           <Route path="/create-course" element={<CreateCourse />} />
+          <Route path="/create-organization" element={<CreateOrganization />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/logout" element={<Logout />} />
         </Routes>
         <Footer />
       </div>

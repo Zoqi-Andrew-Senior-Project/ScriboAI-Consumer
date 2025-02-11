@@ -1,4 +1,4 @@
-from mongoengine import Document, EmbeddedDocument, StringField, ListField, EmbeddedDocumentField, ReferenceField, EnumField
+from mongoengine import Document, EmbeddedDocument, fields
 from enum import Enum
 from organization_utils.models import Organization
 
@@ -10,24 +10,16 @@ class FeatureEnum(Enum):
 
 
 class Module(EmbeddedDocument):
-    name = StringField(max_length=255)
-    duration = StringField(max_length=50)
-    sub_topics = ListField(StringField())
-    features = ListField(EnumField(FeatureEnum))
+    name = fields.StringField(max_length=255)
+    duration = fields.StringField(max_length=50)
+    subtopics = fields.ListField(fields.StringField())
+    features = fields.ListField(fields.StringField(choices=[e.value for e in FeatureEnum]))
 
-    
-    meta = {
-        "indexes": ["name", "duration", "sub_topics", "features"]
-    }
 
 class CourseOutline(Document):
-    title = StringField(max_length=255)
-    objectives = ListField(StringField())
-    duration = StringField(max_length=50)
-    modules = ListField(EmbeddedDocumentField('Module'))
-    summary = StringField()
-    organization = ReferenceField(Organization, reverse_delete_rule='CASCADE', default=1)
-
-    meta = {
-        "indexes": ["title", "objectives", "duration", "modules", "summary"]
-    }
+    title = fields.StringField(max_length=255)
+    objectives = fields.ListField(fields.StringField())
+    duration = fields.StringField(max_length=50)
+    modules = fields.EmbeddedDocumentListField(Module)
+    summary = fields.StringField()
+    organization = fields.ReferenceField(Organization, reverse_delete_rule=fields.DO_NOTHING)
