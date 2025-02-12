@@ -85,7 +85,7 @@ function CreateCourse() {
   const handleSubmit = async () => {
       setIsLoading(true);
 
-      const url = "https://martinezjandrew-trainingcoursegen.hf.space/generate-outline"
+      const url = process.env.REACT_APP_HUGGINGFACE_ADDRESS + "/generate-outline"
       const time = courseData.duration === "short" ? "up to one hour" : "between one and two hours"
       const data = {
         topic: courseData.topic,
