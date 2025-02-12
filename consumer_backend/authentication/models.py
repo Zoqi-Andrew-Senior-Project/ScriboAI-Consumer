@@ -8,6 +8,10 @@ class AuthProfile(Document):
     created_at = DateTimeField(default=datetime.now())  # Account creation timestamp
     last_active_at = DateTimeField(default=datetime.now())  # Last activity timestamp
 
+    meta = {
+        "indexes": ["username"]
+    }
+
     def set_password(self, password):
         """Hashes and stores the password."""
         self.password_hash = generate_password_hash(password)
@@ -20,3 +24,7 @@ class AuthProfile(Document):
         """Updates last activity timestamp."""
         self.last_active_at = datetime.datetime.utcnow()
         self.save()
+
+    @property
+    def is_authenticated(self):
+        return True
