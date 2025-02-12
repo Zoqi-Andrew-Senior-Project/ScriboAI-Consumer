@@ -1,3 +1,5 @@
+import os
+from django.core.mail import EmailMultiAlternatives
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
@@ -6,30 +8,30 @@ from .models import Organization, Invitation, Member, Roles
 from .serializers import OrganizationSerializer, MemberSerializer, InviteMemberSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from django.core.mail import send_mail
 from rest_framework.permissions import IsAuthenticated
 from .permissions import *
+from django.template.loader import render_to_string
 
 # Create your views here.
 
 @swagger_auto_schema(
-        method='post',
+        method='get',
         operation_summary="Validates an invitation token.",
         responses={
             status.HTTP_201_CREATED: "Token is valid!",
             status.HTTP_400_BAD_REQUEST: "Invalid input."
         },
-        request_body= openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "invitation_token": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="Token for the invitation."
-                            )
-                    }
+        manual_parameters=[
+        openapi.Parameter(
+            'invitation_token',  # Name of the parameter
+            openapi.IN_PATH,      # Parameter is in the path
+            description='Token for the invitation.',
+            type=openapi.TYPE_STRING,
+            required=True          # This is required in the URL
         )
+    ]
 )
-@api_view(["POST"])
+@api_view(["GET"])
 def validate_invite_token(request, invitation_token):
     """
     Validates an invitation token.
@@ -128,6 +130,7 @@ class OrganizationView(APIView):
             "email": email, 
             "role": Roles.OWNER,
             "password": password,
+            "organization": None
         })
 
         if not member_serializer.is_valid():
@@ -278,14 +281,26 @@ class InviteMemberView(APIView):
 
                 # compost email
                 subject = "You're invited to ScriboAI!"
-                message = f"You've been invited to join {organization.name}.\n\nClick here to accept the invitation: {invitation_token}"
+                body = "Congrats 😁"
 
-                """send_mail(
-                    subject, 
-                    message, 
-                    "martinezjandrew@gmail.com", 
-                    [email]
-                )"""
+                context = {
+                    "organization_name": organization.name,
+                    "link": os.getenv("REACT_APP_BACKEND_ADDRESS") + f"/api/org/validate-invite/{invitation_token}/",
+                    "image": "http://scriboai.tech/static/media/logo.58c00fb0d1fb34fa34b4.png",
+                }
+
+                html_content = render_to_string("invite.html", context)
+
+                email = EmailMultiAlternatives(
+                    subject,
+                    body,
+                    "Scribo <sender@scriboai.tech>",
+                    ["martinezjandrew@gmail.com"], # request.data.get("email")
+                )
+
+                email.attach_alternative(html_content, "text/html")
+
+                email.send()
 
                 return Response({"token": invitation_token.verification_token}, status=status.HTTP_201_CREATED)
             else:
@@ -355,9 +370,41 @@ class MemberView(APIView):
     @swagger_auto_schema(
         operation_summary="Complete's a user's profile.",
         responses={
-            status.HTTP_201_CREATED: "Profile created successfully!",
-            status.HTTP_400_BAD_REQUEST: "Invalid input.",
-            status.HTTP_404_NOT_FOUND: "Invalid token."
+            # status.HTTP_201_CREATED: "Profile created successfully!",
+            # status.HTTP_400_BAD_REQUEST: "Invalid input.",
+            # status.HTTP_404_NOT_FOUND: "Invalid token."
+            202: openapi.Response(
+                description="Token is valid!",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "email": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The email belonging to the user."
+                            ),
+                        "organization": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The organization id the user belongs to."
+                            ),
+                        "first_name": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The first name of the user."
+                            ),
+                        "last_name": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The last name of the user."
+                            ),
+                        "role": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The role of the user."
+                            ),
+                        "user_name": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The username of the user."
+                            ),
+                    }
+                )
+            ),
         },
         request_body= openapi.Schema(
                     type=openapi.TYPE_OBJECT,
@@ -380,7 +427,7 @@ class MemberView(APIView):
                             ),
                     }
         )
-)
+    )
     def post(self, request):
         """
         Complete a user's profile.
@@ -395,7 +442,6 @@ class MemberView(APIView):
             organization: Organization = invitation.organization.uuid
             email = invitation.email
 
-            print(organization)
 
             data = {
                 "first_name": first_name, 
