@@ -214,37 +214,133 @@ def validate_invite_token(request, invitation_token):
     except Invitation.DoesNotExist:
         return Response("Invalid invitation token.", status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(["POST"])
-def invite_member(request):
-    """
-    Send a user an invitation to join an organization.
-    """
+class InviteMemberView(APIView):
+    permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
 
+    @swagger_auto_schema(
+            operation_summary="Emails a user an invite to create an account and join the organization.",
+            responses={
+                status.HTTP_201_CREATED: "Invite sent!",
+                status.HTTP_400_BAD_REQUEST: "Invalid input.",
+                status.HTTP_404_NOT_FOUND: "Member does not exist."
+            },
+            request_body= openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            "email": openapi.Schema(
+                                type=openapi.TYPE_STRING,
+                                description="The email of the person to invite."
+                                )
+                        }
+            )
+    )
+    def post(self, request):
+        """
+        Send a user an invitation to join an organization.
 
+        ### Permissions:
+        - IsAuthenticated - Must be logged in and have an active session.
+        - IsOwnerOrAdmin - Must be an owner or admin of an organization.
 
-    serializer = InviteMemberSerializer(data=request.data)
+        ### Request:
+        - email: the email of the person to invite.
 
-    if serializer.is_valid():
-        invitation_token = serializer.save()
+        ### Response:
+        - 201: Successfully sends the invite.
+        - 400: Invalid input.
+        - 404: The member doesn't exist.
 
+        ### Actions:
+        - Creates an Invitation document in the database that ties an invitation token to an organization and an email.
+        - Emails a message to the provided email address with a link to complete their profile. 
+        """
+        user = request.user # get auth profile of user making the request
 
-        subject = "You're invited to ScriboAI!"
-        message = f"You've been invited to join {request.data['organization_id']}.\n\nClick here to accept the invitation: {invitation_token}"
+        try:
 
-        """send_mail(
-            subject, 
-            message, 
-            "martinezjandrew@gmail.com", 
-            [email]
-        )"""
+            member: Member = Member.objects.get(user_name=user.username)
+            organization: Organization = member.organization
 
-        return Response({"token": invitation_token.verification_token}, status=status.HTTP_200_OK)
-    
-    return Response({
-        "status": "error",
-        "message": "Invalid input. Organization",
-        "data": serializer.errors
-    }, status=status.HTTP_400_BAD_REQUEST)
+            # Check for existing invitations and delete them
+            existing_invitation = Invitation.objects(email=request.data.get("email"), organization=organization)
+
+            for invitation in existing_invitation:
+                invitation.delete()
+
+            data = {
+                "email": request.data.get("email"),
+                "organization_id": organization.uuid
+            }
+
+            serializer = InviteMemberSerializer(data=data)
+            if serializer.is_valid():
+                invitation_token = serializer.save()
+
+                # compost email
+                subject = "You're invited to ScriboAI!"
+                message = f"You've been invited to join {organization.name}.\n\nClick here to accept the invitation: {invitation_token}"
+
+                """send_mail(
+                    subject, 
+                    message, 
+                    "martinezjandrew@gmail.com", 
+                    [email]
+                )"""
+
+                return Response({"token": invitation_token.verification_token}, status=status.HTTP_201_CREATED)
+            else:
+                return Response({
+                    "status": "error",
+                    "message": "Invalid input.",
+                    "data": serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        except Member.DoesNotExist:
+            return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        
+    @swagger_auto_schema(
+            operation_summary="Deletes an active invitation.",
+            responses={
+                status.HTTP_201_CREATED: "Successfully deletes the invitation.",
+                status.HTTP_400_BAD_REQUEST: "Invalid input.",
+            },
+            request_body= openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            "invitation_token": openapi.Schema(
+                                type=openapi.TYPE_STRING,
+                                description="The token of the invitation to delete."
+                                )
+                        }
+            )
+    )
+    def delete(self, request):
+        """
+        Deletes an invitation.
+
+        ### Permissions:
+        - IsAuthenticated - Must be logged in and have an active session.
+        - IsOwnerOrAdmin - Must be an owner or admin of an organization.
+
+        ### Request:
+        - Invitation Token: The token of the invitation to delete.
+
+        ### Response:
+        - 204: Successfully deletes the Invitation document.
+        - 404: Couldn't find the Invitation from the provided token.
+
+        ### Actions:
+        - Deletes the Invitation document from the database.
+        - Makes the token invalid to use when creating a profile.
+        """
+        invitation_token = request.data.get("invitation_token")
+
+        try:
+            invitation = Invitation.objects.get(verification_token=invitation_token)
+            invitation.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Invitation.DoesNotExist:
+            return Response({"error": "Invitation does not exist."}, status=status.HTTP_404_NOT_FOUND)
     
 class MemberView(APIView):
     def get_permissions(self):
@@ -257,20 +353,30 @@ class MemberView(APIView):
         return [permission() for permission in permission_classes]
 
     @swagger_auto_schema(
-        operation_summary="Invite users to an organization.",
+        operation_summary="Complete's a user's profile.",
         responses={
-            status.HTTP_200_OK: "Successfully sent an email to the user."
+            status.HTTP_201_CREATED: "Profile created successfully!",
+            status.HTTP_400_BAD_REQUEST: "Invalid input.",
+            status.HTTP_404_NOT_FOUND: "Invalid token."
         },
         request_body= openapi.Schema(
                     type=openapi.TYPE_OBJECT,
                     properties={
-                        "email": openapi.Schema(
+                        "token": openapi.Schema(
                             type=openapi.TYPE_STRING,
-                            description="The email of the new member to invite."
+                            description="The token of the invitation to delete."
                             ),
-                        "organization_id": openapi.Schema(
+                        "first_name": openapi.Schema(
                             type=openapi.TYPE_STRING,
-                            description="The ID of the organization the member is being invited to."
+                            description="The first name of the user."
+                            ),
+                        "last_name": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The last name of the user."
+                            ),
+                        "password": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Password to authenticate the account."
                             ),
                     }
         )
@@ -289,13 +395,17 @@ class MemberView(APIView):
             organization: Organization = invitation.organization.uuid
             email = invitation.email
 
-            member_serializer = MemberSerializer(data={
+            print(organization)
+
+            data = {
                 "first_name": first_name, 
                 "last_name": last_name,
                 "email": email, 
                 "organization": organization, 
                 "password": password,
-            })
+            }
+
+            member_serializer = MemberSerializer(data=data)
 
             if member_serializer.is_valid():
                 member = member_serializer.save()

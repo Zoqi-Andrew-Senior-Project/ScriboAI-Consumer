@@ -21,6 +21,7 @@ class MemberSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255)
     role = serializers.CharField(max_length=2, allow_blank=True, allow_null=True, required=False )
     password = serializers.CharField(write_only=True)
+    organization = serializers.CharField(max_length=24)
 
     def validate_role(self, value):
         if value is not None and value not in Roles.valid_roles:
@@ -29,6 +30,7 @@ class MemberSerializer(serializers.Serializer):
 
 
     def create(self, data):
+        print(data)
         org_uuid = data.pop('organization')
 
         try:
