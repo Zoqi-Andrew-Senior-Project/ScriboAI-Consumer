@@ -56,6 +56,9 @@ class OrganizationView(APIView):
         """
         Create a new organization.
 
+        ### Permissions:
+        - None.
+
         ### Request:
         - name: The name of the organization.
         - first_name: The first name of the owner.
@@ -143,7 +146,7 @@ class OrganizationView(APIView):
         - IsOwner - Must be an owner of an organization.
 
         ### Request:
-        - id: The id of the organization.
+        - None.
 
         ### Response:
         - 201: Successfully deleted the organization.
@@ -151,6 +154,7 @@ class OrganizationView(APIView):
 
         ### Actions:
         - Deletes an organization model.
+        - Deletes all members of the organization
         """
 
         
@@ -210,31 +214,13 @@ def validate_invite_token(request, invitation_token):
     except Invitation.DoesNotExist:
         return Response("Invalid invitation token.", status=status.HTTP_400_BAD_REQUEST)
 
-@swagger_auto_schema(
-        method='post',
-        operation_summary="Invite users to an organization.",
-        responses={
-            status.HTTP_200_OK: "Successfully sent an email to the user."
-        },
-        request_body= openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "email": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="The email of the new member to invite."
-                            ),
-                        "organization_id": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="The ID of the organization the member is being invited to."
-                            ),
-                    }
-        )
-)
 @api_view(["POST"])
 def invite_member(request):
     """
     Send a user an invitation to join an organization.
     """
+
+
 
     serializer = InviteMemberSerializer(data=request.data)
 
@@ -259,111 +245,120 @@ def invite_member(request):
         "message": "Invalid input. Organization",
         "data": serializer.errors
     }, status=status.HTTP_400_BAD_REQUEST)
-
-@swagger_auto_schema(
-        method='post',
-        operation_summary="Completes profile created from invitation token.",
-        responses={
-            status.HTTP_200_OK: "Successfully sent an email to the user."
-        },
-        request_body= openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "token": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="The invitation token."
-                            ),
-                        "first_name": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="The first name of the owner."
-                            ),
-                        "last_name": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="The last name of the owner."
-                            ),
-                        "email": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="The last name of the owner."
-                            ),
-                        "password": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="Password to authenticate the account."
-                            ),
-                    }
-        )
-)
-@api_view(["POST"])
-def complete_profile(request):
-    """
-    Complete a user's profile.
-    """
-    token = request.data.get("token")
-    first_name = request.data.get("first_name")
-    last_name = request.data.get("last_name")
-    password = request.data.get("password")
-
-    try:
-        invitation = Invitation.objects.get(verification_token=token)
-        organization: Organization = invitation.organization.uuid
-        email = invitation.email
-
-        member_serializer = MemberSerializer(data={
-            "first_name": first_name, 
-            "last_name": last_name,
-            "email": email, 
-            "organization": organization, 
-            "password": password,
-        })
-
-        if member_serializer.is_valid():
-            member = member_serializer.save()
-            return Response({
-                "status": "success",
-                "message": "Profile created successfully!",
-                "data": member_serializer.data
-            }, status=status.HTTP_201_CREATED)
-        else:
-            return Response({
-                "status": "error",
-                "message": "Invalid input.",
-                "data": member_serializer.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
-    except Invitation.DoesNotExist:
-        return Response({
-            "status": "error",
-            "message": "Invalid token.",
-            "data": member_serializer.errors
-        }, status=status.HTTP_404_NOT_FOUND)
-
-    
-@swagger_auto_schema(
-        method='post',
-        operation_summary="Deletes a member from an organization.",
-        responses={
-            status.HTTP_200_OK: "Successfully sent an email to the user."
-        },
-        request_body= openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "member_id": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="The ID of the member to delete."
-                            ),
-                    }
-        )
-)
-@api_view(["POST"])
-def delete_member(request):
-    """
-    Delete a member from an organization.
-    """
-    username = request.data.get("member_username")
-    member = Member.objects.get(user_name=username)
-    member.delete()
-    return Response(status=status.HTTP_204_NO_CONTENT)
     
 class MemberView(APIView):
-    permission_classes = [IsAuthenticated]
+    def get_permissions(self):
+        if self.request.method in ['DELETE']:
+            permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
+        elif self.request.method in ['GET']:
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = []
+        return [permission() for permission in permission_classes]
+
+    @swagger_auto_schema(
+        operation_summary="Invite users to an organization.",
+        responses={
+            status.HTTP_200_OK: "Successfully sent an email to the user."
+        },
+        request_body= openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "email": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The email of the new member to invite."
+                            ),
+                        "organization_id": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The ID of the organization the member is being invited to."
+                            ),
+                    }
+        )
+)
+    def post(self, request):
+        """
+        Complete a user's profile.
+        """
+        token = request.data.get("token")
+        first_name = request.data.get("first_name")
+        last_name = request.data.get("last_name")
+        password = request.data.get("password")
+
+        try:
+            invitation = Invitation.objects.get(verification_token=token)
+            organization: Organization = invitation.organization.uuid
+            email = invitation.email
+
+            member_serializer = MemberSerializer(data={
+                "first_name": first_name, 
+                "last_name": last_name,
+                "email": email, 
+                "organization": organization, 
+                "password": password,
+            })
+
+            if member_serializer.is_valid():
+                member = member_serializer.save()
+                return Response({
+                    "status": "success",
+                    "message": "Profile created successfully!",
+                    "data": member_serializer.data
+                }, status=status.HTTP_201_CREATED)
+            else:
+                return Response({
+                    "status": "error",
+                    "message": "Invalid input.",
+                    "data": member_serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+        except Invitation.DoesNotExist:
+            return Response({
+                "status": "error",
+                "message": "Invalid token.",
+                "data": member_serializer.errors
+            }, status=status.HTTP_404_NOT_FOUND)
+
+    @swagger_auto_schema(
+        operation_summary="Deletes a member.",
+        responses={
+            status.HTTP_200_OK: "Successfully sent an email to the user."
+        },
+        request_body= openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "member_username": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="member_username."
+                            ),
+                    }
+        )
+    )
+    def delete(self, request):
+        """
+        Delete a member from an organization.
+
+        ### Permissions:
+        - IsAuthenticated - Must be logged in and have an active session.
+        - IsOwner - Must be an owner of an organization.
+
+        ### Request:
+        - member_username: member_username.
+
+        ### Response:
+        - 204: Successfully deletes the member.
+        - 404: The username doesn't belong to any member.
+
+        ### Actions:
+        - Deletes a member from the database.
+        - Deletes the auth profile of the member. 
+        """
+        username = request.data.get("member_username")
+
+        try:
+            member = Member.objects.get(user_name=username)
+            member.delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except Member.DoesNotExist:
+            return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)
 
     def get(self, request):
         """
