@@ -12,6 +12,44 @@ from .permissions import *
 
 # Create your views here.
 
+@swagger_auto_schema(
+        method='post',
+        operation_summary="Validates an invitation token.",
+        responses={
+            status.HTTP_201_CREATED: "Token is valid!",
+            status.HTTP_400_BAD_REQUEST: "Invalid input."
+        },
+        request_body= openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "invitation_token": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="Token for the invitation."
+                            )
+                    }
+        )
+)
+@api_view(["POST"])
+def validate_invite_token(request, invitation_token):
+    """
+    Validates an invitation token.
+    """
+
+    try:
+        invitation = Invitation.objects.get(verification_token=invitation_token)
+
+        return Response({
+            "status": "success",
+            "message": "Token is valid!",
+            "data": {
+                "email": invitation.email,
+                "organization": invitation.organization.name
+            }
+        }, status=status.HTTP_202_ACCEPTED)
+
+    except Invitation.DoesNotExist:
+        return Response("Invalid invitation token.", status=status.HTTP_400_BAD_REQUEST)
+    
 class OrganizationView(APIView):
     def get_permissions(self):
         if self.request.method in ['DELETE']:
@@ -175,44 +213,6 @@ class OrganizationView(APIView):
                 "id": "Organization does not exist."
             }
         },status=status.HTTP_400_BAD_REQUEST)
-
-@swagger_auto_schema(
-        method='post',
-        operation_summary="Validates an invitation token.",
-        responses={
-            status.HTTP_201_CREATED: "Token is valid!",
-            status.HTTP_400_BAD_REQUEST: "Invalid input."
-        },
-        request_body= openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "invitation_token": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="Token for the invitation."
-                            )
-                    }
-        )
-)
-@api_view(["POST"])
-def validate_invite_token(request, invitation_token):
-    """
-    Validates an invitation token.
-    """
-
-    try:
-        invitation = Invitation.objects.get(verification_token=invitation_token)
-
-        return Response({
-            "status": "success",
-            "message": "Token is valid!",
-            "data": {
-                "email": invitation.email,
-                "organization": invitation.organization.name
-            }
-        }, status=status.HTTP_202_ACCEPTED)
-
-    except Invitation.DoesNotExist:
-        return Response("Invalid invitation token.", status=status.HTTP_400_BAD_REQUEST)
 
 class InviteMemberView(APIView):
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
