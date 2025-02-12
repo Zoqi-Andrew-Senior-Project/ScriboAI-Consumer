@@ -1,3 +1,5 @@
+import os
+from django.core.mail import EmailMultiAlternatives
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.views import APIView
@@ -6,9 +8,9 @@ from .models import Organization, Invitation, Member, Roles
 from .serializers import OrganizationSerializer, MemberSerializer, InviteMemberSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from django.core.mail import send_mail
 from rest_framework.permissions import IsAuthenticated
 from .permissions import *
+from django.template.loader import render_to_string
 
 # Create your views here.
 
@@ -279,14 +281,26 @@ class InviteMemberView(APIView):
 
                 # compost email
                 subject = "You're invited to ScriboAI!"
-                message = f"You've been invited to join {organization.name}.\n\nClick here to accept the invitation: http://localhost:8000/api/org/validate-invite/{invitation_token}/"
+                body = "Congrats 😁"
 
-                send_mail(
-                    subject, 
-                    message, 
-                    "Scribo <sender@scriboai.tech>", 
-                    ["martinezjandrew@gmail.com"]
+                context = {
+                    "organization_name": organization.name,
+                    "link": os.getenv("REACT_APP_BACKEND_ADDRESS") + f"/api/org/validate-invite/{invitation_token}/",
+                    "image": "http://scriboai.tech/static/media/logo.58c00fb0d1fb34fa34b4.png",
+                }
+
+                html_content = render_to_string("invite.html", context)
+
+                email = EmailMultiAlternatives(
+                    subject,
+                    body,
+                    "Scribo <sender@scriboai.tech>",
+                    ["martinezjandrew@gmail.com"], # request.data.get("email")
                 )
+
+                email.attach_alternative(html_content, "text/html")
+
+                email.send()
 
                 return Response({"token": invitation_token.verification_token}, status=status.HTTP_201_CREATED)
             else:
