@@ -19,15 +19,15 @@ from .permissions import *
             status.HTTP_201_CREATED: "Token is valid!",
             status.HTTP_400_BAD_REQUEST: "Invalid input."
         },
-        request_body= openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "invitation_token": openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            description="Token for the invitation."
-                            )
-                    }
+        manual_parameters=[
+        openapi.Parameter(
+            'invitation_token',  # Name of the parameter
+            openapi.IN_PATH,      # Parameter is in the path
+            description='Token for the invitation.',
+            type=openapi.TYPE_STRING,
+            required=True          # This is required in the URL
         )
+    ]
 )
 @api_view(["GET"])
 def validate_invite_token(request, invitation_token):
@@ -128,6 +128,7 @@ class OrganizationView(APIView):
             "email": email, 
             "role": Roles.OWNER,
             "password": password,
+            "organization": None
         })
 
         if not member_serializer.is_valid():
@@ -355,9 +356,41 @@ class MemberView(APIView):
     @swagger_auto_schema(
         operation_summary="Complete's a user's profile.",
         responses={
-            status.HTTP_201_CREATED: "Profile created successfully!",
-            status.HTTP_400_BAD_REQUEST: "Invalid input.",
-            status.HTTP_404_NOT_FOUND: "Invalid token."
+            # status.HTTP_201_CREATED: "Profile created successfully!",
+            # status.HTTP_400_BAD_REQUEST: "Invalid input.",
+            # status.HTTP_404_NOT_FOUND: "Invalid token."
+            202: openapi.Response(
+                description="Token is valid!",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "email": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The email belonging to the user."
+                            ),
+                        "organization": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The organization id the user belongs to."
+                            ),
+                        "first_name": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The first name of the user."
+                            ),
+                        "last_name": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The last name of the user."
+                            ),
+                        "role": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The role of the user."
+                            ),
+                        "user_name": openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            description="The username of the user."
+                            ),
+                    }
+                )
+            ),
         },
         request_body= openapi.Schema(
                     type=openapi.TYPE_OBJECT,
@@ -380,7 +413,7 @@ class MemberView(APIView):
                             ),
                     }
         )
-)
+    )
     def post(self, request):
         """
         Complete a user's profile.
@@ -395,7 +428,6 @@ class MemberView(APIView):
             organization: Organization = invitation.organization.uuid
             email = invitation.email
 
-            print(organization)
 
             data = {
                 "first_name": first_name, 
