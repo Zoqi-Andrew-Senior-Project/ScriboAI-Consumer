@@ -13,7 +13,7 @@ from .permissions import *
 # Create your views here.
 
 @swagger_auto_schema(
-        method='post',
+        method='get',
         operation_summary="Validates an invitation token.",
         responses={
             status.HTTP_201_CREATED: "Token is valid!",
@@ -29,7 +29,7 @@ from .permissions import *
                     }
         )
 )
-@api_view(["POST"])
+@api_view(["GET"])
 def validate_invite_token(request, invitation_token):
     """
     Validates an invitation token.
@@ -278,14 +278,14 @@ class InviteMemberView(APIView):
 
                 # compost email
                 subject = "You're invited to ScriboAI!"
-                message = f"You've been invited to join {organization.name}.\n\nClick here to accept the invitation: {invitation_token}"
+                message = f"You've been invited to join {organization.name}.\n\nClick here to accept the invitation: http://localhost:8000/api/org/validate-invite/{invitation_token}/"
 
-                """send_mail(
+                send_mail(
                     subject, 
                     message, 
-                    "martinezjandrew@gmail.com", 
-                    [email]
-                )"""
+                    "Scribo <sender@scriboai.tech>", 
+                    ["martinezjandrew@gmail.com"]
+                )
 
                 return Response({"token": invitation_token.verification_token}, status=status.HTTP_201_CREATED)
             else:

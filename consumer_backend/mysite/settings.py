@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     "django_mongoengine",
     "corsheaders",
+    "anymail",
     "course_utils",
     "authentication",
     "organization_utils",
@@ -163,4 +164,14 @@ REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "authentication.authentication_engine.MongoEngineSessionAuthentication",  # Enable Django session authentication
     ],
+    "DEFAULT_RENDERER_CLASSES": [
+        "rest_framework.renderers.JSONRenderer",
+    ],
+}
+
+# Email Stuff
+EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
+
+ANYMAIL = {
+    "RESEND_API_KEY": os.getenv("RESEND_API_KEY"),
 }
