@@ -12,8 +12,15 @@ from .permissions import *
 
 # Create your views here.
 
-@swagger_auto_schema(
-        method='post',
+class OrganizationView(APIView):
+    def get_permissions(self):
+        if self.request.method in ['DELETE']:
+            permission_classes = [IsAuthenticated, IsOwner]
+        else:
+            permission_classes = []
+        return [permission() for permission in permission_classes]
+
+    @swagger_auto_schema(
         operation_summary="Create a new organization.",
         responses={
             status.HTTP_201_CREATED: "Successfully created a new organization.",
@@ -45,76 +52,73 @@ from .permissions import *
                     }
         )
 )
-@api_view(["POST"])
-def create_organization(request):
+    def post(self, request):
+        """
+        Create a new organization.
 
-    """
-    Create a new organization.
+        ### Request:
+        - name: The name of the organization.
+        - first_name: The first name of the owner.
+        - last_name: The last name of the owner.
+        - email: The email of the owner.
+        - password: The password to authenticate the account.
 
-    ### Request:
-    - name: The name of the organization.
-    - first_name: The first name of the owner.
-    - last_name: The last name of the owner.
-    - email: The email of the owner.
-    - password: The password to authenticate the account.
+        ### Response:
+        - 201: Successfully created a new organization.
+        - 400: Invalid input.
 
-    ### Response:
-    - 201: Successfully created a new organization.
-    - 400: Invalid input.
+        ### Actions:
+        - Creates an organization model.
+        - Creates a member model.
+            - role: "OW" Owner
+            - organization: The organization id.    
+        """
+        # assigns variables from request body
+        name = request.data.get("name")
+        first_name = request.data.get("first_name")
+        last_name = request.data.get("last_name")
+        email = request.data.get("email")
+        password = request.data.get("password")
 
-    ### Actions:
-    - Creates an organization model.
-    - Creates a member model.
-        - role: "OW" Owner
-        - organization: The organization id.    
-    """
-    # assigns variables from request body
-    name = request.data.get("name")
-    first_name = request.data.get("first_name")
-    last_name = request.data.get("last_name")
-    email = request.data.get("email")
-    password = request.data.get("password")
+        # Validate member data first
+        member_serializer = MemberSerializer(data={
+            "first_name": first_name, 
+            "last_name": last_name, 
+            "email": email, 
+            "role": Roles.OWNER,
+            "password": password,
+        })
 
-     # Validate member data first
-    member_serializer = MemberSerializer(data={
-        "first_name": first_name, 
-        "last_name": last_name, 
-        "email": email, 
-        "role": Roles.OWNER,
-        "password": password,
-    })
+        if not member_serializer.is_valid():
+            return Response({
+                "status": "error",
+                "message": "Invalid input for Member.",
+                "data": member_serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        # Validate organization data
+        organization_serializer = OrganizationSerializer(data={"name": name})
+        if not organization_serializer.is_valid():
+            return Response({
+                "status": "error",
+                "message": "Invalid input for Organization.",
+                "data": organization_serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        organization = organization_serializer.save()
 
-    if not member_serializer.is_valid():
+        member_serializer.validated_data["organization"] = organization.uuid
+        member=member_serializer.save()
+
         return Response({
-            "status": "error",
-            "message": "Invalid input for Member.",
-            "data": member_serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
-      # Validate organization data
-    organization_serializer = OrganizationSerializer(data={"name": name})
-    if not organization_serializer.is_valid():
-        return Response({
-            "status": "error",
-            "message": "Invalid input for Organization.",
-            "data": organization_serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
-    
-    organization = organization_serializer.save()
+            "status": "success",
+            "message": "Organization created successfully!",
+            "data": {
+                "organization": organization_serializer.data,
+                "member": member_serializer.data
+            }
+        }, status=status.HTTP_201_CREATED)
 
-    member_serializer.validated_data["organization"] = organization.uuid
-    member=member_serializer.save()
-
-    return Response({
-        "status": "success",
-        "message": "Organization created successfully!",
-        "data": {
-            "organization": organization_serializer.data,
-            "member": member_serializer.data
-        }
-    }, status=status.HTTP_201_CREATED)
-
-@swagger_auto_schema(
-        method='post',
+    @swagger_auto_schema(
         operation_summary="Deletes an organization.",
         responses={
             status.HTTP_201_CREATED: "Successfully deletes an organization.",
@@ -130,38 +134,43 @@ def create_organization(request):
                     }
         )
 )
-@api_view(["POST"])
-def delete_organization(request):
-    """
-    Deletes an  organization.
+    def delete(self, request):
+        """
+        Deletes an  organization.
 
-    ### Request:
-    - id: The id of the organization.
+        ### Permissions:
+        - IsAuthenticated - Must be logged in and have an active session.
+        - IsOwner - Must be an owner of an organization.
 
-    ### Response:
-    - 201: Successfully deleted the organization.
-    - 400: Invalid input.
+        ### Request:
+        - id: The id of the organization.
 
-    ### Actions:
-    - Deletes an organization model.
-    """
+        ### Response:
+        - 201: Successfully deleted the organization.
+        - 400: Invalid input.
 
-    request_id = request.data.get("id")
-    instance = Organization.objects.get(uuid=request_id)
-    if instance:
-        instance.delete()
+        ### Actions:
+        - Deletes an organization model.
+        """
+
+        
+        user = request.user
+
+        organization: Organization = Member.objects.get(user_name=user.username).organization
+        if organization:
+            organization.delete()
+            return Response({
+                "status": "success",
+                "message": f"Organization {organization.uuid}, {organization.name} deleted successfully!",
+            }, status=status.HTTP_200_OK)
+        
         return Response({
-            "status": "success",
-            "message": f"Organization {request_id}, {instance.name} deleted successfully!",
-        }, status=status.HTTP_200_OK)
-    
-    return Response({
-        "status": "error",
-        "message": "Invalid input.",
-        "errors": {
-            "id": "Organization does not exist."
-        }
-    },status=status.HTTP_400_BAD_REQUEST)
+            "status": "error",
+            "message": "Invalid input.",
+            "errors": {
+                "id": "Organization does not exist."
+            }
+        },status=status.HTTP_400_BAD_REQUEST)
 
 @swagger_auto_schema(
         method='post',
