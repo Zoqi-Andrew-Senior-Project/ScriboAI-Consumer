@@ -11,7 +11,7 @@ class IsOwner(BasePermission):
         auth_profile = request.user  # Assuming the user is set via your custom authentication
 
         # Fetch the member's role based on the auth_profile
-        member = Member.objects(auth_profile=auth_profile).first()
+        member = Member.objects(user_name=auth_profile.username).first()
 
         # Check if the member's role is "OW" (Owner)
         if member and member.role == "OW":
@@ -26,7 +26,7 @@ class IsAdmin(BasePermission):
     def has_permission(self, request, view):
         auth_profile = request.user
 
-        member = Member.objects(auth_profile=auth_profile).first()
+        member = Member.objects(user_name=auth_profile.username).first()
 
         if member and member.role == "AD":
             return True
@@ -40,7 +40,7 @@ class IsEmployee(BasePermission):
     def has_permission(self, request, view):
         auth_profile = request.user
 
-        member = Member.objects(auth_profile=auth_profile).first()
+        member = Member.objects(user_name=auth_profile.username).first()
 
         if member and member.role == "EM":
             return True
@@ -53,7 +53,7 @@ class IsOwnerOrAdmin(BasePermission):
     def has_permission(self, request, view):
         auth_profile = request.user
 
-        member = Member.objects(auth_profile=auth_profile).first()
+        member = Member.objects(user_name=auth_profile.username).first()
 
         if member and (member.role == "OW" or member.role == "AD"):
             return True
