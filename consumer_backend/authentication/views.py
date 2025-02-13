@@ -2,7 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from authentication.models import AuthProfile
-from django.contrib.sessions.models import Session
+from django.views.decorators.csrf import ensure_csrf_cookie
+from rest_framework.decorators import api_view
+
 
 
 class LoginView(APIView):
@@ -43,3 +45,8 @@ class LogoutView(APIView):
 
         request.session.flush()  # Clear the session data
         return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+
+@ensure_csrf_cookie
+@api_view(["GET"])
+def get_csrf_token(request):
+    return Response({"detail": 'CSRF cookie set'}, status=200)
