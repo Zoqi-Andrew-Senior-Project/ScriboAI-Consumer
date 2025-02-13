@@ -37,8 +37,6 @@ class ProfileView(APIView):
     
 class LogoutView(APIView):
     def post(self, request):
-        print(str(request.session.get("session_data")))
-        print(request.session.get("auth_profile_id"))
         auth_profile_id = request.session.get("auth_profile_id")
         if not auth_profile_id:
             return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
