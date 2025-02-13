@@ -64,7 +64,7 @@ function CreateOrganization() {
         e.preventDefault();
         console.log(formData);
 
-        axios.post('http://localhost:8000/api/organization/create-organization/', formData)
+        axios.post(process.env.REACT_APP_BACKEND_ADDRESS + '/api/org/organization/', formData)
             .then(response => {
                 setMessage(response.data.message);
                 setStatus('success')
