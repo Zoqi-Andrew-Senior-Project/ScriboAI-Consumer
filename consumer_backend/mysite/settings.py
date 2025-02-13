@@ -174,3 +174,8 @@ EMAIL_BACKEND = "anymail.backends.resend.EmailBackend"
 ANYMAIL = {
     "RESEND_API_KEY": os.getenv("RESEND_API_KEY"),
 }
+
+# CSRF Settings
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_SAME_SITE = 'Lax'
+CSRF_COOKIE_SECURE = False # Need to change to True when upgraded to HTTPS
