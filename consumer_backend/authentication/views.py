@@ -4,6 +4,7 @@ from rest_framework import status
 from authentication.models import AuthProfile
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.decorators import api_view
+from django.middleware.csrf import get_token
 
 
 
@@ -47,4 +48,5 @@ class LogoutView(APIView):
 @ensure_csrf_cookie
 @api_view(["GET"])
 def get_csrf_token(request):
-    return Response({"detail": 'CSRF cookie set'}, status=200)
+    csrf_token = get_token(request)
+    return Response({"csrfToken": csrf_token}, status=200)

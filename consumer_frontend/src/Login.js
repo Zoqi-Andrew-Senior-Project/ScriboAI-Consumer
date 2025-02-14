@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { getCSRFToken } from "./utils/csrf";
 
 function Login() {
     const [loginData, setLoginData] = useState({ username: '', password: '' });
@@ -11,13 +12,18 @@ function Login() {
         setLoginData({ ...loginData, [name]: value });
     };
 
-    const handleSubmit = async (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         setMessage('');
         setError('');
 
+        const csrfToken = await getCSRFToken();
+        if (!csrfToken) {
+            setError('Failed to get CSRF token');
+            return;
+        }
+
         try {
-            console.log(process.env.REACT_APP_BACKEND_ADDRESS);
             const endpoint = process.env.REACT_APP_BACKEND_ADDRESS + '/api/auth/login/';
             const response = await axios.post(endpoint, loginData, {
                 withCredentials: true,
@@ -44,7 +50,7 @@ function Login() {
                 {/* Right Column: Login Form */}
                 <div className="col-lg-6 d-flex flex-column align-items-center justify-content-center">
                     <div className="form-container">
-                        <form onSubmit={handleSubmit} className="w-100">
+                        <form onSubmit={handleLogin} className="w-100">
                             <div className="mb-3">
                                 <label>Username</label>
                                 <input
