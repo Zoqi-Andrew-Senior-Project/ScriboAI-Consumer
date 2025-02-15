@@ -6,6 +6,9 @@ import CreateCourse from './CreateCourse';
 import Login from './Login';
 import Logout from './Logout';
 import CreateOrganization from './CreateOrganization';
+import { useAuth } from './utils/AuthContext';
+import { EmployeeHome } from './EmployeePages/EmployeeHome';
+import ProtectedRoute from './utils/ProtectedRoute';
 
 function Navbar() {
   return (
@@ -56,28 +59,6 @@ function Welcome() {
   );
 }
 
-function Home() {
-  return (
-    <div className="container-fluid main-content d-flex align-items-center">
-      <div className="row w-100">
-        {/* Left Column: Logo and Welcome Message */}
-        <div className="col-lg-6 d-flex flex-column align-items-center justify-content-center text-center mb-4">
-          <div className="logo-placeholder mb-3"></div> {/* Placeholder for circular logo */}
-          <h1>Hello from Scribo!</h1>
-          <p>All of your training problems solved with just a few clicks!</p>
-        </div>
-
-        {/* Right Column: Buttons stacked on top of each other */}
-        <div className="col-lg-6 d-flex flex-column align-items-center justify-content-center">
-          <Link to="/create-course" className="btn btn-primary btn-big mb-3 w-75">Create a Course</Link>
-          <button className="btn btn-primary btn-big mb-3 w-75">Employee Management</button>
-          <button className="btn btn-primary btn-big w-75">Existing Courses</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function Footer() {
   return (
     <footer className="footer">
@@ -93,7 +74,7 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Welcome />} /> 
-          <Route path="/home" element={<Home />} /> 
+          <Route path="/home" element={<ProtectedRoute><EmployeeHome /></ProtectedRoute>} /> 
           <Route path="/create-course" element={<CreateCourse />} />
           <Route path="/create-organization" element={<CreateOrganization />} />
           <Route path="/login" element={<Login />} />
