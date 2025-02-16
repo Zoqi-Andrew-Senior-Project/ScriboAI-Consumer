@@ -6,13 +6,14 @@ function Logout() {
     const [error, setError] = useState('');
 
     return (
-        <div className="container-fluid main-content d-flex align-items-center">
-            <button className="btn btn-secondary" onClick={() => {
-                axios.post(process.env.REACT_APP_BACKEND_ADDRESS + '/api/auth/logout/', {}, { withCredentials: true })
-                    .then(() => setMessage('Logout successful!'))
-                    .catch(() => setError('Logout failed. Please try again.'));
-            }}>Logout</button>
-        </div>
+        <button className="btn btn-secondary" onClick={() => {
+            axios.post(process.env.REACT_APP_BACKEND_ADDRESS + '/api/auth/logout/', {}, { withCredentials: true })
+                .then(() => {
+                    setMessage('Logout successful!');
+                    window.location.reload();
+                })
+                .catch(() => setError('Logout failed. Please try again.'));
+        }}>Logout</button>
     );
 }
 
