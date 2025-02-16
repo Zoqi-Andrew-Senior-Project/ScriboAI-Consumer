@@ -19,10 +19,11 @@ class MemberSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=255)
     last_name = serializers.CharField(max_length=255)
     email = serializers.EmailField(max_length=255)
-    role = serializers.CharField(max_length=2, allow_blank=True, allow_null=True, required=False )
+    role = serializers.CharField(max_length=2, allow_blank=True, allow_null=True, required=False)
     password = serializers.CharField(write_only=True)
     organization = serializers.CharField(max_length=24, allow_null=True)
     user_name = serializers.CharField(max_length=255, read_only=True)
+    status = serializers.CharField(max_length=2, allow_blank=True, allow_null=True, required=False)
 
     def validate_role(self, value):
         if value is not None and value not in Roles.valid_roles:
