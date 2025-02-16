@@ -83,6 +83,9 @@ class Organization(Document):
             member.delete()
         super().delete(*args, **kwargs)
 
+    def __str__(self):
+        return self.name
+
 class Member(Document):
     first_name = StringField(max_length=255)
     last_name = StringField(max_length=255)
