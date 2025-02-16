@@ -10,7 +10,7 @@ const HomeRedirect = () => {
     if (!loading) {
       if (!user) {
         navigate("/login"); // Redirect to login if not authenticated
-      } else if (user.role === "admin") {
+      } else if (user.role === "OW" || user.role === "AD") {
         navigate("/admin/home");
       } else {
         navigate("/employee/home");

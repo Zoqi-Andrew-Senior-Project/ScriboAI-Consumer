@@ -8,7 +8,7 @@ import Logout from './Logout';
 import CreateOrganization from './CreateOrganization';
 import { useAuth } from './utils/AuthContext';
 import { EmployeeHome } from './EmployeePages/EmployeeHome';
-import ProtectedRoute from './utils/ProtectedRoute';
+import { ProtectedRoute, ProtectedRouteAdmin } from './utils/ProtectedRoute';
 import HomeRedirect from './utils/HomeRedirect';
 import { AdminHome } from './AdminPages/AdminHome';
 import Settings from './Settings'
@@ -88,7 +88,7 @@ function App() {
           <Route path="/" element={<Welcome />} /> 
           <Route path="/home" element={<HomeRedirect />} />
           <Route path="/employee/home" element={<ProtectedRoute><EmployeeHome /></ProtectedRoute>} />
-          <Route path="/admin/home" element={<ProtectedRoute><AdminHome /></ProtectedRoute>} />
+          <Route path="/admin/home" element={<ProtectedRouteAdmin><AdminHome /></ProtectedRouteAdmin>} />
           <Route path="/create-course" element={<CreateCourse />} />
           <Route path="/create-organization" element={<CreateOrganization />} />
           <Route path="/login" element={<Login />} />
