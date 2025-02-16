@@ -1,3 +1,4 @@
+import json
 import os
 from django.core.mail import EmailMultiAlternatives
 from rest_framework.response import Response
@@ -54,7 +55,7 @@ def validate_invite_token(request, invitation_token):
     
 class OrganizationView(APIView):
     def get_permissions(self):
-        if self.request.method in ['DELETE']:
+        if self.request.method in ['DELETE', 'GET']:
             permission_classes = [IsAuthenticated, IsOwner]
         else:
             permission_classes = []
@@ -216,6 +217,30 @@ class OrganizationView(APIView):
                 "id": "Organization does not exist."
             }
         },status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request):
+        user = request.user
+
+        organization = Member.objects.get(user_name=user.username).organization
+        if organization:
+            organization_members = Member.objects(organization=organization)
+
+            # members = []
+            # for member in organization_members:
+            #     members.append(MemberSerializer(member).data)
+
+            # print(members)
+
+            members_data = MemberSerializer(organization_members, many=True).data
+
+            org_data = OrganizationSerializer(organization).data
+
+            data = {
+                "organization": org_data,
+                "members": members_data
+            }
+
+            return Response(data, status=status.HTTP_200_OK)
 
 class InviteMemberView(APIView):
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
