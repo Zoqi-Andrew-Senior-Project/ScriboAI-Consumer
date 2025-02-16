@@ -1,24 +1,38 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { getCSRFToken } from "./utils/csrf";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "./utils/AuthContext";
 
 function Login() {
     const [loginData, setLoginData] = useState({ username: '', password: '' });
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
+    const { user, fetchUser } = useAuth();
+
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setLoginData({ ...loginData, [name]: value });
     };
 
-    const handleSubmit = async (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
         setMessage('');
         setError('');
+        setLoading(true); 
+
+        const csrfToken = await getCSRFToken();
+        if (!csrfToken) {
+            setError('Failed to get CSRF token');
+            setLoading(false);
+            return;
+        }
 
         try {
-            console.log(process.env.REACT_APP_BACKEND_ADDRESS);
-            const endpoint = process.env.REACT_APP_BACKEND_ADDRESS + '/api/authentication/login/';
+            const endpoint = process.env.REACT_APP_BACKEND_ADDRESS + '/api/auth/login/';
             const response = await axios.post(endpoint, loginData, {
                 withCredentials: true,
                 headers: { 'Content-Type': 'application/json' },
@@ -26,10 +40,18 @@ function Login() {
             });
             setMessage('Login successful!');
             setLoginData({ username: '', password: '' });
+
+            await fetchUser();
         } catch (error) {
-            setError(error.response?.data?.error || 'An error occurred. Please try again.');
+            setError(error.response?.data?.error || 'An error occurred. Please try again. \n' + error.message);
         }
     };
+
+    useEffect(() => {
+        if (user) {
+            navigate('/home');
+        }
+    }, [user, navigate]);
 
     return (
         <div className="container-fluid main-content d-flex align-items-center">
@@ -44,7 +66,7 @@ function Login() {
                 {/* Right Column: Login Form */}
                 <div className="col-lg-6 d-flex flex-column align-items-center justify-content-center">
                     <div className="form-container">
-                        <form onSubmit={handleSubmit} className="w-100">
+                        <form onSubmit={handleLogin} className="w-100">
                             <div className="mb-3">
                                 <label>Username</label>
                                 <input

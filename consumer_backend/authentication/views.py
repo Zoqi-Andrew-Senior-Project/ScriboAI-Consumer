@@ -2,7 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from authentication.models import AuthProfile
-from django.contrib.sessions.models import Session
+from django.views.decorators.csrf import ensure_csrf_cookie
+from rest_framework.decorators import api_view
+from django.middleware.csrf import get_token
+
 
 
 class LoginView(APIView):
@@ -35,11 +38,15 @@ class ProfileView(APIView):
     
 class LogoutView(APIView):
     def post(self, request):
-        print(str(request.session.get("session_data")))
-        print(request.session.get("auth_profile_id"))
         auth_profile_id = request.session.get("auth_profile_id")
         if not auth_profile_id:
             return Response({"error": "Unauthorized"}, status=status.HTTP_401_UNAUTHORIZED)
 
         request.session.flush()  # Clear the session data
         return Response({"message": "Logout successful"}, status=status.HTTP_200_OK)
+
+@ensure_csrf_cookie
+@api_view(["GET"])
+def get_csrf_token(request):
+    csrf_token = get_token(request)
+    return Response({"csrfToken": csrf_token}, status=200)

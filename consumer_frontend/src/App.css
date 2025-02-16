@@ -253,3 +253,39 @@ textarea.form-control::placeholder {
     padding: 15px;
   }
 }
+
+/* Settings Dropdown */
+.settings-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: #CFD7C7; /* Ash grey */
+  border-radius: 10px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+  width: 200px;
+  padding: 15px;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  min-height: 50px;
+}
+
+.settings-dropdown a {
+  color: #0B2027; /* Rich black */
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 5px;
+  transition: background-color 0.2s;
+}
+
+.settings-dropdown a:hover {
+  background-color: #70A9A1; /* Verdigris */
+  color: #F6F1D1; /* Cornsilk */
+}
+
+.settings-dropdown hr {
+  border: 0;
+  height: 1px;
+  background: #40798C; /* Cerulean */
+  margin: 10px 0;
+}
