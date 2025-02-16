@@ -8,7 +8,7 @@ import Logout from './Logout';
 import CreateOrganization from './CreateOrganization';
 import { useAuth } from './utils/AuthContext';
 import { EmployeeHome } from './EmployeePages/EmployeeHome';
-import { ProtectedRoute, ProtectedRouteAdmin } from './utils/ProtectedRoute';
+import { ProtectedRoute, ProtectedRouteAdmin, ProtectedRouteEmployee } from './utils/ProtectedRoute';
 import HomeRedirect from './utils/HomeRedirect';
 import { AdminHome } from './AdminPages/AdminHome';
 import Settings from './Settings'
@@ -87,12 +87,11 @@ function App() {
         <Routes>
           <Route path="/" element={<Welcome />} /> 
           <Route path="/home" element={<HomeRedirect />} />
-          <Route path="/employee/home" element={<ProtectedRoute><EmployeeHome /></ProtectedRoute>} />
+          <Route path="/employee/home" element={<ProtectedRouteEmployee><EmployeeHome /></ProtectedRouteEmployee>} />
           <Route path="/admin/home" element={<ProtectedRouteAdmin><AdminHome /></ProtectedRouteAdmin>} />
           <Route path="/create-course" element={<CreateCourse />} />
           <Route path="/create-organization" element={<CreateOrganization />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/logout" element={<Logout />} />
         </Routes>
         <Footer />
       </div>
