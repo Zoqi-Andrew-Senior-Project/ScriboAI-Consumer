@@ -9,6 +9,8 @@ import CreateOrganization from './CreateOrganization';
 import { useAuth } from './utils/AuthContext';
 import { EmployeeHome } from './EmployeePages/EmployeeHome';
 import ProtectedRoute from './utils/ProtectedRoute';
+import HomeRedirect from './utils/HomeRedirect';
+import { AdminHome } from './AdminPages/AdminHome';
 
 function Navbar() {
   return (
@@ -52,7 +54,7 @@ function Welcome() {
           <h1>Hello from Scribo!</h1>
           <p>All of your training problems solved with just a few clicks!</p>
           <Link to="/create-organization" className="btn btn-primary btn-big mb-3 w-75">Create an Organization</Link>
-          <Link to="/signup" className="btn btn-primary btn-big mb-3 w-75">Log in</Link>
+          <Link to="/login" className="btn btn-primary btn-big mb-3 w-75">Log in</Link>
         </div>
       </div>
     </div>
@@ -74,7 +76,9 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Welcome />} /> 
-          <Route path="/home" element={<ProtectedRoute><EmployeeHome /></ProtectedRoute>} /> 
+          <Route path="/home" element={<HomeRedirect />} />
+          <Route path="/employee/home" element={<ProtectedRoute><EmployeeHome /></ProtectedRoute>} />
+          <Route path="/admin/home" element={<ProtectedRoute><AdminHome /></ProtectedRoute>} />
           <Route path="/create-course" element={<CreateCourse />} />
           <Route path="/create-organization" element={<CreateOrganization />} />
           <Route path="/login" element={<Login />} />
