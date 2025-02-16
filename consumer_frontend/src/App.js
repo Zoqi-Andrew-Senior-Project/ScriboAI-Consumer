@@ -11,8 +11,12 @@ import { EmployeeHome } from './EmployeePages/EmployeeHome';
 import ProtectedRoute from './utils/ProtectedRoute';
 import HomeRedirect from './utils/HomeRedirect';
 import { AdminHome } from './AdminPages/AdminHome';
+import Settings from './Settings'
+import { useState } from 'react';
 
 function Navbar() {
+  const [showSettings, setShowSettings] = useState(false);
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container-fluid">
@@ -35,7 +39,13 @@ function Navbar() {
               <a className="nav-link" href="#">Analytics</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="#">Settings</a>
+              <button
+                onClick={() => setShowSettings((prev) => !prev)}
+                className="nav-link btn btn-link"
+              > 
+              Settings
+              </button>
+              {showSettings && <Settings />}
             </li>
           </ul>
         </div>
