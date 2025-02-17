@@ -4,6 +4,7 @@ services:
     image: consumer-frontend:latest # Replace with your frontend Docker image
     ports:
       - "3000:3000" # Maps port 3000 of the host to port 3000 of the container
+    env_file: .env
     networks:
       - app-network
     depends_on:
