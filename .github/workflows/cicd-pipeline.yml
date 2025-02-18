@@ -19,6 +19,8 @@ jobs:
         DB_PORT: ${{ secrets.DB_PORT }}
         DB_USERNAME: ${{ secrets.DB_USERNAME }}
         DEBUG: ${{ secrets.DEBUG }}
+        REACT_APP_BACKEND_ADDRESS: ${{ secrets.REACT_APP_BACKEND_ADDRESS}}
+        REACT_APP_HUGGINGFACE_ADDRESS: ${{ secrets.REACT_APP_HUGGINGFACE_ADDRESS }}
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
@@ -45,7 +47,7 @@ jobs:
           docker build -t consumer-frontend:latest . || { echo -e " ++++++++++++++++++++++++\n❌ Error building consumer-frontend image! ❌ \n ++++++++++++++++++++++++"; exit 1; }
           
           echo "+++++++++++++++"
-          echo "📄 Creating .env file......."
+          echo "📄 Creating backend .env file......."
           echo "+++++++++++++++"
 
           cat > ~/AI-Training-Consumer/.env <<EOF
@@ -60,9 +62,23 @@ jobs:
           EOF
 
           echo "+++++++++++++++"
-          echo "✅ Verifying .env file contents......."
+          echo "📄 Creating frontend .env file......."
           echo "+++++++++++++++"
-          cat ~/AI-Training-Consumer/.env || { echo "❌ .env file not found!"; exit 1; }
+
+          cat > ~/AI-Training-Consumer/consumer_frontend/.env <<EOF
+          REACT_APP_BACKEND_ADDRESS=${REACT_APP_BACKEND_ADDRESS}
+          REACT_APP_HUGGINGFACE_ADDRESS=${REACT_APP_HUGGINGFACE_ADDRESS}
+          EOF
+
+          echo "+++++++++++++++"
+          echo "✅ Verifying .env files......."
+          echo "+++++++++++++++"
+          
+          echo "Backend .env contents:"
+          cat ~/AI-Training-Consumer/.env || { echo "❌ Backend .env file not found!"; exit 1; }
+
+          echo "Frontend .env contents:"
+          cat ~/AI-Training-Consumer/consumer_frontend/.env || { echo "❌ Frontend .env file not found!"; exit 1; }
           
           echo "+++++++++++++++"
           echo "🏗️ Composing docker setup......."
