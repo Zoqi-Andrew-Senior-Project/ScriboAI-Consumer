@@ -297,7 +297,7 @@ class InviteMemberView(APIView):
 
             data = {
                 "email": request.data.get("email"),
-                "organization_id": organization.uuid
+                "organization": organization.uuid
             }
 
             serializer = InviteMemberSerializer(data=data)
@@ -381,6 +381,25 @@ class InviteMemberView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Invitation.DoesNotExist:
             return Response({"error": "Invitation does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        
+    def get(self, request):
+        user = request.user
+
+        try:
+            member: Member = Member.objects.get(user_name=user.username)
+            organization: Organization = member.organization
+
+            print(organization)
+
+            invitations = Invitation.objects(organization=organization)
+
+            print(invitations)
+
+            data = InviteMemberSerializer(invitations, many=True).data
+
+            return Response(data, status=status.HTTP_200_OK)
+        except Member.DoesNotExist:
+            return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)
     
 class MemberView(APIView):
     def get_permissions(self):

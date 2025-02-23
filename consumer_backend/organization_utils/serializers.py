@@ -55,14 +55,14 @@ class MemberSerializer(serializers.Serializer):
         
 class InviteMemberSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255)
-    organization_id = serializers.CharField(max_length=24)
+    organization = serializers.CharField(max_length=24)
 
     def create(self, validated_data):
         email = validated_data["email"]
-        organization_id = validated_data["organization_id"]
+        organization = validated_data["organization"]
         
         # Fetch the organization using the validated organization_id
-        organization = Organization.objects.get(uuid=organization_id)
+        organization = Organization.objects.get(uuid=organization)
         
         try:
             # Generate the invitation token
