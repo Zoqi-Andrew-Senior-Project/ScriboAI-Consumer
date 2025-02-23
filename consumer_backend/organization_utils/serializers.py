@@ -56,6 +56,7 @@ class MemberSerializer(serializers.Serializer):
 class InviteMemberSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255)
     organization = serializers.CharField(max_length=24)
+    created_at = serializers.DateTimeField(read_only=True)
 
     def create(self, validated_data):
         email = validated_data["email"]

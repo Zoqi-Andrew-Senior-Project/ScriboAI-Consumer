@@ -395,7 +395,9 @@ class InviteMemberView(APIView):
 
             print(invitations)
 
-            data = InviteMemberSerializer(invitations, many=True).data
+            data = {
+                "invites": InviteMemberSerializer(invitations, many=True).data
+            }
 
             return Response(data, status=status.HTTP_200_OK)
         except Member.DoesNotExist:
