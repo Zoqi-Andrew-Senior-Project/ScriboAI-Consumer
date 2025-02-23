@@ -578,7 +578,8 @@ class MemberView(APIView):
                 "role": member.role,
                 "organization": member.organization.name,
                 "status": member.status,
-                "email": member.email
+                "email": member.email,
+                "user_name": member.user_name,
             }, status=status.HTTP_200_OK)
         except Member.DoesNotExist:
             return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)
