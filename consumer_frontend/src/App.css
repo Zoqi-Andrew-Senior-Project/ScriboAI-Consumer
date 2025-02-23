@@ -332,3 +332,28 @@ textarea.form-control::placeholder {
 .table tr:hover {
   background-color: #9e5555;
 }
+
+.overlay {
+  display: flex;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+  justify-content: center;
+  align-items: center;
+}
+
+.close-button {
+  position: relative;
+  right: -200px;
+  background: none;
+  border: none;
+  font-size: 40px;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  color: red;
+}

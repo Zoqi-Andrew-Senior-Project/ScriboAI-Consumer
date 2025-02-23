@@ -1,14 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../utils/AuthContext';
 import axios from 'axios';
 
 const InviteButton = () =>{
     return(
-        <button className="btn btn-primary">Invite</button>
+        <button className="btn btn-secondary">+</button>
     )
 }
 const MemberTable = () => {
     const [members, setMembers] = useState([]);
+
+    const [isMemberActionFormOpen, setIsMemberActionFormOpen] = useState(false);
+
+    const handleShowForm = () => {
+        setIsMemberActionFormOpen(true);
+    }
+
+    const handleCloseForm = () => {
+        setIsMemberActionFormOpen(false);
+    }
 
     useEffect(() => {
         axios
@@ -43,7 +53,7 @@ const MemberTable = () => {
                             <td>{member.role}</td>
                             <td>{member.status}</td>
                             <td>
-                                <button className="btn btn-secondary">
+                                <button onClick={handleShowForm} className="btn btn-secondary">
                                     🛠️
                                 </button>
                             </td>
@@ -51,12 +61,45 @@ const MemberTable = () => {
                     ))}
                 </tbody>
             </table>
+            <MemberActionForm isOpen={isMemberActionFormOpen} onClose={handleCloseForm} />
+        </div>
+    )
+}
+
+const MemberActionForm = ({isOpen, onClose}) => {
+    const formRef = useRef(null);
+
+    const handleClickOutside = (e) => {
+        if (!formRef.current.contains(e.target)) {
+            onClose();
+        }
+    }
+
+    if (!isOpen) return null;
+    return (
+        <div className='overlay' onClick={handleClickOutside}>
+            <div className='form-container' ref={formRef}>
+                <button className="close-button" onClick={onClose}>&times;</button>
+                <h1>Member Actions</h1>
+                <div> 🔁 Change Role </div>
+                <div> 🗑️ Remove </div>
+            </div>
         </div>
     )
 }
 
 const InvitationsTable = () => {
     const [invites, setInvites] = useState([]);
+
+    const [isInviteActionFormOpen, setIsInviteActionFormOpen] = useState(false);
+
+    const handleShowForm = () => {
+        setIsInviteActionFormOpen(true);
+    }
+
+    const handleCloseForm = () => {
+        setIsInviteActionFormOpen(false);
+    }
 
     useEffect(() => {
         axios
@@ -71,6 +114,7 @@ const InvitationsTable = () => {
     return (
         <div>
             <h2>Invite List</h2>
+            <p className="text-muted"> Invite more employees to your organization. <InviteButton /></p> 
             <table className="table">
                 <thead>
                     <tr>
@@ -81,11 +125,11 @@ const InvitationsTable = () => {
                 </thead>
                 <tbody>
                     {invites.map((invite) => (
-                        <tr key={invite.verification_token}>
+                        <tr key={invite.email}>
                             <td>{invite.email}</td>
                             <td>{Date(invite.created_at).split(' ').slice(0,5).join(' ')}</td>
                             <td>
-                                <button className="btn btn-secondary">
+                                <button onClick={handleShowForm} className="btn btn-secondary">
                                     🛠️
                                 </button>
                             </td>
@@ -93,6 +137,30 @@ const InvitationsTable = () => {
                     ))}
                 </tbody>
             </table>
+            <InviteActionForm isOpen={isInviteActionFormOpen} onClose={handleCloseForm} />
+        </div>
+    )
+}
+
+
+const InviteActionForm = ({isOpen, onClose}) => {
+    const formRef = useRef(null);
+
+    const handleClickOutside = (e) => {
+        if (!formRef.current.contains(e.target)) {
+            onClose();
+        }
+    }
+
+    if (!isOpen) return null;
+    return (
+        <div className='overlay' onClick={handleClickOutside}>
+            <div className='form-container' ref={formRef}>
+                <button className="close-button" onClick={onClose}>&times;</button>
+                <h1>Invite Actions</h1>
+                <div> 🔁 Resend </div>
+                <div> 🗑️ Delete </div>
+            </div>
         </div>
     )
 }
