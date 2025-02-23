@@ -19,7 +19,7 @@ const RegenerateDialog = ({ data, setRegenerateDialogPressed, setResponseContent
     const onSubmit = async () => {
         setIsLoading(true);
 
-        const url = "https://martinezjandrew-trainingcoursegen.hf.space/update-outline"
+        const url = process.env.REACT_APP_HUGGINGFACE_ADDRESS + "/update-outline"
 
         const script = data
         const requestData = {
