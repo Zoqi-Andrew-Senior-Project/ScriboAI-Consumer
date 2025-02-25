@@ -55,8 +55,10 @@ def validate_invite_token(request, invitation_token):
     
 class OrganizationView(APIView):
     def get_permissions(self):
-        if self.request.method in ['DELETE', 'GET']:
+        if self.request.method in ['DELETE']:
             permission_classes = [IsAuthenticated, IsOwner]
+        elif self.request.method in ['GET']:
+            permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
         else:
             permission_classes = []
         return [permission() for permission in permission_classes]
@@ -388,12 +390,7 @@ class InviteMemberView(APIView):
         try:
             member: Member = Member.objects.get(user_name=user.username)
             organization: Organization = member.organization
-
-            print(organization)
-
             invitations = Invitation.objects(organization=organization)
-
-            print(invitations)
 
             data = {
                 "invites": InviteMemberSerializer(invitations, many=True).data
@@ -405,7 +402,7 @@ class InviteMemberView(APIView):
     
 class MemberView(APIView):
     def get_permissions(self):
-        if self.request.method in ['DELETE']:
+        if self.request.method in ['DELETE', 'PUT']:
             permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
         elif self.request.method in ['GET']:
             permission_classes = [IsAuthenticated]
@@ -557,6 +554,12 @@ class MemberView(APIView):
 
         try:
             member = Member.objects.get(user_name=username)
+            authuser = request.user.username
+            organization = Member.objects.get(user_name=authuser).organization
+
+            if member.organization != organization:
+                return Response({"error": "Member does not belong to the organization."}, status=status.HTTP_404_NOT_FOUND)
+
             member.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Member.DoesNotExist:
@@ -564,22 +567,115 @@ class MemberView(APIView):
 
     def get(self, request):
         """
-        Returns profile details of the member.
+        Returns a member's profile.
+
+        ### Permissions:
+        - IsAuthenticated - Must be logged in and have an active session.
+
+        ### Request:
+        - member_username: member_username.
+        - if empty, returns the profile of the user making the request.
+
+        ### Response:
+        - 200: Successfully returns the member's profile.
+        - 404: The username doesn't belong to any member.
+
+        ### Actions:
+        - Returns the profile of a member.
         """
-        user = request.user
+        try:
+            if request.data.get("member_username"):
+                member_username = request.data.get("member_username")
+                member = Member.objects.get(user_name=member_username)
+
+                request_user = request.user
+                request_member: Member = Member.objects.get(user_name=request_user.username)
+
+                if request_member.organization == member.organization:
+                    return Response({
+                        "first_name": member.first_name,
+                        "last_name": member.last_name,
+                        "email": member.email,
+                        "role": member.role,
+                        "organization": member.organization.name,
+                        "status": member.status,
+                        "email": member.email,
+                        "user_name": member.user_name,
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "Member does not belong to the organization."}, status=status.HTTP_404_NOT_FOUND)
+                
+            elif request.user:
+                user = request.user
+                member: Member = Member.objects.get(user_name=user.username)
+
+                return Response({
+                    "first_name": member.first_name,
+                    "last_name": member.last_name,
+                    "email": member.email,
+                    "role": member.role,
+                    "organization": member.organization.name,
+                    "status": member.status,
+                    "email": member.email,
+                    "user_name": member.user_name,
+                }, status=status.HTTP_200_OK)
+        except Member.DoesNotExist:
+            return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        
+    def put(self, request):
+        """
+        Updates a member's profile.
+        """
 
         try:
-            member: Member = Member.objects.get(user_name=user.username)
+
+            if request.data.get("member_username"):
+                member = request.data.get("member_username")
+            elif request.user:
+                member = request.user
+            else:
+                return Response({"error": "No member specified."}, status=status.HTTP_400_BAD_REQUEST)
+
+            authuser = Member.objects.get(user_name=request.user.username)
+            
+            member = Member.objects.get(user_name=member)
+
+            if request.data.get("role"):
+                # currently should only accept this change request if authuser is the owner and if its to change the role to admin or employee
+
+                requested_role = request.data.get("role")
+
+                if requested_role not in Roles.valid_roles:
+                    return Response({"error": "Invalid role."}, status=status.HTTP_400_BAD_REQUEST)
+
+                if authuser.role != Roles.OWNER:
+                    return Response({"error": "Unauthorized."}, status=status.HTTP_401_UNAUTHORIZED)
+
+                if requested_role == Roles.OWNER:
+                    return Response({"error": "Cannot change owner role."}, status=status.HTTP_400_BAD_REQUEST)
+                
+                member.role = request.data.get("role")
+            
+            # Reqiries further testing
+
+            # if request.data.get("status"):
+            #     member.status = request.data.get("status")
+
+            # if request.data.get("email"):
+            #     member.email = request.data.get("email")
+
+            # if request.data.get("first_name"):
+            #     member.first_name = request.data.get("first_name")
+
+            # if request.data.get("last_name"):
+            #     member.last_name = request.data.get("last_name")
+
+            member.save()
 
             return Response({
-                "first_name": member.first_name,
-                "last_name": member.last_name,
-                "email": member.email,
-                "role": member.role,
-                "organization": member.organization.name,
-                "status": member.status,
-                "email": member.email,
-                "user_name": member.user_name,
+                "status": "success",
+                "message": "Profile updated successfully!",
+                "data": MemberSerializer(member).data
             }, status=status.HTTP_200_OK)
         except Member.DoesNotExist:
             return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)
