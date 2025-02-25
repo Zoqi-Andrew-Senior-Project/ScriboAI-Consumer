@@ -2,11 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../utils/AuthContext';
 import axios from 'axios';
 
-const InviteButton = () =>{
-    return(
-        <button className="btn btn-secondary">+</button>
-    )
-}
 const MemberTable = () => {
     const [members, setMembers] = useState([]);
     const [selectedMember, setSelectedMember] = useState(null);
@@ -189,6 +184,7 @@ const InvitationsTable = () => {
     const [invites, setInvites] = useState([]);
 
     const [isInviteActionFormOpen, setIsInviteActionFormOpen] = useState(false);
+    const [isCreateInviteFormOpen, setIsCreateInviteFormOpen] = useState(false);
 
     const handleShowForm = () => {
         setIsInviteActionFormOpen(true);
@@ -196,6 +192,14 @@ const InvitationsTable = () => {
 
     const handleCloseForm = () => {
         setIsInviteActionFormOpen(false);
+    }
+
+    const handleShowCreateForm = () => {
+        setIsCreateInviteFormOpen(true);
+    }
+
+    const handleCloseCreateForm = () => {
+        setIsCreateInviteFormOpen(false);
     }
 
     useEffect(() => {
@@ -211,7 +215,7 @@ const InvitationsTable = () => {
     return (
         <div>
             <h2>Invite List</h2>
-            <p className="text-muted"> Invite more employees to your organization. <InviteButton /></p> 
+            <p className="text-muted"> Invite more employees to your organization.<button className="btn btn-secondary" onClick={handleShowCreateForm}>+</button></p> 
             <table className="table">
                 <thead>
                     <tr>
@@ -235,6 +239,7 @@ const InvitationsTable = () => {
                 </tbody>
             </table>
             <InviteActionForm isOpen={isInviteActionFormOpen} onClose={handleCloseForm} />
+            <CreateInviteForm isOpen={isCreateInviteFormOpen} onClose={handleCloseCreateForm} />
         </div>
     )
 }
@@ -257,6 +262,83 @@ const InviteActionForm = ({isOpen, onClose}) => {
                 <h1>Invite Actions</h1>
                 <div> 🔁 Resend </div>
                 <div> 🗑️ Delete </div>
+            </div>
+        </div>
+    )
+}
+
+const CreateInviteForm = ({isOpen, onClose}) => {
+    const formRef = useRef(null);
+
+    const [email, setEmail] = useState('');
+    const [isValid, setIsValid] = useState(true);
+    const [errorMessage, setErrorMessage] = useState('');
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    const handleEmailChange = (e) => {
+        const newEmail = e.target.value;
+        setEmail(newEmail);
+        if(emailRegex.test(newEmail)) {
+            setIsValid(true);
+            setErrorMessage('');
+        } else {
+            setIsValid(false);
+            setErrorMessage('Please enter a valid email address.');
+        }
+    };
+
+    const handleClickOutside = (e) => {
+        if (!formRef.current.contains(e.target)) {
+            onClose();
+        }
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!isValid) {
+            setErrorMessage('Please enter a valid email address.');
+        } else {
+            setErrorMessage('');
+            axios.post(process.env.REACT_APP_BACKEND_ADDRESS + "/api/org/invite/", {
+                email: email
+            }, {
+                withCredentials: true
+            })
+            .then((response) => {
+                alert('Invite sent to ' + email);
+                onClose();
+            })
+            .catch((error) => {
+                console.error("Error sending invite:", error);
+                alert('Error sending invite to ' + email);
+            });
+        }
+    };
+
+
+    if (!isOpen) return null;
+    return (
+        <div className='overlay' onClick={handleClickOutside}>
+            <div className='form-container' ref={formRef}>
+                <button className="close-button" onClick={onClose}>&times;</button>
+                <h1>Invite Employee</h1>
+                <p>Enter the email of the employee you would like to invite.</p>
+                <form id="emailForm" onSubmit={handleSubmit}>
+                    <label htmlFor="email">Email:</label>
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        value={email}
+                        onChange={handleEmailChange}
+                        required
+                        pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+                        title="Please enter a valid email address."
+                    />
+                    <button className='btn btn-secondary' type="submit">Submit</button>
+                    <div id="error" className="error">{errorMessage}</div>
+                </form>
             </div>
         </div>
     )
