@@ -79,7 +79,20 @@ p {
   font-size: 1.25rem;
 }
 
-.btn-secondar:hover {
+.btn-secondary:hover {
+  background-color: #70A9A1; /* Verdigris */
+}
+
+.btn-tertiary {
+  background-color: #40798C; /* Cerulean */
+  border-color: #40798C;
+  color: #F6F1D1; /* Cornsilk */
+  padding: 10px 10px;
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.btn-tertiary:hover {
   background-color: #70A9A1; /* Verdigris */
 }
 
