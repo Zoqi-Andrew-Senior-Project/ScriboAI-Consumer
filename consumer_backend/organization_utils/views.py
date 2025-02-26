@@ -365,7 +365,7 @@ class InviteMemberView(APIView):
         - IsOwnerOrAdmin - Must be an owner or admin of an organization.
 
         ### Request:
-        - Invitation Token: The token of the invitation to delete.
+        - Email: The email tied to the invitation to delete.
 
         ### Response:
         - 204: Successfully deletes the Invitation document.
@@ -375,10 +375,10 @@ class InviteMemberView(APIView):
         - Deletes the Invitation document from the database.
         - Makes the token invalid to use when creating a profile.
         """
-        invitation_token = request.data.get("invitation_token")
+        email = request.data.get("email")
 
         try:
-            invitation = Invitation.objects.get(verification_token=invitation_token)
+            invitation = Invitation.objects.get(email=email)
             invitation.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Invitation.DoesNotExist:

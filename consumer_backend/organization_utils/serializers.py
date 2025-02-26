@@ -58,6 +58,10 @@ class InviteMemberSerializer(serializers.Serializer):
     organization = serializers.CharField(max_length=24)
     created_at = serializers.DateTimeField(read_only=True)
 
+    class Meta:
+        model = Invitation
+        fields = ['email', 'organization', 'created_at']
+
     def create(self, validated_data):
         email = validated_data["email"]
         organization = validated_data["organization"]
