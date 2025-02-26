@@ -182,16 +182,19 @@ const MemberActionForm = ({isOpen, onClose, member}) => {
 
 const InvitationsTable = () => {
     const [invites, setInvites] = useState([]);
+    const [selectedInvite, setSelectedInvite] = useState(null);
 
     const [isInviteActionFormOpen, setIsInviteActionFormOpen] = useState(false);
     const [isCreateInviteFormOpen, setIsCreateInviteFormOpen] = useState(false);
 
-    const handleShowForm = () => {
+    const handleShowForm = (invite) => {
+        setSelectedInvite(invite);
         setIsInviteActionFormOpen(true);
     }
 
     const handleCloseForm = () => {
         setIsInviteActionFormOpen(false);
+        setSelectedInvite(null);
     }
 
     const handleShowCreateForm = () => {
@@ -228,9 +231,9 @@ const InvitationsTable = () => {
                     {invites.map((invite) => (
                         <tr key={invite.email}>
                             <td>{invite.email}</td>
-                            <td>{Date(invite.created_at).split(' ').slice(0,5).join(' ')}</td>
+                            <td>{invite.created_at}</td>
                             <td>
-                                <button onClick={handleShowForm} className="btn btn-secondary">
+                                <button onClick={() => handleShowForm(invite)} className="btn btn-secondary">
                                     🛠️
                                 </button>
                             </td>
@@ -238,14 +241,14 @@ const InvitationsTable = () => {
                     ))}
                 </tbody>
             </table>
-            <InviteActionForm isOpen={isInviteActionFormOpen} onClose={handleCloseForm} />
+            <InviteActionForm isOpen={isInviteActionFormOpen} onClose={handleCloseForm} invite={selectedInvite} />
             <CreateInviteForm isOpen={isCreateInviteFormOpen} onClose={handleCloseCreateForm} />
         </div>
     )
 }
 
 
-const InviteActionForm = ({isOpen, onClose}) => {
+const InviteActionForm = ({isOpen, onClose, invite}) => {
     const formRef = useRef(null);
 
     const handleClickOutside = (e) => {
@@ -254,14 +257,52 @@ const InviteActionForm = ({isOpen, onClose}) => {
         }
     }
 
-    if (!isOpen) return null;
+    const handleDelete = () => {
+        axios.delete(process.env.REACT_APP_BACKEND_ADDRESS + "/api/org/invite/", {
+            withCredentials: true,  // Ensures cookies are sent
+            data: {
+                email: invite.email
+            }
+          })
+        .then((response) => {
+            alert('Deleted invite to ' + invite.email);
+            onClose();
+        })
+        .catch((error) => {
+            console.error("Error deleting invite:", error);
+            alert('Error deleting invite to ' + invite.email);
+        });
+    }
+
+    const handleResend = () => {
+        axios.post(process.env.REACT_APP_BACKEND_ADDRESS + "/api/org/invite/", {
+            email: invite.email
+        }, {
+            withCredentials: true
+        })
+        .then((response) => {
+            alert('Invite sent to ' + invite.email);
+            onClose();
+        })
+        .catch((error) => {
+            console.error("Error sending invite:", error);
+            alert('Error sending invite to ' + invite.email);
+        });
+    }
+
+    if (!isOpen || !invite) return null;
     return (
         <div className='overlay' onClick={handleClickOutside}>
             <div className='form-container' ref={formRef}>
                 <button className="close-button" onClick={onClose}>&times;</button>
                 <h1>Invite Actions</h1>
-                <div> 🔁 Resend </div>
-                <div> 🗑️ Delete </div>
+                <p>Invite to: {invite.email}</p>
+                <div>
+                    <button className='btn btn-tertiary' onClick={handleResend}> 🔁 Resend </button>
+                </div>
+                <div>
+                    <button className='btn btn-tertiary' onClick={handleDelete}> 🗑️ Delete </button>
+                </div>
             </div>
         </div>
     )
