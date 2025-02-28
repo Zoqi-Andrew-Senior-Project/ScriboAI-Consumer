@@ -11,6 +11,7 @@ import { EmployeeHome } from './EmployeePages/EmployeeHome';
 import { ProtectedRoute, ProtectedRouteAdmin, ProtectedRouteEmployee } from './utils/ProtectedRoute';
 import HomeRedirect from './utils/HomeRedirect';
 import { AdminHome } from './AdminPages/AdminHome';
+import EmployeeDashboard from './AdminPages/EmployeeDashboard';
 import Settings from './Settings'
 import { useState } from 'react';
 
@@ -58,7 +59,6 @@ function Welcome() {
   return (
     <div className="container-fluid main-content d-flex align-items-center">
       <div className="row w-100">
-        {/* Left Column: Logo and Welcome Message */}
         <div className="d-flex flex-column align-items-center justify-content-center text-center mb-4">
           <div className="logo-placeholder mb-3"></div> {/* Placeholder for circular logo */}
           <h1>Hello from Scribo!</h1>
@@ -89,7 +89,13 @@ function App() {
           <Route path="/home" element={<HomeRedirect />} />
           <Route path="/employee/home" element={<ProtectedRouteEmployee><EmployeeHome /></ProtectedRouteEmployee>} />
           <Route path="/admin/home" element={<ProtectedRouteAdmin><AdminHome /></ProtectedRouteAdmin>} />
+
+          {/* Admin Pages */}
+
+          <Route path="/admin/employee-dashboard" element={<ProtectedRouteAdmin><EmployeeDashboard /></ProtectedRouteAdmin>} />
+
           <Route path="/create-course" element={<CreateCourse />} />
+
           <Route path="/create-organization" element={<CreateOrganization />} />
           <Route path="/login" element={<Login />} />
         </Routes>

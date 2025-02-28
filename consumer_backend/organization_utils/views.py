@@ -1,3 +1,4 @@
+import json
 import os
 from django.core.mail import EmailMultiAlternatives
 from rest_framework.response import Response
@@ -56,6 +57,8 @@ class OrganizationView(APIView):
     def get_permissions(self):
         if self.request.method in ['DELETE']:
             permission_classes = [IsAuthenticated, IsOwner]
+        elif self.request.method in ['GET']:
+            permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
         else:
             permission_classes = []
         return [permission() for permission in permission_classes]
@@ -217,6 +220,30 @@ class OrganizationView(APIView):
             }
         },status=status.HTTP_400_BAD_REQUEST)
 
+    def get(self, request):
+        user = request.user
+
+        organization = Member.objects.get(user_name=user.username).organization
+        if organization:
+            organization_members = Member.objects(organization=organization)
+
+            # members = []
+            # for member in organization_members:
+            #     members.append(MemberSerializer(member).data)
+
+            # print(members)
+
+            members_data = MemberSerializer(organization_members, many=True).data
+
+            org_data = OrganizationSerializer(organization).data
+
+            data = {
+                "organization": org_data,
+                "members": members_data
+            }
+
+            return Response(data, status=status.HTTP_200_OK)
+
 class InviteMemberView(APIView):
     permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
 
@@ -272,7 +299,7 @@ class InviteMemberView(APIView):
 
             data = {
                 "email": request.data.get("email"),
-                "organization_id": organization.uuid
+                "organization": organization.uuid
             }
 
             serializer = InviteMemberSerializer(data=data)
@@ -338,7 +365,7 @@ class InviteMemberView(APIView):
         - IsOwnerOrAdmin - Must be an owner or admin of an organization.
 
         ### Request:
-        - Invitation Token: The token of the invitation to delete.
+        - Email: The email tied to the invitation to delete.
 
         ### Response:
         - 204: Successfully deletes the Invitation document.
@@ -348,18 +375,34 @@ class InviteMemberView(APIView):
         - Deletes the Invitation document from the database.
         - Makes the token invalid to use when creating a profile.
         """
-        invitation_token = request.data.get("invitation_token")
+        email = request.data.get("email")
 
         try:
-            invitation = Invitation.objects.get(verification_token=invitation_token)
+            invitation = Invitation.objects.get(email=email)
             invitation.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Invitation.DoesNotExist:
             return Response({"error": "Invitation does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        
+    def get(self, request):
+        user = request.user
+
+        try:
+            member: Member = Member.objects.get(user_name=user.username)
+            organization: Organization = member.organization
+            invitations = Invitation.objects(organization=organization)
+
+            data = {
+                "invites": InviteMemberSerializer(invitations, many=True).data
+            }
+
+            return Response(data, status=status.HTTP_200_OK)
+        except Member.DoesNotExist:
+            return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)
     
 class MemberView(APIView):
     def get_permissions(self):
-        if self.request.method in ['DELETE']:
+        if self.request.method in ['DELETE', 'PUT']:
             permission_classes = [IsAuthenticated, IsOwnerOrAdmin]
         elif self.request.method in ['GET']:
             permission_classes = [IsAuthenticated]
@@ -511,6 +554,12 @@ class MemberView(APIView):
 
         try:
             member = Member.objects.get(user_name=username)
+            authuser = request.user.username
+            organization = Member.objects.get(user_name=authuser).organization
+
+            if member.organization != organization:
+                return Response({"error": "Member does not belong to the organization."}, status=status.HTTP_404_NOT_FOUND)
+
             member.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         except Member.DoesNotExist:
@@ -518,21 +567,115 @@ class MemberView(APIView):
 
     def get(self, request):
         """
-        Returns profile details of the member.
+        Returns a member's profile.
+
+        ### Permissions:
+        - IsAuthenticated - Must be logged in and have an active session.
+
+        ### Request:
+        - member_username: member_username.
+        - if empty, returns the profile of the user making the request.
+
+        ### Response:
+        - 200: Successfully returns the member's profile.
+        - 404: The username doesn't belong to any member.
+
+        ### Actions:
+        - Returns the profile of a member.
         """
-        user = request.user
+        try:
+            if request.data.get("member_username"):
+                member_username = request.data.get("member_username")
+                member = Member.objects.get(user_name=member_username)
+
+                request_user = request.user
+                request_member: Member = Member.objects.get(user_name=request_user.username)
+
+                if request_member.organization == member.organization:
+                    return Response({
+                        "first_name": member.first_name,
+                        "last_name": member.last_name,
+                        "email": member.email,
+                        "role": member.role,
+                        "organization": member.organization.name,
+                        "status": member.status,
+                        "email": member.email,
+                        "user_name": member.user_name,
+                    }, status=status.HTTP_200_OK)
+                else:
+                    return Response({"error": "Member does not belong to the organization."}, status=status.HTTP_404_NOT_FOUND)
+                
+            elif request.user:
+                user = request.user
+                member: Member = Member.objects.get(user_name=user.username)
+
+                return Response({
+                    "first_name": member.first_name,
+                    "last_name": member.last_name,
+                    "email": member.email,
+                    "role": member.role,
+                    "organization": member.organization.name,
+                    "status": member.status,
+                    "email": member.email,
+                    "user_name": member.user_name,
+                }, status=status.HTTP_200_OK)
+        except Member.DoesNotExist:
+            return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)
+        
+    def put(self, request):
+        """
+        Updates a member's profile.
+        """
 
         try:
-            member: Member = Member.objects.get(user_name=user.username)
+
+            if request.data.get("member_username"):
+                member = request.data.get("member_username")
+            elif request.user:
+                member = request.user
+            else:
+                return Response({"error": "No member specified."}, status=status.HTTP_400_BAD_REQUEST)
+
+            authuser = Member.objects.get(user_name=request.user.username)
+            
+            member = Member.objects.get(user_name=member)
+
+            if request.data.get("role"):
+                # currently should only accept this change request if authuser is the owner and if its to change the role to admin or employee
+
+                requested_role = request.data.get("role")
+
+                if requested_role not in Roles.valid_roles:
+                    return Response({"error": "Invalid role."}, status=status.HTTP_400_BAD_REQUEST)
+
+                if authuser.role != Roles.OWNER:
+                    return Response({"error": "Unauthorized."}, status=status.HTTP_401_UNAUTHORIZED)
+
+                if requested_role == Roles.OWNER:
+                    return Response({"error": "Cannot change owner role."}, status=status.HTTP_400_BAD_REQUEST)
+                
+                member.role = request.data.get("role")
+            
+            # Reqiries further testing
+
+            # if request.data.get("status"):
+            #     member.status = request.data.get("status")
+
+            # if request.data.get("email"):
+            #     member.email = request.data.get("email")
+
+            # if request.data.get("first_name"):
+            #     member.first_name = request.data.get("first_name")
+
+            # if request.data.get("last_name"):
+            #     member.last_name = request.data.get("last_name")
+
+            member.save()
 
             return Response({
-                "first_name": member.first_name,
-                "last_name": member.last_name,
-                "email": member.email,
-                "role": member.role,
-                "organization": member.organization.name,
-                "status": member.status,
-                "email": member.email
+                "status": "success",
+                "message": "Profile updated successfully!",
+                "data": MemberSerializer(member).data
             }, status=status.HTTP_200_OK)
         except Member.DoesNotExist:
             return Response({"error": "Member does not exist."}, status=status.HTTP_404_NOT_FOUND)

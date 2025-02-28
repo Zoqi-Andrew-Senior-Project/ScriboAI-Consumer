@@ -1,3 +1,4 @@
+from datetime import datetime
 import uuid
 import random
 from django.forms import ValidationError
@@ -83,6 +84,9 @@ class Organization(Document):
             member.delete()
         super().delete(*args, **kwargs)
 
+    def __str__(self):
+        return self.name
+
 class Member(Document):
     first_name = StringField(max_length=255)
     last_name = StringField(max_length=255)
@@ -127,7 +131,7 @@ class Invitation(Document):
     email = EmailField(unique=False, null=True)
     organization = ReferenceField(Organization, reverse_delete_rule=CASCADE)
     verification_token = StringField(max_length=255, unique=True)
-    created_at = DateTimeField(auto_now_add=True)
+    created_at = DateTimeField(default=datetime.now())
 
     def __str__(self):
         return self.verification_token

@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import Logout from './Logout';
+import { useAuth } from './utils/AuthContext';
+
 
 function Settings() {
-    const [message, setMessage] = useState('');
-    const [error, setError] = useState('');
-
+    const { user, loading } = useAuth();
     return (
         <div className="settings-dropdown">
             <h3>Settings</h3>
+            <h2>User: {user.user_name}</h2>
             <Logout />
         </div>
     );

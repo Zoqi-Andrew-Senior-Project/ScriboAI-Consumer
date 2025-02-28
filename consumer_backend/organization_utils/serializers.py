@@ -19,10 +19,11 @@ class MemberSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=255)
     last_name = serializers.CharField(max_length=255)
     email = serializers.EmailField(max_length=255)
-    role = serializers.CharField(max_length=2, allow_blank=True, allow_null=True, required=False )
+    role = serializers.CharField(max_length=2, allow_blank=True, allow_null=True, required=False)
     password = serializers.CharField(write_only=True)
     organization = serializers.CharField(max_length=24, allow_null=True)
     user_name = serializers.CharField(max_length=255, read_only=True)
+    status = serializers.CharField(max_length=2, allow_blank=True, allow_null=True, required=False)
 
     def validate_role(self, value):
         if value is not None and value not in Roles.valid_roles:
@@ -54,14 +55,19 @@ class MemberSerializer(serializers.Serializer):
         
 class InviteMemberSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255)
-    organization_id = serializers.CharField(max_length=24)
+    organization = serializers.CharField(max_length=24)
+    created_at = serializers.DateTimeField(read_only=True)
+
+    class Meta:
+        model = Invitation
+        fields = ['email', 'organization', 'created_at']
 
     def create(self, validated_data):
         email = validated_data["email"]
-        organization_id = validated_data["organization_id"]
+        organization = validated_data["organization"]
         
         # Fetch the organization using the validated organization_id
-        organization = Organization.objects.get(uuid=organization_id)
+        organization = Organization.objects.get(uuid=organization)
         
         try:
             # Generate the invitation token

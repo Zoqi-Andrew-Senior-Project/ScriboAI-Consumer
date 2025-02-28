@@ -22,8 +22,8 @@ export function AdminHome() {
   
           {/* Right Column: Buttons stacked on top of each other */}
           <div className="col-lg-6 d-flex flex-column align-items-center justify-content-center">
-            <button className="btn btn-primary btn-big mb-3 w-75">Browse Courses</button>
-            <button className="btn btn-primary btn-big mb-3 w-75">View your stats</button>
+            <Link to="/create-course" className="btn btn-primary btn-big mb-3 w-75">Create Course</Link>
+            <Link to="/admin/employee-dashboard" className="btn btn-primary btn-big mb-3 w-75">Employee Management</Link>
             <button className="btn btn-primary btn-big mb-3 w-75">View your stats</button>
           </div>
         </div>
