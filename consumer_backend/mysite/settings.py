@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
-from mongoengine import connect
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -44,6 +43,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework_swagger",
     "drf_yasg",
+    "channels",
     "django_mongoengine",
     "corsheaders",
     "anymail",
@@ -179,3 +179,5 @@ ANYMAIL = {
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAME_SITE = 'Lax'
 CSRF_COOKIE_SECURE = False # Need to change to True when upgraded to HTTPS
+
+ASGI_APPLICATION = "mysite.asgi.application"
