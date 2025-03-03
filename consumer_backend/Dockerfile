@@ -15,8 +15,8 @@ WORKDIR /code
 # Copy the Django project code
 COPY . /code
 
-# Expose the port that Gunicorn will run on
+# Expose the port that daphne will run on
 EXPOSE 8000
 
 # Run Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "mysite.wsgi:application"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "mysite.asgi:application"]
