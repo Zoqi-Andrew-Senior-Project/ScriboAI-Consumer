@@ -20,9 +20,11 @@ services:
     env_file: .env
     environment:
       DB_HOST: mongo # Referencing the Mongo service by its container name
+      REDIS_HOST: redis
       DJANGO_SETTINGS_MODULE: mysite.settings
     depends_on:
       - mongo
+      - redis
 
   # MongoDB service
   mongo:
@@ -36,6 +38,17 @@ services:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
       MONGO_INITDB_DATABASE: ${DB_NAME}
+    networks:
+      - app-network
+
+  # Redis service
+  redis:
+    image: redis:latest
+    container_name: redis-db
+    ports:
+      - "6379:6379" # Maps port 6379 of the host to port 6379 of the container
+    volumes:
+      - redis_data:/data # Persistent storage for Redis
     networks:
       - app-network
 
@@ -60,3 +73,4 @@ networks:
 # Define volumes for persistent storage
 volumes:
   mongo_data:
+  redis_data:
