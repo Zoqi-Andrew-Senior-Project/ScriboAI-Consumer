@@ -99,7 +99,7 @@ function App() {
 
           <Route path="/create-organization" element={<CreateOrganization />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/document" element={<DocumentEditor />} />
+          <Route path="/document" element={<DocumentEditor docId="123" />} />
         </Routes>
         <Footer />
       </div>
