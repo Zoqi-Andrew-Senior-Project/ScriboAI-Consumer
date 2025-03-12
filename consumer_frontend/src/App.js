@@ -14,6 +14,7 @@ import { AdminHome } from './AdminPages/AdminHome';
 import EmployeeDashboard from './AdminPages/EmployeeDashboard';
 import Settings from './Settings'
 import { useState } from 'react';
+import DocumentEditor from './CourseManagement/CourseEditor';
 
 function Navbar() {
   const [showSettings, setShowSettings] = useState(false);
@@ -98,6 +99,7 @@ function App() {
 
           <Route path="/create-organization" element={<CreateOrganization />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/document" element={<DocumentEditor />} />
         </Routes>
         <Footer />
       </div>
