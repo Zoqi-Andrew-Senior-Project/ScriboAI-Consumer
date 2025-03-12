@@ -1,8 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
-from .models import CourseOutline
-from .serializers import CourseOutlineSerializer
+from .models import Course
+from .serializers import CourseSerializer, ModuleSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import json
@@ -36,10 +36,34 @@ def create_course_outline(request):
     Create a course outline.
     """
 
-    serializer = CourseOutlineSerializer(data=request.data)
+    course_serializer = CourseSerializer(data=request.data)
 
-    if serializer.is_valid():
-        CourseOutline = serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if course_serializer.is_valid():
+        course = course_serializer.save()
+
+        modules = request.data['modules']
+
+        module_data = []
+
+        order = 0
+        for module in modules:
+            print(course.uuid)
+            module['course_uuid'] = course.uuid
+            module['order'] = order
+            order += 1
+
+            print(module)
+            module_serializer = ModuleSerializer(data=module)
+
+            if module_serializer.is_valid():
+                module_instance = module_serializer.save()
+                module_data.append(ModuleSerializer(module_instance).data)
+                pass
+            else:
+                return Response(module_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        response_data = course_serializer.data
+        response_data["modules"] = module_data
+        return Response(response_data, status=status.HTTP_201_CREATED)
+            
+    return Response(course_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
