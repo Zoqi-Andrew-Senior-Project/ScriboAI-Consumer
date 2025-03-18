@@ -15,6 +15,7 @@ import EmployeeDashboard from './AdminPages/EmployeeDashboard';
 import Settings from './Settings'
 import { useState } from 'react';
 import DocumentEditor from './CourseManagement/CourseEditor';
+import OutlineEditor from './CourseManagement/OutlineEditor';
 
 function Navbar() {
   const [showSettings, setShowSettings] = useState(false);
@@ -99,7 +100,8 @@ function App() {
 
           <Route path="/create-organization" element={<CreateOrganization />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/document" element={<DocumentEditor docId="123" />} />
+          <Route path="/document/:docId" element={<DocumentEditor />} />
+          <Route path="/outline/:outId" element={<OutlineEditor />} />
         </Routes>
         <Footer />
       </div>

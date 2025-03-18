@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import debounce from "lodash.debounce";
+import { useParams } from "react-router-dom";
 
-const DocumentEditor = ({ docId }) => {
+const DocumentEditor = () => {
+  const { docId } = useParams();
   const [content, setContent] = useState(""); // Local state for smooth typing
   const ws = useRef(null);
   const isTyping = useRef(false); // Track typing activity
