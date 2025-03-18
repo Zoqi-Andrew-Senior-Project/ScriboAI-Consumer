@@ -31,3 +31,6 @@ class ModuleSerializer(serializers.DocumentSerializer):
         validated_data['order'] = order
 
         return super().create(validated_data)
+    
+# class CourseWithModulesSerializer(serializers.DocumentSerializer):
+#     course = 

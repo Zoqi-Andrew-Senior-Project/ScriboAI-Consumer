@@ -68,48 +68,6 @@ def create_course_outline(request):
 
         response_data = course_serializer.data
         response_data["modules"] = module_data
-        return Response(response_data, status=status.HTTP_201_CREATED)
-            
-    return Response(course_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(["POST"])
-def create_course_outline(request):
-    """
-    Create a course outline.
-    """
-    scribo = ScriboHandler()
-
-    course_outline = scribo.update_course_outline(request.data)
-
-    course_serializer = CourseSerializer(data=course_outline)
-
-    if course_serializer.is_valid():
-        course = course_serializer.save()
-
-        modules = course_outline['modules']
-
-        module_data = []
-
-        order = 0
-        for module in modules:
-            print(course.uuid)
-            module['course_uuid'] = course.uuid
-            module['order'] = order
-            order += 1
-
-            print(module)
-            module_serializer = ModuleSerializer(data=module)
-
-            if module_serializer.is_valid():
-                module_instance = module_serializer.save()
-                module_data.append(ModuleSerializer(module_instance).data)
-                pass
-            else:
-                return Response(module_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        response_data = course_serializer.data
-        response_data["modules"] = module_data
-        return Response(response_data, status=status.HTTP_201_CREATED)
+        return Response({"uuid": response_data["uuid"]}, status=status.HTTP_201_CREATED)
             
     return Response(course_serializer.errors, status=status.HTTP_400_BAD_REQUEST)

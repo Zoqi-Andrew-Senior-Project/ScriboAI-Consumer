@@ -2,6 +2,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .scribo_handler import ScriboHandler
 from .serializers import CourseSerializer, ModuleSerializer
+from .models import Course, Module
 
 class DocumentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -33,19 +34,37 @@ class DocumentConsumer(AsyncWebsocketConsumer):
 
 class OutlineConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.room_name = self.scope['url_route']['kwargs']['doc_id']
-        self.room_group_name = f"document_{self.room_name}"
+
+        self.room_name = self.scope['url_route']['kwargs']['cor_uuid']
+        self.room_group_name = f"course_{self.room_name}"
 
         # Join room group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
+        uuid = self.scope['url_route']['kwargs']['cor_uuid']
+
+        course = Course.objects.get(uuid=uuid)
+
+        serialized = CourseSerializer(course)
+    
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
 
     async def receive(self, text_data):
+        """Data:
+
+        {
+            "status": "good" | "bad",
+            "action": "update" | "save" | null,
+            "data": {
+                "script": {},
+                "comments": str | null
+            }        
+        }
+        """
         data = json.loads(text_data)
-        content = data["script"]
+        content = data["data"]["script"]
         
         status = "good"
         if data.get("status"):
@@ -66,13 +85,19 @@ class OutlineConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_send(
             self.room_group_name,
             {
-                "type": "document_update",
+                "type": "outline_update",
                 "script": content,
                 "status": status
             }
         )
-    async def document_update(self, event):
-        await self.send(text_data=json.dumps({"script": event["script"],"status": event["status"]}))
+    async def outline_update(self, event):
+        message = {
+            "status": event["status"],
+            "data": {
+                "script": event["script"]
+            }
+        }
+        await self.send(text_data=json.dumps(message))
 
 
 class OutlineActions():
@@ -80,11 +105,13 @@ class OutlineActions():
         self.scribo = ScriboHandler()
 
     def update(self, data):
-        content = data["script"]
+        content = data["data"]["script"]
 
-        comments = ""
-        if data["comments"]:
-            comments = data["comments"]
+        comments = data["data"].get("comments", "")
+        
+        if comments == "":
+            return content, "bad"
+
 
         data = {
             "notes":  comments,
