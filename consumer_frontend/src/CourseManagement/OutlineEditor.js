@@ -187,8 +187,30 @@ const OutlineEditor = () => {
     setOutlineData(updatedOutline);
   }
 
+  const debouncedSave = useCallback(
+    debounce((outline) => {
+      console.log("WebSocket Save:", {"data": outline});
+      const data = {
+        "action": "save",
+        "data": {
+          "script": outline,
+        }
+      };
+      console.log("sending", data)
+      if (ws.current?.readyState === WebSocket.OPEN) {
+        ws.current.send(JSON.stringify(data));
+      }
+    }, 500), // Delay WebSocket save by 500ms
+    []
+  );
+
+  const sendSave = () => {
+    debouncedSave(outlineData);
+  };
+
   return (
     <div class="course-outline" id="course outline">
+      <button onClick={sendSave}>SAVE</button>
       <h1>Title:
         <EditableLine 
           text={outlineData.title} 
@@ -248,52 +270,9 @@ const OutlineEditor = () => {
       )}
       <h4>Raw JSON</h4>
       <p>{JSON.stringify(outlineData, null, 2)}</p>
-      <button onClick={console.log(outlineData)}>Hello</button>
+      {/* <button onClick={console.log(outlineData)}>Hello</button> */}
     </div>
   );
 };
 
 export default OutlineEditor;
-
-/*const CourseOutlineRenderer = ({ editable = false, courseOutlineData, setCourseOutlineData }) => {
-    const updateModule = (index, updatedModule) => {
-        const updatedModules = [...courseOutlineData.modules]
-        updatedModules[index] = updatedModule
-        setCourseOutlineData({ ...courseOutlineData, modules: updatedModules })
-    }
-    
-    return (
-        <div class="course-outline" id="course outline">
-            <h3>Objectives:</h3>
-            <ul>
-                {courseOutlineData.objectives.map((objective, index) => (
-                <li key={index}>
-                    <EditableLine 
-                        text={objective} 
-                        onSave={
-                            (newObjective) => {
-                                const updatedObjectives = [...courseOutlineData.objectives]
-                                updatedObjectives[index] = newObjective
-                                setCourseOutlineData({ ...courseOutlineData, objectives: updatedObjectives })
-                            }
-                        }
-                        editable={editable}
-                    />
-                </li>
-                ))}
-            </ul>
-            <div class="module-container">
-                <h3>Modules:</h3>
-                {courseOutlineData.modules.map((module, index) => (
-                    <Module
-                        key={index}
-                        module={module}
-                        updateModule={(updatedModule) => updateModule(index, updatedModule)}
-                        editable={editable}
-                    />
-                ))}
-            </div>
-            <button onClick={console.log(courseOutlineData)}>Hello</button>
-        </div>
-    )
-}*/
