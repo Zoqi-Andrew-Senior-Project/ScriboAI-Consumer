@@ -17,12 +17,19 @@ class Course(Document):
     duration = fields.StringField(max_length=50)
     summary = fields.StringField()
 
+    def __str__(self):
+        return self.uuid
+
 
 # 🔹 Module Model
 class Module(Document):
+    uuid = fields.StringField(default=lambda: str(uuid.uuid4()), unique=True)  # UUID for referencing
     name = fields.StringField(max_length=255)
     duration = fields.StringField(max_length=50)
     subtopics = fields.ListField(fields.StringField())
     features = fields.ListField(fields.StringField(choices=[e.value for e in FeatureEnum]))
     course = fields.ReferenceField(Course, reverse_delete_rule=CASCADE)  # Ensure proper referencing
     order = fields.IntField()
+
+    def __str__(self):
+        return self.name

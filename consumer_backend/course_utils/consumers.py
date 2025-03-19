@@ -1,8 +1,8 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .scribo_handler import ScriboHandler
-from .serializers import CourseSerializer, ModuleSerializer
-from .models import Course, Module
+from .serializers import CourseWithModulesSerializer
+from .models import Course
 
 class DocumentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -46,7 +46,17 @@ class OutlineConsumer(AsyncWebsocketConsumer):
 
         course = Course.objects.get(uuid=uuid)
 
-        serialized = CourseSerializer(course)
+        serialized = CourseWithModulesSerializer(course)
+
+        message = {
+            "status": "good",
+            "data": {
+                "script": serialized.data
+            }
+        }
+        
+        # Sends back the current state of the outline
+        await self.send(text_data=json.dumps(message))
     
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
@@ -64,21 +74,22 @@ class OutlineConsumer(AsyncWebsocketConsumer):
         }
         """
         data = json.loads(text_data)
-        content = data["data"]["script"]
-        
-        status = "good"
-        if data.get("status"):
-            status = data["status"]
 
-        action = ""
-        if data.get("action"):
-            action = data["action"]
+        content = data["data"]["script"]
+        status = "good"
+        action = data.get("action", "")
 
         if action == "update":
-            content, status = OutlineActions().update(data)
+            """
+            Makes a change to in-memory outline
+            """
+            content, status = OutlineActions().update(data["data"])
 
         if action == "save":
-            content = OutlineActions().save(data)
+            """
+            Saves the state of in-memory outline to the db
+            """
+            content, status = OutlineActions().save(data["data"])
 
 
         # Broadcast changes to all users in the room
@@ -105,13 +116,11 @@ class OutlineActions():
         self.scribo = ScriboHandler()
 
     def update(self, data):
-        content = data["data"]["script"]
-
-        comments = data["data"].get("comments", "")
-        
-        if comments == "":
-            return content, "bad"
-
+        """
+        Makes a Call to SCRIBO to update the course outline
+        """
+        content = data["script"]
+        comments = data.get("comments", "")
 
         data = {
             "notes":  comments,
@@ -119,42 +128,31 @@ class OutlineActions():
         }
 
         content = self.scribo.update_course_outline(data)
-
-        status = "good"
         
-        return content, status
+        return content, "good"
     
     def save(self, data):
+        """
+        Saves the outline to the db
+        """
         content = data["script"]
-        status = ""
 
-        course_serializer = CourseSerializer(data=content)
+        course_serializer = CourseWithModulesSerializer(data=content, context={'action': 'update'})
 
         if course_serializer.is_valid():
-            course = course_serializer.save()
+            course_uuid = course_serializer.validated_data['uuid']
 
-            modules = content['modules']
+            try:
+                course = Course.objects.get(uuid=course_uuid)
+            except Course.DoesNotExist:
+                return content, "bad"
+            
+            updated_course = course_serializer.update(course, content)
+            updated_course.save()
 
-            module_data = []
+            content = course_serializer.data
 
-            order = 0
-            for module in modules:
-                module['course_uuid'] = course.uuid
-                module['order'] = order
-                order += 1
-
-                module_serializer = ModuleSerializer(data=module)
-
-                if module_serializer.is_valid():
-                    module_instance = module_serializer.save()
-                    module_data.append(ModuleSerializer(module_instance).data)
-
-                    status = "good"
-                    
-                    return content, status
-                else:
-                    status = "bad"
-                    return content, status
+            return content, "good"
         else:
-            status = "bad"
-            return content, status
+            print(course_serializer.errors)
+            return content, "bad"

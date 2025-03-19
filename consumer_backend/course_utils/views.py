@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
 from .models import Course
-from .serializers import CourseSerializer, ModuleSerializer
+from .serializers import CourseSerializer, ModuleSerializer, CourseWithModulesSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import json
@@ -40,34 +40,19 @@ def create_course_outline(request):
 
     course_outline = scribo.generate_course_outline(request.data)
 
-    course_serializer = CourseSerializer(data=course_outline)
+    course_serializer = CourseWithModulesSerializer(data=course_outline)
 
     if course_serializer.is_valid():
         course = course_serializer.save()
 
-        modules = course_outline['modules']
-
-        module_data = []
-
-        order = 0
-        for module in modules:
-            print(course.uuid)
-            module['course_uuid'] = course.uuid
-            module['order'] = order
-            order += 1
-
-            print(module)
-            module_serializer = ModuleSerializer(data=module)
-
-            if module_serializer.is_valid():
-                module_instance = module_serializer.save()
-                module_data.append(ModuleSerializer(module_instance).data)
-                pass
-            else:
-                return Response(module_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        response_data = course_serializer.data
-        response_data["modules"] = module_data
-        return Response({"uuid": response_data["uuid"]}, status=status.HTTP_201_CREATED)
-            
+        return Response({"uuid": course.uuid}, status=status.HTTP_201_CREATED)
+    
     return Response(course_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["GET"])
+def get_course(request):
+    course = Course.objects.get(uuid=request.data['uuid'])
+
+    course_serializer = CourseWithModulesSerializer(course)
+
+    return Response({"course": course_serializer.data}, status=status.HTTP_200_OK)
