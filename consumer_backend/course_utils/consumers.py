@@ -119,6 +119,8 @@ class OutlineActions():
         """
         Makes a Call to SCRIBO to update the course outline
         """
+        print("inside update")
+        print(data)
         content = data["script"]
         comments = data.get("comments", "")
 
@@ -127,9 +129,15 @@ class OutlineActions():
             "script": content
         }
 
-        content = self.scribo.update_course_outline(data)
+        course_outline = self.scribo.update_course_outline(data)
+
+        course_serializer = CourseWithModulesSerializer(data=course_outline)
         
-        return content, "good"
+        if course_serializer.is_valid():
+            course_serializer.save()
+            return course_serializer.data, "good"
+        
+        return data["script"], "bad"
     
     def save(self, data):
         """
