@@ -3,6 +3,7 @@ import debounce from "lodash.debounce";
 import { useParams } from "react-router-dom";
 import '../courseoutline.css'
 import isEqual from 'lodash/isEqual'; 
+import CourseOutlineMenuRenderer from '../courseOutlineMenu'
 
 const EditableLine = ({ text, onSave, type = "text" }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -103,6 +104,114 @@ const Module = ({ module, updateModule}) => {
             </ul>
         </div>
     )
+}
+
+const RegenerateDialog = ({ setRegenerateDialogPressed, onRegenerate }) => {
+  const [notes, setNotes] = useState("")
+
+  const handleChange = (e) => {
+    setNotes(e.target.value);
+  };
+
+  const onCancel = () => {
+    setRegenerateDialogPressed(null)
+  }
+
+  const onRegenerateAction = () => {
+    const comments = notes;
+    setRegenerateDialogPressed(null)
+    onRegenerate(comments);
+  }
+
+  return (
+    <div className="course-outline" id="outline menu">
+        <div className='outline-menu'>
+            <p>Enter notes for the model to follow as it regenerates the outline!</p>
+            <textarea 
+                value={notes} 
+                onChange={handleChange}
+            ></textarea>
+            <div className='menu-buttons'>
+                <div className='button-wrapper'>
+                    <button className='btn-primary btn-group' onClick={onCancel}>Cancel</button>
+                </div>
+                <div className='button-wrapper'>
+                    <button className='btn-primary btn-group' onClick={onRegenerateAction}>Submit</button>
+                </div>
+            </div>
+            {/* {isLoading && (
+                <div className="spinner-container">
+                <div className="spinner-border" role="status">
+                    <span className="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading...</p>
+                </div>
+            )} */}
+        </div>
+    </div>
+  )
+}
+
+const OutlineEditorMenu = ({ onNewPrompt, onRegenerate, onAccept }) => {
+  const [hoveredButton, setHoveredButton] = useState(null)
+  const [regenerateDialogPressed, setRegenerateDialogPressed] = useState(null)
+  
+  const handleMouseEnter = (buttonName) => {
+    setHoveredButton(buttonName);
+  };
+
+  const handleMouseLeave = () => {
+    setHoveredButton(null);
+  };
+
+  const onRegenerateClick = () => {
+    setRegenerateDialogPressed("True");
+  }
+  return (
+    <div className="course-outline" id="outline menu">
+      <div className="outline-menu">
+        <h2>Course Outline Editor</h2>
+          <div className="menu-buttons">
+            <div
+                className="button-wrapper"
+                onMouseEnter={() => handleMouseEnter('newPrompt')}
+                onMouseLeave={handleMouseLeave}
+            >
+              <button className="btn-primary btn-group" onClick={onNewPrompt}>Restart</button>
+              {hoveredButton === 'newPrompt' && (
+              <span className="tooltip">Reset the course and start fresh.</span>
+              )}
+            </div>
+            <div
+                className="button-wrapper"
+                onMouseEnter={() => handleMouseEnter('regenerate')}
+                onMouseLeave={handleMouseLeave}
+            >
+              <button className="btn-primary btn-group" onClick={onRegenerateClick}>Regenerate</button>
+              {hoveredButton === 'regenerate' && (
+              <span className="tooltip">Send the current course outline and notes to prompt for an entire new outline.</span>
+              )}
+            </div>
+            <div
+                className="button-wrapper"
+                onMouseEnter={() => handleMouseEnter('accept')}
+                onMouseLeave={handleMouseLeave}
+            >
+              <button className="btn-primary btn-group" onClick={onAccept}>Accept</button>
+              {hoveredButton === 'accept' && (
+              <span className="tooltip">Accept the current course outline and move onto script generation.</span>
+              )}
+            </div>
+          </div>
+        </div>
+        {regenerateDialogPressed && (
+                <RegenerateDialog 
+                  setRegenerateDialogPressed={setRegenerateDialogPressed}
+                  onRegenerate={onRegenerate}
+                />
+            )}
+    </div>
+  )
 }
 
 const OutlineEditor = () => {
@@ -208,69 +317,107 @@ const OutlineEditor = () => {
     debouncedSave(outlineData);
   };
 
+  const onNewPrompt = () => {
+    console.log("new prompt");
+    // Send a message to the WebSocket server to handle the new prompt action
+    // if (ws.current?.readyState === WebSocket.OPEN) {
+    //   ws.current.send(JSON.stringify({ "action": "newPrompt" }));
+    // }
+  };
+
+  const onRegenerate = (comments) => {
+    console.log("regenerate");
+    console.log(comments)
+    console.log(outlineData)
+    // Send a message to the WebSocket server to handle the regenerate action
+    const data = {
+      "action": "update",
+      "data": {
+        "comments": comments,
+        "script": outlineData
+      }
+    }
+
+    console.log("sending...", data)
+    if (ws.current?.readyState === WebSocket.OPEN) {
+      ws.current.send(JSON.stringify(data));
+    }
+  };
+
+  const onAccept = () => {
+    console.log("accept");
+    // Send a message to the WebSocket server to handle the accept action
+    // if (ws.current?.readyState === WebSocket.OPEN) {
+    //   ws.current.send(JSON.stringify({ "action": "accept" }));
+    // }
+  };
+
   return (
-    <div class="course-outline" id="course outline">
-      <button onClick={sendSave}>SAVE</button>
-      <h1>Title:
-        <EditableLine 
-          text={outlineData.title} 
-          onSave={(newTitle) => {
-            const updatedOutline = { ...outlineData, title: newTitle };
-            setOutlineData(updatedOutline);
-          }}
-        />
-      </h1>
-
-      <h4>Duration:</h4>
-      <p>{outlineData.duration || "No duration specified"}</p>
-
-      <h3>Summary:</h3>
-      <EditableLine 
-          text={outlineData.summary} 
-          onSave={(newSummary) => {
-            const updatedOutline = { ...outlineData, summary: newSummary};
-            setOutlineData(updatedOutline);
-          }} 
-          type="textbox"
-      />
-
-      <h3>Objectives:</h3>
-      <ul>
-          {outlineData.objectives?.length > 0 ? (
-            outlineData.objectives.map((objective, index) => (
-              <li key={index}>
-                <EditableLine 
-                        text={objective} 
-                        onSave={
-                            (newObjective) => {
-                                const updatedObjectives = [...outlineData.objectives]
-                                updatedObjectives[index] = newObjective
-                                setOutlineData({ ...outlineData, objectives: updatedObjectives })
-                            }
-                        }
-                    />
-              </li>
-            ))
-          ) : (
-            <li>No objectives specified</li>
-          )}
-      </ul>
-
-      <h3>Modules:</h3>
-      {outlineData.modules?.length > 0 ? (
-        outlineData.modules.map((module, index) => (
-          <Module
-            key={index}
-            module={module}
-            updateModule={(updatedModule) => updateModule(index, updatedModule)}
+    <div>
+      <OutlineEditorMenu onNewPrompt={onNewPrompt} onRegenerate={onRegenerate} onAccept={onAccept} />
+      <div class="course-outline" id="course outline">
+        <button onClick={sendSave}>SAVE</button>
+        <h1>Title:
+          <EditableLine 
+            text={outlineData.title} 
+            onSave={(newTitle) => {
+              const updatedOutline = { ...outlineData, title: newTitle };
+              setOutlineData(updatedOutline);
+            }}
           />
-        ))
-      ) : (
-        <p>No modules available</p>
-      )}
-      <h4>Raw JSON</h4>
-      <p>{JSON.stringify(outlineData, null, 2)}</p>
-      {/* <button onClick={console.log(outlineData)}>Hello</button> */}
+        </h1>
+
+        <h4>Duration:</h4>
+        <p>{outlineData.duration || "No duration specified"}</p>
+
+        <h3>Summary:</h3>
+        <EditableLine 
+            text={outlineData.summary} 
+            onSave={(newSummary) => {
+              const updatedOutline = { ...outlineData, summary: newSummary};
+              setOutlineData(updatedOutline);
+            }} 
+            type="textbox"
+        />
+
+        <h3>Objectives:</h3>
+        <ul>
+            {outlineData.objectives?.length > 0 ? (
+              outlineData.objectives.map((objective, index) => (
+                <li key={index}>
+                  <EditableLine 
+                          text={objective} 
+                          onSave={
+                              (newObjective) => {
+                                  const updatedObjectives = [...outlineData.objectives]
+                                  updatedObjectives[index] = newObjective
+                                  setOutlineData({ ...outlineData, objectives: updatedObjectives })
+                              }
+                          }
+                      />
+                </li>
+              ))
+            ) : (
+              <li>No objectives specified</li>
+            )}
+        </ul>
+
+        <h3>Modules:</h3>
+        {outlineData.modules?.length > 0 ? (
+          outlineData.modules.map((module, index) => (
+            <Module
+              key={index}
+              module={module}
+              updateModule={(updatedModule) => updateModule(index, updatedModule)}
+            />
+          ))
+        ) : (
+          <p>No modules available</p>
+        )}
+        <h4>Raw JSON</h4>
+        <p>{JSON.stringify(outlineData, null, 2)}</p>
+        {/* <button onClick={console.log(outlineData)}>Hello</button> */}
+      </div>
     </div>
   );
 };
