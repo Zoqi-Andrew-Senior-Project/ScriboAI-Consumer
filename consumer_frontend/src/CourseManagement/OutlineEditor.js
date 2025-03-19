@@ -1,9 +1,8 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import debounce from "lodash.debounce";
 import { useParams } from "react-router-dom";
-import '../courseoutline.css'
+import './courseoutline.css'
 import isEqual from 'lodash/isEqual'; 
-import CourseOutlineMenuRenderer from '../courseOutlineMenu'
 
 const EditableLine = ({ text, onSave, type = "text" }) => {
     const [isEditing, setIsEditing] = useState(false);
@@ -326,9 +325,6 @@ const OutlineEditor = () => {
   };
 
   const onRegenerate = (comments) => {
-    console.log("regenerate");
-    console.log(comments)
-    console.log(outlineData)
     // Send a message to the WebSocket server to handle the regenerate action
     const data = {
       "action": "update",
@@ -338,7 +334,6 @@ const OutlineEditor = () => {
       }
     }
 
-    console.log("sending...", data)
     if (ws.current?.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify(data));
     }

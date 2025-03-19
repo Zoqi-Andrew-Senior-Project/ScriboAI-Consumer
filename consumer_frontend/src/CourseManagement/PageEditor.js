@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import debounce from "lodash.debounce";
 import { useParams } from "react-router-dom";
 
-const DocumentEditor = () => {
+const PageEditor = () => {
   const { docId } = useParams();
   const [content, setContent] = useState(""); // Local state for smooth typing
   const ws = useRef(null);
@@ -51,4 +51,4 @@ const DocumentEditor = () => {
   return <textarea value={content} onChange={handleChange} rows={10} cols={50} />;
 };
 
-export default DocumentEditor;
+export default PageEditor;

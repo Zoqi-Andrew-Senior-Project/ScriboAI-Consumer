@@ -2,7 +2,7 @@ import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import './App.css';
-import CreateCourse from './CreateCourse';
+import CreateCourse from './CourseManagement/CreateCourse';
 import Login from './Login';
 import Logout from './Logout';
 import CreateOrganization from './CreateOrganization';
@@ -14,7 +14,7 @@ import { AdminHome } from './AdminPages/AdminHome';
 import EmployeeDashboard from './AdminPages/EmployeeDashboard';
 import Settings from './Settings'
 import { useState } from 'react';
-import DocumentEditor from './CourseManagement/CourseEditor';
+import PageEditor from './CourseManagement/PageEditor';
 import OutlineEditor from './CourseManagement/OutlineEditor';
 
 function Navbar() {
@@ -88,19 +88,20 @@ function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Welcome />} /> 
+          <Route path="/login" element={<Login />} />
+          <Route path="/create-organization" element={<CreateOrganization />} />
+
+          {/* Home Pahes */}
           <Route path="/home" element={<HomeRedirect />} />
           <Route path="/employee/home" element={<ProtectedRouteEmployee><EmployeeHome /></ProtectedRouteEmployee>} />
           <Route path="/admin/home" element={<ProtectedRouteAdmin><AdminHome /></ProtectedRouteAdmin>} />
 
-          {/* Admin Pages */}
-
+          {/* Employee Management */}
           <Route path="/admin/employee-dashboard" element={<ProtectedRouteAdmin><EmployeeDashboard /></ProtectedRouteAdmin>} />
 
+          {/* Course Management */}
           <Route path="/create-course" element={<CreateCourse />} />
-
-          <Route path="/create-organization" element={<CreateOrganization />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/document/:docId" element={<DocumentEditor />} />
+          <Route path="/document/:docId" element={<PageEditor />} />
           <Route path="/outline/:outId" element={<OutlineEditor />} />
         </Routes>
         <Footer />
