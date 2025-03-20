@@ -1,12 +1,14 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import debounce from "lodash.debounce";
 import { useParams } from "react-router-dom";
+import MDEditor from '@uiw/react-md-editor';
 
 const PageEditor = () => {
   const { docId } = useParams();
   const [content, setContent] = useState(""); // Local state for smooth typing
   const ws = useRef(null);
   const isTyping = useRef(false); // Track typing activity
+  const [value, setValue] = useState("**Hello world!!!**");
 
   useEffect(() => {
     ws.current = new WebSocket(`ws://localhost:8000/ws/document/${docId}/`);
@@ -17,7 +19,7 @@ const PageEditor = () => {
       try {
         const data = JSON.parse(event.data);
         if (!isTyping.current) {
-          setContent(data.content);
+          setContent(data.data.content);
         }
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
@@ -41,14 +43,23 @@ const PageEditor = () => {
     []
   );
 
-  const handleChange = (e) => {
-    const newContent = e.target.value;
-    setContent(newContent);
+  const handleChange = (newValue) => {
+    setContent(newValue);
     isTyping.current = true; // Prevent overwriting while typing
-    sendUpdate(newContent);
+    sendUpdate(newValue);
   };
 
-  return <textarea value={content} onChange={handleChange} rows={10} cols={50} />;
+  return (
+  <div>
+    <div data-color-mode="light">
+      <MDEditor
+        value={content}
+        onChange={handleChange}
+      />
+      {/* <MDEditor.Markdown source={value} style={{ whiteSpace: 'pre-wrap' }} /> */}
+    </div>
+  </div>
+  );
 };
 
 export default PageEditor;
