@@ -1,8 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework import status
-from .models import Course
-from .serializers import CourseSerializer, ModuleSerializer, CourseWithModulesSerializer
+from .models import Course, Module
+from .serializers import CourseWithModulesSerializer, PageSerializer
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import json
@@ -56,3 +56,25 @@ def get_course(request):
     course_serializer = CourseWithModulesSerializer(course)
 
     return Response({"course": course_serializer.data}, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+def initialize_pages(request):
+    scribo = ScriboHandler()
+
+    course = Course.objects.get(uuid=request.data['uuid'])
+
+    modules = Module.objects.filter(course=course).order_by('order')
+
+    for module in modules:
+        module.content = scribo.generate_page(module)
+        module.save()
+
+    page_serializer = PageSerializer({"currentPage": modules[0].uuid})
+
+    return Response(page_serializer.data, status=status.HTTP_201_CREATED)
+
+@api_view(["GET"])
+def get_page(request):
+    page_serializer = PageSerializer(request.data)
+
+    return Response(page_serializer.data, status=status.HTTP_200_OK)
