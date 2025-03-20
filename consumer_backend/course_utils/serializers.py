@@ -1,8 +1,8 @@
-from rest_framework_mongoengine import serializers
+from rest_framework_mongoengine.serializers import serializers, DocumentSerializer
 from .models import Course, Module
 from django.forms import ValidationError
 
-class BaseSerializer(serializers.DocumentSerializer):
+class BaseSerializer(DocumentSerializer):
     """ Base Serializer that over rights the update and validate functions
     """
     def update(self, instance, validated_data):
@@ -30,16 +30,16 @@ class BaseSerializer(serializers.DocumentSerializer):
         return data
 
 class CourseSerializer(BaseSerializer):
-    uuid = serializers.serializers.CharField(required=False)
+    uuid = serializers.CharField(required=False)
  
     class Meta:
         model = Course
         fields = ['uuid', 'title', 'objectives', 'duration', 'summary']  # Added `uuid`
 
 class ModuleSerializer(BaseSerializer):
-    uuid = serializers.serializers.CharField(required=False)
-    course_uuid = serializers.serializers.CharField(write_only=True, required=False)  # Allow input but don't include in response
-    order = serializers.serializers.IntegerField(write_only=True, required=False)
+    uuid = serializers.CharField(required=False)
+    course_uuid = serializers.CharField(write_only=True, required=False)  # Allow input but don't include in response
+    order = serializers.IntegerField(write_only=True, required=False)
 
     class Meta:
         model = Module
@@ -138,3 +138,34 @@ class CourseWithModulesSerializer(CourseSerializer):
             ).data
 
         return representation
+    
+class PageSerializer(DocumentSerializer):
+    prevPage = serializers.CharField(read_only=True)
+    nextPage = serializers.CharField(read_only=True)
+    currentPage = serializers.CharField()
+    course = serializers.CharField()
+    total = serializers.IntegerField()
+    current_order = serializers.IntegerField()
+    content = serializers.CharField()
+
+    def validate(self, data):
+        if not Module.objects.filter(uuid=data['currentPage']).first():
+                raise ValidationError(f"Object with uuid {data['currecurrentPagent']} does not exist!")
+
+    def to_representation(self, instance):
+        """Modify how data is serialized and returned"""
+        module = Module.objects.filter(uuid=instance["currentPage"]).first()
+
+        course = module.course
+        prev_module = Module.objects.filter(course=course, order=module.order - 1).first()
+        next_module = Module.objects.filter(course=course, order=module.order + 1).first()
+
+        return {
+            "prevPage": prev_module.uuid if prev_module else None,
+            "nextPage": next_module.uuid if next_module else None,
+            "currentPage": module.uuid,
+            "course": course.uuid,
+            "total": Module.objects.filter(course=course).count(),
+            "current_order": (module.order + 1),
+            "content": module.content
+        }

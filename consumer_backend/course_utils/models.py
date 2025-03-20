@@ -30,6 +30,7 @@ class Module(Document):
     features = fields.ListField(fields.StringField(choices=[e.value for e in FeatureEnum]))
     course = fields.ReferenceField(Course, reverse_delete_rule=CASCADE)  # Ensure proper referencing
     order = fields.IntField()
+    content = fields.StringField(default="No data.")
 
     def __str__(self):
         return self.name
