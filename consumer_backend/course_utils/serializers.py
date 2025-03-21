@@ -1,6 +1,7 @@
 from rest_framework_mongoengine.serializers import serializers, DocumentSerializer
 from .models import Course, Module, StatusEnum
 from django.forms import ValidationError
+from rest_framework import serializers as rf_serializers
 
 class BaseSerializer(DocumentSerializer):
     """ Base Serializer that over rights the update and validate functions
@@ -160,14 +161,14 @@ class CourseWithModulesSerializer(CourseSerializer):
 
         return representation
     
-class PageSerializer(DocumentSerializer):
+class PageSerializer(rf_serializers.Serializer):
     prevPage = serializers.CharField(read_only=True)
     nextPage = serializers.CharField(read_only=True)
     currentPage = serializers.CharField(default=None)
     course = serializers.CharField(default=None)
-    total = serializers.IntegerField()
-    current_order = serializers.IntegerField()
-    content = serializers.CharField()
+    total = serializers.IntegerField(default=None)
+    current_order = serializers.IntegerField(default=None)
+    content = serializers.CharField(default=None)
 
     def validate(self, data):
         if not (data.get("course", None) or data.get("currentPage")):
@@ -178,16 +179,20 @@ class PageSerializer(DocumentSerializer):
         
         if data.get("currentPage", None) and not Module.objects.filter(uuid=data['currentPage']).first():
             raise ValidationError(f"Object with uuid {data['currentPage']} does not exist!")
+        
+        return data
 
     def to_representation(self, instance):
         """Modify how data is serialized and returned"""
+
+        print(instance)
 
         if instance.get("currentPage", None):
             module = Module.objects.filter(uuid=instance["currentPage"]).first()
             course = module.course
         if instance.get("course", None):
             course = Course.objects.get(uuid=instance["course"])
-            module = Module.objects.filter(course=course).order_by('order').first()
+            module: dict = Module.objects.filter(course=course).order_by('order').first()
 
         prev_module = Module.objects.filter(course=course, order=module.order - 1).first()
         next_module = Module.objects.filter(course=course, order=module.order + 1).first()

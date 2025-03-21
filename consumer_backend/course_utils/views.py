@@ -75,6 +75,23 @@ def initialize_pages(request):
 
 @api_view(["GET"])
 def get_page(request):
-    page_serializer = PageSerializer(request.data)
+    print(request.query_params)
+    data = {}
 
-    return Response(page_serializer.data, status=status.HTTP_200_OK)
+    if request.query_params.get("course", None):
+        data["course"] = request.query_params.get("course")
+
+    if request.query_params.get("currentPage", None):
+        data["currentPage"] = request.query_params.get("currentPage")
+
+    if not (data.get("course", None) or data.get("currentPage", None)):
+        return Response({"error": "Need 'course' or 'currentPage'"}, status=status.HTTP_400_BAD_REQUEST)
+    
+    print(data)
+
+    page_serializer = PageSerializer(data=request.query_params)
+
+    if page_serializer.is_valid():
+        return Response(page_serializer.data, status=status.HTTP_200_OK)
+
+    return Response({"error": page_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
