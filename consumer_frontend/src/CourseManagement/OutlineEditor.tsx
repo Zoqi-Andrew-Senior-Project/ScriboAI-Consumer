@@ -3,6 +3,8 @@ import debounce from "lodash.debounce";
 import { useParams } from "react-router-dom";
 import './courseoutline.css'
 import isEqual from "lodash/isEqual";
+import axios from "axios";
+import { useNavigate } from 'react-router-dom';
 
 enum FeatureType {
   IMAGE = "image",
@@ -259,6 +261,9 @@ const OutlineEditor = () => {
   const [outlineData, setOutlineData] = useState<Outline | null>(null); // Local state for smooth typing
 
   const prevOutlineDataRef = useRef<Outline | null>(null);
+
+  
+  const navigate = useNavigate();
   /* Script JSON
   {
     "title": str,
@@ -386,11 +391,60 @@ const OutlineEditor = () => {
     }
   };
 
-  const onAccept = () => {
-    console.log("accept");
-    // Send a message to the WebSocket server to handle the accept action
-    // if (ws.current?.readyState === WebSocket.OPEN) {
-    //   ws.current.send(JSON.stringify({ "action": "accept" }));
+  interface PageData{
+    prevPage: string,
+    nextPage: string,
+    currentPage: string,
+    course: string,
+    total: number,
+    current_order: number,
+    content: string,
+  }
+
+  interface InitializePagesResponseData{
+    data: PageData
+  }
+
+  const onAccept = async () => {
+
+    const uuid = outlineData?.uuid
+
+    if (uuid !== null) {      
+      const data = {
+        "uuid": uuid
+      }
+
+      const url = `${import.meta.env.VITE_BACKEND_ADDRESS}/api/course/initialize-pages/`
+
+      try {
+        const response: InitializePagesResponseData = await axios.post(url, data);
+        navigate(`/document/${response.data.course}`);
+        //navigate("/outline/" + response.data.uuid)
+
+      } catch (error) {
+        console.error("ERROR:", error)
+      }
+
+    }
+
+    // const data = {
+    //   course: promptData.topic,
+    // }
+    // try {
+    //     const response = await axios.post(url, data);
+    //     console.log(response);
+    //     alert(`Course created successfully! ${promptData.topic} ${promptData.duration}`);
+
+    //     navigate("/outline/" + response.data.uuid)
+
+    //     setResponseContent(response.data);
+
+    // } catch (error) {
+    //     console.error("Error creating course:", error);
+    //     alert("There was an error creating the course.");
+    // } finally {
+        
+    //     setIsLoading(false);
     // }
   };
 

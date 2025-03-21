@@ -94,7 +94,7 @@ function CreateCourse() {
   const handleSubmit = async () => {
       setIsLoading(true);
 
-      const url = process.env.REACT_APP_BACKEND_ADDRESS + "/api/course/create-outline/"
+      const url = `${import.meta.env.VITE_BACKEND_ADDRESS}/api/course/create-outline/`
       console.log(url)
       const time = promptData.duration === "short" ? "up to one hour" : "between one and two hours"
       const data = {
@@ -121,7 +121,7 @@ function CreateCourse() {
 
   return (
     <div id="page">
-      {Object.keys(responseContent).length > 0 && (
+      {(
         <PromptMenu
           promptData={promptData}
           handleChange={handleChange}
