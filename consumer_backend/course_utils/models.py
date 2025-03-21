@@ -9,6 +9,11 @@ class FeatureEnum(Enum):
     IMAGE = "image"
     INTERACTIVE = "interactive"
 
+class StatusEnum(Enum):
+    TEMP = "temp" # only seen by author during creation - automatically removed if not saved as draft or published
+    DRAFT = "draft" # can be seen by any user with editing rights
+    PUBLISH = "published" # can be seen by read only rights
+
 # 🔹 Course Model
 class Course(Document):
     uuid = fields.StringField(default=lambda: str(uuid.uuid4()), unique=True)  # UUID for referencing
@@ -16,6 +21,7 @@ class Course(Document):
     objectives = fields.ListField(fields.StringField())
     duration = fields.StringField(max_length=50)
     summary = fields.StringField()
+    status = fields.StringField(choices=[e.value for e in StatusEnum], default=StatusEnum.TEMP)
 
     def __str__(self):
         return self.uuid

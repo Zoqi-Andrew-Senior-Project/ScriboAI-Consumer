@@ -2,7 +2,7 @@ import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .scribo_handler import ScriboHandler
 from .serializers import CourseWithModulesSerializer, PageSerializer, ModuleSerializer
-from .models import Course, Module
+from .models import Course, Module, StatusEnum
 import markdown
 import redis
 from django.conf import settings
@@ -249,6 +249,8 @@ class OutlineActions():
                 return content, "bad"
             
             updated_course = course_serializer.update(course, content)
+            updated_course["status"] = StatusEnum.DRAFT.value
+            print(updated_course)
             updated_course.save()
 
             content = course_serializer.data

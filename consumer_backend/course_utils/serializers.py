@@ -34,7 +34,7 @@ class CourseSerializer(BaseSerializer):
  
     class Meta:
         model = Course
-        fields = ['uuid', 'title', 'objectives', 'duration', 'summary']  # Added `uuid`
+        fields = ['uuid', 'title', 'objectives', 'duration', 'summary', 'status']  # Added `uuid`
 
 class ModuleSerializer(BaseSerializer):
     uuid = serializers.CharField(required=False)
