@@ -1,5 +1,5 @@
 from rest_framework_mongoengine.serializers import serializers, DocumentSerializer
-from .models import Course, Module
+from .models import Course, Module, StatusEnum
 from django.forms import ValidationError
 
 class BaseSerializer(DocumentSerializer):
@@ -31,11 +31,32 @@ class BaseSerializer(DocumentSerializer):
 
 class CourseSerializer(BaseSerializer):
     uuid = serializers.CharField(required=False)
+    status = serializers.CharField(required=False, allow_null=True)
  
     class Meta:
         model = Course
         fields = ['uuid', 'title', 'objectives', 'duration', 'summary', 'status']  # Added `uuid`
 
+    def create(self, validated_data):
+        """
+        Override the create method to ensure the status is set to `StatusEnum.TEMP` if not provided.
+        """
+        # Check if 'status' is in validated_data, if not, set it to StatusEnum.TEMP
+        status = validated_data.get('status', StatusEnum.TEMP.value)
+
+        # Ensure the status is valid
+        if status not in [StatusEnum.TEMP.value, StatusEnum.DRAFT.value, StatusEnum.PUBLISH.value]:
+            raise serializers.ValidationError({"status": "Invalid status value"})
+
+        validated_data['status'] = status  # Set the validated status
+
+        # Call the parent class's create method to create the course instance
+
+        return super().create(validated_data)
+    
+    def validate(self, data):
+        return super().validate(data)
+    
 class ModuleSerializer(BaseSerializer):
     uuid = serializers.CharField(required=False)
     course_uuid = serializers.CharField(write_only=True, required=False)  # Allow input but don't include in response
