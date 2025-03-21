@@ -1,9 +1,13 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
 from .scribo_handler import ScriboHandler
-from .serializers import CourseWithModulesSerializer, PageSerializer
+from .serializers import CourseWithModulesSerializer, PageSerializer, ModuleSerializer
 from .models import Course, Module
 import markdown
+import redis
+from django.conf import settings
+
+redis_client = redis.StrictRedis.from_url(settings.CACHES["default"]["LOCATION"], decode_responses=True)
 
 class DocumentConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -16,13 +20,25 @@ class DocumentConsumer(AsyncWebsocketConsumer):
 
         uuid = self.scope['url_route']['kwargs']['doc_id']
 
-        module = Module.objects.get(uuid=uuid)
+        cached_data = redis_client.get(f"page:{uuid}")
+        cached_data = json.loads(cached_data) if cached_data else {}
 
-        page_serializer = PageSerializer({"currentPage": module.uuid})
+        if cached_data:
+            page_data = cached_data
+        else: 
+            course = Course.objects.get(uuid=uuid)
+            page_serializer = PageSerializer({"course": course.uuid})
+            page_data = page_serializer.data
+
+            redis_client.set(f"page:{uuid}", json.dumps(page_data))
+
 
         message = {
             "status": "good",
-            "data": page_serializer.data
+            "data": {
+                "content": page_data.pop("content"),
+            },
+            "meta": page_data
         }
 
         await self.send(text_data=json.dumps(message))
@@ -32,33 +48,72 @@ class DocumentConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        content = data["content"]
-        response_data = data
+
+        response_data = data.get("data", {})
 
         action = data.get("action", None)
+        
+        cached_data: dict = json.loads(redis_client.get(f"page:{self.room_name}"))
 
-        if action == "next":
-            nextPage = data.get("nextPage", None)
+        if action == "next" and cached_data.get("nextPage"):
+            page_serializer = PageSerializer({"currentPage": cached_data.get("nextPage")})
+            response_data = page_serializer.data
 
-            if nextPage:
-                page_serializer = PageSerializer({"currentPage": nextPage})
-                response_data = page_serializer.data
+            # Update in Redis
+            redis_client.set(f"page:{self.room_name}", json.dumps(response_data))
+
+        if action == "back" and cached_data.get("prevPage", None):
+            page_serializer = PageSerializer({"currentPage": cached_data.get("prevPage")})
+            response_data = page_serializer.data
+
+            # Update in Redis
+            redis_client.set(f"page:{self.room_name}", json.dumps(response_data))
+
+        if action == "save":
+            cached_data = json.loads(redis_client.get(f"page:{self.room_name}"))
+
+            try:
+                module = Module.objects.get(uuid=cached_data.get("currentPage"))
+            except Module.DoesNotExist:
+                print(f'No module matched with uuid {cached_data.get("currentPage")}')
+
+            module["content"] = cached_data.get("content")
+            module.save()
+
+        if action == "clear":
+            redis_client.delete(f"page:{self.room_name}")
+
+            await self.send(text_data=json.dumps({"status": "cleared"}))
+            return
+
+        if action == None and response_data:
+            cached_data["content"] = response_data["content"]
+            response_data = cached_data
+            redis_client.set(f"page:{self.room_name}", json.dumps(cached_data))
+
+        if not response_data.get("content", None):
+            response_data["content"] = cached_data.get("content")
+
+        response_data["currentPage"] = cached_data.get("currentPage")
             
-
         # Broadcast changes to all users in the room
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 "type": "document_update",
                 "status": "good",
-                "data": response_data
+                "data": {
+                    "content": response_data.pop("content"),
+                },
+                "meta": response_data
             }
         )
 
     async def document_update(self, event):
         message = {
             "status": event["status"],
-            "data": event["data"]
+            "data": event["data"],
+            "meta": event["meta"]
         }
         await self.send(text_data=json.dumps(message))
 

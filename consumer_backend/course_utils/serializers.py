@@ -142,21 +142,32 @@ class CourseWithModulesSerializer(CourseSerializer):
 class PageSerializer(DocumentSerializer):
     prevPage = serializers.CharField(read_only=True)
     nextPage = serializers.CharField(read_only=True)
-    currentPage = serializers.CharField()
-    course = serializers.CharField()
+    currentPage = serializers.CharField(default=None)
+    course = serializers.CharField(default=None)
     total = serializers.IntegerField()
     current_order = serializers.IntegerField()
     content = serializers.CharField()
 
     def validate(self, data):
-        if not Module.objects.filter(uuid=data['currentPage']).first():
-                raise ValidationError(f"Object with uuid {data['currecurrentPagent']} does not exist!")
+        if not (data.get("course", None) or data.get("currentPage")):
+            raise ValidationError("'course' or 'currentPage' values are not provided.")
+        
+        if data.get("course", None) and not Course.objects.filter(uuid=data.get("course")).first():
+            raise ValidationError(f"Course with uuid {data['course']} does not exist!")
+        
+        if data.get("currentPage", None) and not Module.objects.filter(uuid=data['currentPage']).first():
+            raise ValidationError(f"Object with uuid {data['currentPage']} does not exist!")
 
     def to_representation(self, instance):
         """Modify how data is serialized and returned"""
-        module = Module.objects.filter(uuid=instance["currentPage"]).first()
 
-        course = module.course
+        if instance.get("currentPage", None):
+            module = Module.objects.filter(uuid=instance["currentPage"]).first()
+            course = module.course
+        if instance.get("course", None):
+            course = Course.objects.get(uuid=instance["course"])
+            module = Module.objects.filter(course=course).order_by('order').first()
+
         prev_module = Module.objects.filter(course=course, order=module.order - 1).first()
         next_module = Module.objects.filter(course=course, order=module.order + 1).first()
 
