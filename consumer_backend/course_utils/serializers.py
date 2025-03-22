@@ -193,8 +193,6 @@ class PageSerializer(rf_serializers.Serializer):
     def to_representation(self, instance):
         """Modify how data is serialized and returned"""
 
-        print(instance)
-
         if instance.get("currentPage", None):
             module = Module.objects.filter(uuid=instance["currentPage"]).first()
             course = module.course

@@ -100,42 +100,41 @@ class CourseView(APIView):
 
         return Response("Invalid Request", status=status.HTTP_400_BAD_REQUEST)
 
+class PageView(APIView):
+    def post(self, request):
+        scribo = ScriboHandler()
 
-@api_view(["POST"])
-def initialize_pages(request):
-    scribo = ScriboHandler()
+        try:
 
-    course = Course.objects.get(uuid=request.data['uuid'])
+            course = Course.objects.get(uuid=request.data['course'])
 
-    modules = Module.objects.filter(course=course).order_by('order')
+            modules = Module.objects.filter(course=course).order_by('order')
 
-    for module in modules:
-        module.content = scribo.generate_page(module)
-        module.save()
+            for module in modules:
+                module.content = scribo.generate_page(module)
+                module.save()
 
-    page_serializer = PageSerializer({"currentPage": modules[0].uuid})
+            page_serializer = PageSerializer({"currentPage": modules[0].uuid})
 
-    return Response(page_serializer.data, status=status.HTTP_201_CREATED)
-
-@api_view(["GET"])
-def get_page(request):
-    print(request.query_params)
-    data = {}
-
-    if request.query_params.get("course", None):
-        data["course"] = request.query_params.get("course")
-
-    if request.query_params.get("currentPage", None):
-        data["currentPage"] = request.query_params.get("currentPage")
-
-    if not (data.get("course", None) or data.get("currentPage", None)):
-        return Response({"error": "Need 'course' or 'currentPage'"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(page_serializer.data, status=status.HTTP_201_CREATED)
+        except Course.DoesNotExist:
+            return Response("Invalid course uuid.", status=status.HTTP_404_NOT_FOUND)
     
-    print(data)
+    def get(self, request):
+        data = {}
 
-    page_serializer = PageSerializer(data=request.query_params)
+        if request.query_params.get("course", None):
+            data["course"] = request.query_params.get("course")
 
-    if page_serializer.is_valid():
-        return Response(page_serializer.data, status=status.HTTP_200_OK)
+        if request.query_params.get("currentPage", None):
+            data["currentPage"] = request.query_params.get("currentPage")
 
-    return Response({"error": page_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+        if not (data.get("course", None) or data.get("currentPage", None)):
+            return Response({"error": "Need 'course' or 'currentPage'"}, status=status.HTTP_400_BAD_REQUEST)
+
+        page_serializer = PageSerializer(data=request.query_params)
+
+        if page_serializer.is_valid():
+            return Response(page_serializer.data, status=status.HTTP_200_OK)
+
+        return Response({"error": page_serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
