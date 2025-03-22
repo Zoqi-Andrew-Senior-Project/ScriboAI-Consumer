@@ -22,6 +22,7 @@ class Course(Document):
     duration = fields.StringField(max_length=50)
     summary = fields.StringField()
     status = fields.StringField(choices=[e.value for e in StatusEnum], default=StatusEnum.TEMP)
+    organization = fields.ReferenceField(Organization, reverse_delete_rule=CASCADE) # refers to owner of the course
 
     def __str__(self):
         return self.uuid

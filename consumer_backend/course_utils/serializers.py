@@ -1,5 +1,6 @@
 from rest_framework_mongoengine.serializers import serializers, DocumentSerializer
 from .models import Course, Module, StatusEnum
+from organization_utils.models import Organization
 from django.forms import ValidationError
 from rest_framework import serializers as rf_serializers
 
@@ -33,10 +34,11 @@ class BaseSerializer(DocumentSerializer):
 class CourseSerializer(BaseSerializer):
     uuid = serializers.CharField(required=False)
     status = serializers.CharField(required=False, allow_null=True)
+    organization = serializers.CharField(max_length=24, allow_null=True)
  
     class Meta:
         model = Course
-        fields = ['uuid', 'title', 'objectives', 'duration', 'summary', 'status']  # Added `uuid`
+        fields = ['uuid', 'title', 'objectives', 'duration', 'summary', 'status', 'organization']  # Added `uuid`
 
     def create(self, validated_data):
         """
@@ -51,7 +53,13 @@ class CourseSerializer(BaseSerializer):
 
         validated_data['status'] = status  # Set the validated status
 
-        # Call the parent class's create method to create the course instance
+        try:
+            organization = Organization.objects.get(uuid=validated_data.get('organization'))
+
+            validated_data["organization"] = organization
+
+        except Organization.DoesNotExist:
+            raise serializers.ValidationError({"organization": "Invalid uuid"})
 
         return super().create(validated_data)
     
