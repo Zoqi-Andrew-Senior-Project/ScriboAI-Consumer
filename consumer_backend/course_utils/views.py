@@ -73,20 +73,26 @@ class CourseView(APIView):
             return Response("member doesnt exist...", status=status.HTTP_404_NOT_FOUND)
         
     def get(self, request):
-        if request.data.get("course"):
-            course = Course.objects.get(uuid=request.data["course"])
+        if request.query_params.get("course", None):
+            try:
+                course = Course.objects.get(uuid=request.query_params.get("course"))
 
-            course_serializer = CourseWithModulesSerializer(course)
+                course_serializer = CourseWithModulesSerializer(course)
 
-            return Response({"course": course_serializer.data}, status=status.HTTP_200_OK)
-        
-        if request.data.get("organization"):
-            organization = Organization.objects.get(uuid=request.data["organization"])
-            courses = Course.objects.filter(organization=organization)
+                return Response({"course": course_serializer.data}, status=status.HTTP_200_OK)
+            except Course.DoesNotExist:
+                return Response("Course not found.", status=status.HTTP_404_NOT_FOUND)
 
-            courses_serializer = CourseWithModulesSerializer(courses, many=True)
+        if request.query_params.get("organization", None):
+            try:
+                organization = Organization.objects.get(uuid=request.query_params.get("organization"))
+                courses = Course.objects.filter(organization=organization)
 
-            return Response({"courses": courses_serializer.data}, status=status.HTTP_200_OK)
+                courses_serializer = CourseWithModulesSerializer(courses, many=True)
+
+                return Response({"courses": courses_serializer.data}, status=status.HTTP_200_OK)
+            except Organization.DoesNotExist:
+                return Response("Organization not found.", status=status.HTTP_404_NOT_FOUND)
         
         try:
             user = request.user
@@ -99,6 +105,8 @@ class CourseView(APIView):
             return Response({"courses": courses_serializer.data}, status=status.HTTP_200_OK)
         except Member.DoesNotExist:
             return Response("member doesnt exist...", status=status.HTTP_404_NOT_FOUND)
+            
+        return Response("Invalid Request", status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request):
         if request.data.get("course"):
@@ -111,19 +119,27 @@ class CourseView(APIView):
         return Response("Invalid Request", status=status.HTTP_400_BAD_REQUEST)
     
     def put(self, request):
-        if request.data.get("action") == "publish":
-            try:
+        try:
+            if request.data.get("action") == "publish":
                 course_uuid = request.data.get("course")
                 course: Course = Course.objects.get(uuid=course_uuid)
 
                 course.toPublish().save()
 
                 return Response("Course published successfully.", status=status.HTTP_201_CREATED)
+            
+            if request.data.get("action") == "draft":
+                course_uuid = request.data.get("course")
+                course: Course = Course.objects.get(uuid=course_uuid)
 
-            except Course.DoesNotExist:
-                return Response("Course not found", status=status.HTTP_404_NOT_FOUND)
+                course.toDraft().save()
 
-        return Response("Invalid Request", status=status.HTTP_400_BAD_REQUEST)
+                return Response("Course successfully saved as a draft.", status=status.HTTP_201_CREATED)
+
+            return Response("Invalid Request", status=status.HTTP_400_BAD_REQUEST)
+
+        except Course.DoesNotExist:
+            return Response("Course not found", status=status.HTTP_404_NOT_FOUND)
 
 class PageView(APIView):
     def post(self, request):
