@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../utils/AuthContext';
 import axios from 'axios';
 import '../App.css'
+import { useNavigate } from 'react-router-dom';
 
 enum FeatureType {
     IMAGE = "image",
@@ -29,18 +30,7 @@ interface Outline {
 const CourseTable = () => {
     const [courses, setCourses] = useState<Outline[]>([]);
     const [selectedCourse, setSelectedCourse] = useState<Outline | null>(null);
-    // const [isMemberActionFormOpen, setIsMemberActionFormOpen] = useState(false);
-
-    // const handleShowForm = (member: Outline) => {
-    //     setSelectedMember(member);
-    //     setIsMemberActionFormOpen(true);
-    // }
-
-    // const handleCloseForm = () => {
-    //     setIsMemberActionFormOpen(false);
-    //     setSelectedMember(null);
-    // }
-
+    const navigate = useNavigate();
 
 
     useEffect(() => {
@@ -54,15 +44,32 @@ const CourseTable = () => {
 
     const onDelete = (outline: Outline) => {
         console.log("Deleting outline", outline.uuid)
+
+        axios
+            .delete(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/course/course`, {
+                data: {
+                course: outline.uuid
+                },
+                withCredentials: true,  // Ensures cookies are sent
+            })
+            .then((response) => {
+                console.log("Courses fetched successfully:", response.data);
+                setCourses(response.data.courses);
+            })
+            .catch((error) => {
+                console.error("Error fetching courses:", error);
+            });
     }
 
     const onEdit = (outline: Outline) => {
         console.log("Editing outline", outline.uuid)
+        navigate("/outline/" + outline.uuid)
     }
 
     const onView = (outline: Outline) => {
         console.log("Viewing outline", outline.uuid)
-    }
+        
+    };
 
     return (
         <div>
