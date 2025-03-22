@@ -238,7 +238,7 @@ const InvitationsTable = () => {
 
     useEffect(() => {
         axios
-          .get(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/invite`, {
+          .get(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/invite/`, {
             withCredentials: true,  // Ensures cookies are sent
           })
           .then((response) => setInvites(response.data.invites))
@@ -299,7 +299,7 @@ const InviteActionForm: React.FC<InviteActionFormProps> = ({ isOpen, onClose, in
             return;
         }
         
-        axios.delete(process.env.REACT_APP_BACKEND_ADDRESS + "/api/org/invite/", {
+        axios.delete(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/invite/`, {
             withCredentials: true,  // Ensures cookies are sent
             data: {
                 email: invite.email
@@ -320,7 +320,7 @@ const InviteActionForm: React.FC<InviteActionFormProps> = ({ isOpen, onClose, in
             console.error("No invite selected for resend.");
             return;
         }
-        axios.post(process.env.REACT_APP_BACKEND_ADDRESS + "/api/org/invite/", {
+        axios.post(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/invite/`, {
             email: invite.email
         }, {
             withCredentials: true
@@ -390,7 +390,7 @@ const CreateInviteForm: React.FC<CreateInviteFormProps> = ({ isOpen, onClose }) 
             setErrorMessage('Please enter a valid email address.');
         } else {
             setErrorMessage('');
-            axios.post(process.env.REACT_APP_BACKEND_ADDRESS + "/api/org/invite/", {
+            axios.post(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/invite/`, {
                 email: email
             }, {
                 withCredentials: true

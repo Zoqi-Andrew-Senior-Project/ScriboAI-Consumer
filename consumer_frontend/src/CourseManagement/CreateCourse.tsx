@@ -94,7 +94,7 @@ function CreateCourse() {
   const handleSubmit = async () => {
       setIsLoading(true);
 
-      const url = `${import.meta.env.VITE_BACKEND_ADDRESS}/api/course/create-outline/`
+      const url = `${import.meta.env.VITE_BACKEND_ADDRESS}/api/course/course/`
       console.log(url)
       const time = promptData.duration === "short" ? "up to one hour" : "between one and two hours"
       const data = {
@@ -102,7 +102,9 @@ function CreateCourse() {
         time: time
       }
       try {
-          const response = await axios.post(url, data);
+          const response = await axios.post(url, data, {
+            withCredentials: true
+        });
           console.log(response);
           alert(`Course created successfully! ${promptData.topic} ${promptData.duration}`);
 

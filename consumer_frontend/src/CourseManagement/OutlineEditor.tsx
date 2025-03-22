@@ -411,10 +411,10 @@ const OutlineEditor = () => {
 
     if (uuid !== null) {      
       const data = {
-        "uuid": uuid
+        "course": uuid
       }
 
-      const url = `${import.meta.env.VITE_BACKEND_ADDRESS}/api/course/initialize-pages/`
+      const url = `${import.meta.env.VITE_BACKEND_ADDRESS}/api/course/pages/`
 
       try {
         const response: InitializePagesResponseData = await axios.post(url, data);
@@ -426,7 +426,7 @@ const OutlineEditor = () => {
       }
 
     }
-    
+
   };
 
   return (
