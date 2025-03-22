@@ -73,7 +73,6 @@ class CourseView(APIView):
             return Response("member doesnt exist...", status=status.HTTP_404_NOT_FOUND)
         
     def get(self, request):
-
         if request.data.get("course"):
             course = Course.objects.get(uuid=request.data["course"])
 
@@ -90,6 +89,17 @@ class CourseView(APIView):
             return Response({"course": courses_serializer.data}, status=status.HTTP_200_OK)
 
         return Response("Invalid Request", status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request):
+        if request.data.get("course"):
+            course = Course.objects.get(uuid=request.data["course"])
+
+            course.delete()
+
+            return Response("Course deleted.", status=status.HTTP_200_OK)
+
+        return Response("Invalid Request", status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(["POST"])
 def initialize_pages(request):
