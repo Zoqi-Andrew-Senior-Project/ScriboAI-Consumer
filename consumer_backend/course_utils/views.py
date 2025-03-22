@@ -73,11 +73,23 @@ class CourseView(APIView):
             return Response("member doesnt exist...", status=status.HTTP_404_NOT_FOUND)
         
     def get(self, request):
-        course = Course.objects.get(uuid=request.data['uuid'])
 
-        course_serializer = CourseWithModulesSerializer(course)
+        if request.data.get("course"):
+            course = Course.objects.get(uuid=request.data["course"])
 
-        return Response({"course": course_serializer.data}, status=status.HTTP_200_OK)
+            course_serializer = CourseWithModulesSerializer(course)
+
+            return Response({"course": course_serializer.data}, status=status.HTTP_200_OK)
+        
+        if request.data.get("organization"):
+            organization = Organization.objects.get(uuid=request.data["organization"])
+            courses = Course.objects.filter(organization=organization)
+
+            courses_serializer = CourseWithModulesSerializer(courses, many=True)
+
+            return Response({"course": courses_serializer.data}, status=status.HTTP_200_OK)
+
+        return Response("Invalid Request", status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(["POST"])
 def initialize_pages(request):
