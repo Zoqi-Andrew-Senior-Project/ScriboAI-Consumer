@@ -26,6 +26,14 @@ class Course(Document):
 
     def __str__(self):
         return self.uuid
+    
+    def toPublish(self):
+        self.status = StatusEnum.PUBLISH.value
+        return self
+    
+    def toDraft(self):
+        self.status = StatusEnum.DRAFT.value
+        return self
 
 
 # 🔹 Module Model

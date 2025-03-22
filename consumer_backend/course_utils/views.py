@@ -109,6 +109,21 @@ class CourseView(APIView):
             return Response("Course deleted.", status=status.HTTP_200_OK)
 
         return Response("Invalid Request", status=status.HTTP_400_BAD_REQUEST)
+    
+    def put(self, request):
+        if request.data.get("action") == "publish":
+            try:
+                course_uuid = request.data.get("course")
+                course: Course = Course.objects.get(uuid=course_uuid)
+
+                course.toPublish().save()
+
+                return Response("Course published successfully.", status=status.HTTP_201_CREATED)
+
+            except Course.DoesNotExist:
+                return Response("Course not found", status=status.HTTP_404_NOT_FOUND)
+
+        return Response("Invalid Request", status=status.HTTP_400_BAD_REQUEST)
 
 class PageView(APIView):
     def post(self, request):
