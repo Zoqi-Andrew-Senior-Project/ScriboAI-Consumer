@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import MDEditor from '@uiw/react-md-editor';
 import { MDXEditor, MDXEditorMethods, UndoRedo, BoldItalicUnderlineToggles, toolbarPlugin, BlockTypeSelect, DiffSourceToggleWrapper } from '@mdxeditor/editor'
 import { headingsPlugin, diffSourcePlugin, listsPlugin } from '@mdxeditor/editor'
+import { useNavigate } from 'react-router-dom';
 
 import '@mdxeditor/editor/style.css'
 import './pageeditor.css'
@@ -54,6 +55,7 @@ const PageEditor = () => {
   const isTyping = useRef(false); // Track typing activity
   const debouncedAction = useWebSocketAction(ws);
   const ref = useRef<MDXEditorMethods>(null); // Adjust the type of ref as needed
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (ws.current) {
@@ -114,6 +116,7 @@ const PageEditor = () => {
       <h1>Hello {metaData?.currentPage}</h1>
 
       <button onClick={debouncedAction.save}>Save</button>
+      <button onClick={()=>navigate(`/complete-course/${docId}`)}>Accept</button>
       <div className='doc-buttons'>
         <button onClick={debouncedAction.prev}>Back</button>
         <p>{metaData?.current_order}/{metaData?.total}</p>

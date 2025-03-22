@@ -24,7 +24,8 @@ interface Outline {
     "objectives": string[];
     "duration": string;
     "summary": string;
-    "modules": Module[]
+    "modules": Module[],
+    "status": string
 }
 
 const CourseTable = () => {
@@ -79,6 +80,7 @@ const CourseTable = () => {
                     <tr>
                         <th>Title</th>
                         <th>Duration</th>
+                        <th>Status</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -87,6 +89,7 @@ const CourseTable = () => {
                         <tr key={course.uuid}>
                             <td>{course.title}</td>
                             <td>{course.duration}</td>
+                            <td>{course.status}</td>
                             <td>
                                 <button onClick={() => onView(course)} className="btn">👁️</button>
                                 <button onClick={() => onEdit(course)} className="btn">🛠️</button>
