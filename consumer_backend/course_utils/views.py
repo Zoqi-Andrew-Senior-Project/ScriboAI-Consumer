@@ -86,9 +86,19 @@ class CourseView(APIView):
 
             courses_serializer = CourseWithModulesSerializer(courses, many=True)
 
-            return Response({"course": courses_serializer.data}, status=status.HTTP_200_OK)
+            return Response({"courses": courses_serializer.data}, status=status.HTTP_200_OK)
+        
+        try:
+            user = request.user
 
-        return Response("Invalid Request", status=status.HTTP_400_BAD_REQUEST)
+            member: Member = Member.objects.get(user_name=user.username)
+            courses = Course.objects.filter(organization=member.organization)
+
+            courses_serializer = CourseWithModulesSerializer(courses, many=True)
+
+            return Response({"courses": courses_serializer.data}, status=status.HTTP_200_OK)
+        except Member.DoesNotExist:
+            return Response("member doesnt exist...", status=status.HTTP_404_NOT_FOUND)
     
     def delete(self, request):
         if request.data.get("course"):
