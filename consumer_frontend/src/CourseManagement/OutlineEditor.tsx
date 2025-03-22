@@ -426,26 +426,7 @@ const OutlineEditor = () => {
       }
 
     }
-
-    // const data = {
-    //   course: promptData.topic,
-    // }
-    // try {
-    //     const response = await axios.post(url, data);
-    //     console.log(response);
-    //     alert(`Course created successfully! ${promptData.topic} ${promptData.duration}`);
-
-    //     navigate("/outline/" + response.data.uuid)
-
-    //     setResponseContent(response.data);
-
-    // } catch (error) {
-    //     console.error("Error creating course:", error);
-    //     alert("There was an error creating the course.");
-    // } finally {
-        
-    //     setIsLoading(false);
-    // }
+    
   };
 
   return (

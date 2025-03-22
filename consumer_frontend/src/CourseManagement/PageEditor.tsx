@@ -2,8 +2,11 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import debounce from "lodash.debounce";
 import { useParams } from "react-router-dom";
 import MDEditor from '@uiw/react-md-editor';
+import { MDXEditor, MDXEditorMethods, UndoRedo, BoldItalicUnderlineToggles, toolbarPlugin, BlockTypeSelect, DiffSourceToggleWrapper } from '@mdxeditor/editor'
+import { headingsPlugin, diffSourcePlugin, listsPlugin } from '@mdxeditor/editor'
+
 import '@mdxeditor/editor/style.css'
-import { MDXEditor, headingsPlugin } from '@mdxeditor/editor'
+import './pageeditor.css'
 
 interface WebSocketAction {
   next: () => void;
@@ -45,13 +48,12 @@ interface MetaData{
 
 const PageEditor = () => {
   const { docId } = useParams();
-  const [content, setContent] = useState<string>("");  // Local state for smooth typing
+  const [content, setContent] = useState<string>("No data.");  // Local state for smooth typing
   const [metaData, setMetaData] = useState<MetaData | null>(null)
   const ws = useRef<WebSocket | null>(null);
   const isTyping = useRef(false); // Track typing activity
   const debouncedAction = useWebSocketAction(ws);
-  const [markdown, setMarkdown] = useState("Nada");
-  const ref = useRef<any>(null); // Adjust the type of ref as needed
+  const ref = useRef<MDXEditorMethods>(null); // Adjust the type of ref as needed
 
   useEffect(() => {
     if (ws.current) {
@@ -66,9 +68,8 @@ const PageEditor = () => {
         const data = JSON.parse(event.data);
         if (!isTyping.current) {
           setContent(data.data.content);
-          console.log(data.meta)
+          ref.current?.setMarkdown(data.data.content);
           setMetaData(data.meta);
-          console.log("META", metaData)
         }
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
@@ -101,30 +102,47 @@ const PageEditor = () => {
   const handleChange = (newValue: string | undefined) => {
     if (newValue !== undefined) {
       setContent(newValue);
+      ref.current?.setMarkdown(newValue);
       isTyping.current = true; // Prevent overwriting while typing
       sendUpdate(newValue);
     }
   };
 
-  const handleMarkdown = (newValue: string) => {
-    const markeddown_value = ref.current?.insertMarkdown(newValue)
-    setMarkdown(markeddown_value);
-    console.log("changed markdown")
-  }
-
   return (
   <div>
     <div data-color-mode="light">
       <h1>Hello {metaData?.currentPage}</h1>
-      <h1>{metaData?.current_order}/{metaData?.total}</h1>
-      <button onClick={debouncedAction.next}>Next</button>
-      <button onClick={debouncedAction.prev}>Back</button>
+
       <button onClick={debouncedAction.save}>Save</button>
-      <MDEditor
+      <div className='doc-buttons'>
+        <button onClick={debouncedAction.prev}>Back</button>
+        <p>{metaData?.current_order}/{metaData?.total}</p>
+        <button onClick={debouncedAction.next}>Next</button>
+      </div>
+      {/* <MDEditor
         value={content}
         onChange={handleChange}
-      />
-      <MDXEditor markdown={markdown} onChange={handleMarkdown} plugins={[headingsPlugin()]} />
+      /> */}
+
+      <div className='editor'>
+        <MDXEditor ref={ref} markdown={content} onChange={handleChange} plugins={[
+          toolbarPlugin({
+            toolbarClassName: 'my-classname',
+            toolbarContents: () => (
+              <>
+                <DiffSourceToggleWrapper>
+                  <UndoRedo />
+                  <BoldItalicUnderlineToggles />
+                  <BlockTypeSelect />
+                </DiffSourceToggleWrapper>
+              </>
+            ),
+          }),
+          headingsPlugin(),
+          diffSourcePlugin(),
+          listsPlugin()
+        ]}/>
+      </div>    
     </div>
   </div>
   );
