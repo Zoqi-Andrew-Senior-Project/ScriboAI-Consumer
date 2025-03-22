@@ -15,6 +15,8 @@ import Settings from './Settings';
 import { useState } from 'react';
 import PageEditor from './CourseManagement/PageEditor';
 import OutlineEditor from './CourseManagement/OutlineEditor';
+import CourseDashboard from './CourseManagement/CourseDashboard';
+import CompleteCourse from './CourseManagement/CompleteCourse';
 
 function Navbar() {
   const [showSettings, setShowSettings] = useState(false);
@@ -102,6 +104,8 @@ function App() {
           <Route path="/create-course" element={<CreateCourse />} />
           <Route path="/document/:docId" element={<PageEditor />} />
           <Route path="/outline/:outId" element={<OutlineEditor />} />
+          <Route path="/course-dashboard" element={<CourseDashboard />} />
+          <Route path="/complete-course/:courseId" element={<CompleteCourse />} />
         </Routes>
         <Footer />
       </div>
