@@ -17,6 +17,7 @@ import PageEditor from './CourseManagement/PageEditor';
 import OutlineEditor from './CourseManagement/OutlineEditor';
 import CourseDashboard from './CourseManagement/CourseDashboard';
 import CompleteCourse from './CourseManagement/CompleteCourse';
+import PageViewer from './CourseManagement/PageViewer';
 
 function Navbar() {
   const [showSettings, setShowSettings] = useState(false);
@@ -106,6 +107,9 @@ function App() {
           <Route path="/outline/:outId" element={<OutlineEditor />} />
           <Route path="/course-dashboard" element={<CourseDashboard />} />
           <Route path="/complete-course/:courseId" element={<CompleteCourse />} />
+
+          {/* Course View */}
+          <Route path="/view/:docId" element={<PageViewer />} />
         </Routes>
         <Footer />
       </div>
