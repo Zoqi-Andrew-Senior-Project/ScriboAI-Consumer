@@ -257,10 +257,12 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
 
 const OutlineEditor = () => {
   const { outId } = useParams();
+  
 
   const [outlineData, setOutlineData] = useState<Outline | null>(null); // Local state for smooth typing
+  const [prevOutlineData, setPreviousOutlineData] = useState<Outline | null>(null); // Local state for smooth typing
 
-  const prevOutlineDataRef = useRef<Outline | null>(null);
+  // const prevOutlineDataRef = useRef<Outline | null>(null);
 
   
   const navigate = useNavigate();
@@ -307,8 +309,11 @@ const OutlineEditor = () => {
       try {
         const data = JSON.parse(event.data);
         const script = data.data.script;
+        console.log("Received WebSocket Data:", script);
         if (!isTyping.current) {
           setOutlineData(script);
+          setPreviousOutlineData(script);
+          console.log("Received A Message")
         }
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
@@ -321,15 +326,67 @@ const OutlineEditor = () => {
     return () => ws.current?.close();
   }, [outId]);
 
+  const detectChanges = ( prev: Outline | null, curr: Outline | null) => {
+    console.log("prev\n", prev)
+    console.log("curr\n", curr)
+    console.log("detecting changes...")
+    if (!prev || !curr) return curr;
+    console.log("passed!")
+
+    let changes: Partial<Outline> = {};
+    
+    if (prev && curr) {
+      (["title", "summary", "duration"] as Array<keyof Pick<Outline, "title" | "summary" | "duration">>).forEach((field) => {
+        if (prev[field] !== curr[field]) {
+          changes[field] = curr[field]; // Now TypeScript understands the expected type
+        }
+      });
+    }
+
+    if (!isEqual(prev.objectives, curr.objectives)) {
+      changes.objectives = curr.objectives;
+    }
+    
+    const updatedModules = curr.modules?.filter((mod, index) =>
+      !prev.modules || !prev.modules[index] || !isEqual(prev.modules[index], mod)
+    );
+  
+    if (updatedModules && updatedModules.length > 0) {
+      changes.modules = updatedModules;
+    }
+
+    return Object.keys(changes).length > 0 ? changes : null;
+  };
+
   // Debounced function to send updates with batching
   const sendUpdate = useCallback(
-    debounce((newOutlineData) => {
-      console.log("WebSocket Update:", {"data": newOutlineData});
-      const data = {
-        "script": newOutlineData,
+    debounce((oldOutlineData, newOutlineData) => {
+      console.log("sending update...")
+      const changes = detectChanges(oldOutlineData, newOutlineData);
+
+      console.log(changes);
+
+      if (!changes) return;
+
+      // if (changes){
+      //   console.log("WebSocket Update:", {"changes": changes});
+      // }
+
+      const data = { changes: changes };
+      const action = "change"
+
+      const message = {
+        action: "change",
+        data: data
       }
+
+      console.log(message)
+
       if (ws.current?.readyState === WebSocket.OPEN) {
-        ws.current.send(JSON.stringify({"data": data}));
+        ws.current.send(JSON.stringify({
+          "action": action,
+          "data": data
+        }));
       }
       isTyping.current = false;
     }, 500), // Delay WebSocket updates by 500ms
@@ -337,13 +394,16 @@ const OutlineEditor = () => {
   );
 
   useEffect(() => {
-    if (!isEqual(outlineData, prevOutlineDataRef.current)) {
-      sendUpdate(outlineData);
-      prevOutlineDataRef.current = outlineData;
+    console.log("outlineData changed:", outlineData);
+    console.log("previous:", prevOutlineData);
+    console.log()
+    if (!isEqual(outlineData, prevOutlineData)) {
+      sendUpdate(prevOutlineData, outlineData);
     }
   }, [outlineData, sendUpdate]);
 
   const handleChange = ( updatedOutline: Outline ) => {
+    console.log("handling change", updatedOutline)
     setOutlineData(updatedOutline);
   }
 
@@ -365,6 +425,7 @@ const OutlineEditor = () => {
   );
 
   const sendSave = () => {
+    console.log(outlineData);
     debouncedSave(outlineData);
   };
 
@@ -492,7 +553,8 @@ const OutlineEditor = () => {
         )}
         <h4>Raw JSON</h4>
         <p>{JSON.stringify(outlineData, null, 2)}</p>
-        {/* <button onClick={console.log(outlineData)}>Hello</button> */}
+        <h4>Raw JSON Previous</h4>
+        <p>{JSON.stringify(prevOutlineData, null, 2)}</p>
       </div>
     </div>
   );
