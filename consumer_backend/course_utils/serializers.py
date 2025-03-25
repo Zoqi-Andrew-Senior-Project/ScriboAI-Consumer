@@ -132,6 +132,16 @@ class CourseWithModulesSerializer(CourseSerializer):
         If a module is not included in the request, it will be deleted.
         """
         modules_data = validated_data.pop('modules', [])
+
+        if "organization" in validated_data:
+            org_id = validated_data["organization"]
+
+            if isinstance(org_id, str):  # Check if it's a string
+                try:
+                    validated_data["organization"] = Organization.objects.get(uuid=org_id)
+                except Organization.DoesNotExist:
+                    raise serializers.ValidationError("Invalid organization reference.")
+
         course = super().update(instance, validated_data)
 
         existing_modules = {module.uuid: module for module in Module.objects.filter(course=course)}

@@ -127,7 +127,6 @@ class DocumentActions():
 
 class OutlineConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-
         self.room_name = self.scope['url_route']['kwargs']['cor_uuid']
         self.room_group_name = f"course_{self.room_name}"
 
@@ -137,14 +136,22 @@ class OutlineConsumer(AsyncWebsocketConsumer):
 
         uuid = self.scope['url_route']['kwargs']['cor_uuid']
 
-        course = Course.objects.get(uuid=uuid)
+        cached_data = redis_client.get(f"course:{uuid}")
+        cached_data = json.loads(cached_data) if cached_data else {}
 
-        serialized = CourseWithModulesSerializer(course)
+        if cached_data:
+            course_data = cached_data
+        else:
+            course = Course.objects.get(uuid=uuid)
+            serialized = CourseWithModulesSerializer(course)
+            course_data = serialized.data
+
+            redis_client.set(f"course:{uuid}", json.dumps(course_data))
 
         message = {
             "status": "good",
             "data": {
-                "script": serialized.data
+                "script": course_data
             }
         }
         
@@ -159,31 +166,53 @@ class OutlineConsumer(AsyncWebsocketConsumer):
 
         {
             "status": "good" | "bad",
-            "action": "update" | "save" | null,
+            "action": "update" | "save" | "change" | null,
             "data": {
-                "script": {},
+                "changes": {},
                 "comments": str | null
             }        
         }
         """
         data = json.loads(text_data)
-
-        content = data["data"]["script"]
+        cached_data: dict = json.loads(redis_client.get(f"course:{self.room_name}"))
         status = "good"
+        content = None
+        
         action = data.get("action", "")
 
-        if action == "update":
+        if action == "change" and data.get("data", {}).get("changes", None):
+            changes = data.get("data", {}).get("changes", None)
+
+            message = {
+                "original": cached_data,
+                "changes": changes
+            }
+            content, status = OutlineActions().change(message)
+
+
+        if action == "update" and data.get("data", {}).get("comments", None):
             """
             Makes a change to in-memory outline
             """
-            content, status = OutlineActions().update(data["data"])
+            messsage = {
+                "script": cached_data,
+                "comments": data.get("data", {}).get("comments", None)
+            }
+            content, status = OutlineActions().update(messsage)
 
         if action == "save":
             """
             Saves the state of in-memory outline to the db
             """
-            content, status = OutlineActions().save(data["data"])
+            message = {
+                "script": cached_data,
+            }
+            content, status = OutlineActions().save(message)
 
+        if content:
+            redis_client.set(f"course:{self.room_name}", json.dumps(content))
+        else:
+            content = cached_data
 
         # Broadcast changes to all users in the room
         await self.channel_layer.group_send(
@@ -212,8 +241,6 @@ class OutlineActions():
         """
         Makes a Call to SCRIBO to update the course outline
         """
-        print("inside update")
-        print(data)
         content = data["script"]
         comments = data.get("comments", "")
 
@@ -250,12 +277,28 @@ class OutlineActions():
             
             updated_course = course_serializer.update(course, content)
             updated_course["status"] = StatusEnum.DRAFT.value
-            print(updated_course)
             updated_course.save()
 
             content = course_serializer.data
 
             return content, "good"
         else:
-            print(course_serializer.errors)
             return content, "bad"
+        
+    def change(self, data):
+        """
+        Makes changes to data.
+        Data:
+        {
+            original: Outline,
+            changes: Partial<Outline>
+        }
+        """
+        original = data.get("original", None)
+        changes = data.get("changes", None)
+
+        for key in original:
+            if key in changes:
+                original[key] = changes[key]
+
+        return original, "good"
