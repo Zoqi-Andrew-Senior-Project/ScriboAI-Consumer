@@ -113,7 +113,8 @@ const PageEditor = () => {
   return (
     <div className="w-full mx-auto px-4 py-6">
       <div data-color-mode="light" className="space-y-6">
-        <h1 className="text-3xl font-semibold text-center">{metaData?.currentPage}</h1>
+        <h1 className="text-3xl font-semibold text-center">Page Editor</h1>
+        <p className="text-center">Edit each page in the course!</p>
 
         <div className="flex space-x-3 items-center justify-between">
           <button
