@@ -74,11 +74,10 @@ class DocumentConsumer(AsyncWebsocketConsumer):
 
             try:
                 module = Module.objects.get(uuid=cached_data.get("currentPage"))
+                module["content"] = cached_data.get("content")
+                module.save()
             except Module.DoesNotExist:
                 print(f'No module matched with uuid {cached_data.get("currentPage")}')
-
-            module["content"] = cached_data.get("content")
-            module.save()
 
         if action == "clear":
             redis_client.delete(f"page:{self.room_name}")
