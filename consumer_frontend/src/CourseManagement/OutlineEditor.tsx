@@ -251,7 +251,7 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
             className="w-full bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
             onClick={onNewPrompt}
           >
-            Restart
+            New
           </button>
         </div>
 
@@ -285,8 +285,6 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
 
 const OutlineEditor = () => {
   const { outId } = useParams();
-  
-
   const [outlineData, setOutlineData] = useState<Outline | null>(null); // Local state for smooth typing
   const [prevOutlineData, setPreviousOutlineData] = useState<Outline | null>(null); // Local state for smooth typing
 
@@ -486,10 +484,7 @@ const OutlineEditor = () => {
 
   const onNewPrompt = () => {
     console.log("new prompt");
-    // Send a message to the WebSocket server to handle the new prompt action
-    // if (ws.current?.readyState === WebSocket.OPEN) {
-    //   ws.current.send(JSON.stringify({ "action": "newPrompt" }));
-    // }
+    navigate("/create-course")
   };
 
   const onRegenerate = (comments: string) => {
@@ -634,14 +629,19 @@ const OutlineEditor = () => {
             )}
           </div>
 
-          <div className="">
-            <button className="">Add Module</button>
+          <div className="mb-4">
+            {/* Add Module Button */}
+            <button 
+              className="flex items-center justify-center w-full py-3 px-6 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition duration-200"
+            >
+              <span className="mr-2">+</span> {/* Plus sign */}
+            </button>
           </div>
 
-          <div className="">
+          {/* <div className="">
             <h4>View Raw JSON</h4>
             <pre className="bg-gray-100 p-4 rounded-md overflow-auto">{JSON.stringify(outlineData, null, 2)}</pre>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
