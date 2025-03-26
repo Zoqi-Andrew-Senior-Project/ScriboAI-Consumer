@@ -388,16 +388,30 @@ const InviteActionForm: React.FC<InviteActionFormProps> = ({ isOpen, onClose, in
 
     if (!isOpen || !invite) return null;
     return (
-        <div className='overlay' onClick={handleClickOutside}>
-            <div className='form-container' ref={formRef}>
-                <button className="close-button" onClick={onClose}>&times;</button>
-                <h1>Invite Actions</h1>
-                <p>Invite to: {invite.email}</p>
-                <div>
-                    <button className='btn btn-tertiary' onClick={handleResend}> 🔁 Resend </button>
-                </div>
-                <div>
-                    <button className='btn btn-tertiary' onClick={handleDelete}> 🗑️ Delete </button>
+        <div className="fixed inset-0  flex items-center justify-center z-50" onClick={handleClickOutside}>
+            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md" ref={formRef}>
+                <button
+                    className="absolute top-4 right-4 text-gray-600 text-2xl"
+                    onClick={onClose}
+                >
+                    &times;
+                </button>
+                <h1 className="text-2xl font-semibold mb-4 text-center">Invite Actions</h1>
+                <p className="text-center text-gray-700 mb-6">Invite to: {invite.email}</p>
+
+                <div className="space-y-4">
+                    <button
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        onClick={handleResend}
+                    >
+                        🔁 Resend
+                    </button>
+                    <button
+                        className="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                        onClick={handleDelete}
+                    >
+                        🗑️ Delete
+                    </button>
                 </div>
             </div>
         </div>
@@ -460,25 +474,39 @@ const CreateInviteForm: React.FC<CreateInviteFormProps> = ({ isOpen, onClose }) 
 
     if (!isOpen) return null;
     return (
-        <div className='overlay' onClick={handleClickOutside}>
-            <div className='form-container' ref={formRef}>
-                <button className="close-button" onClick={onClose}>&times;</button>
-                <h1>Invite Employee</h1>
-                <p>Enter the email of the employee you would like to invite.</p>
-                <form id="emailForm" onSubmit={handleSubmit}>
-                    <label htmlFor="email">Email:</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={email}
-                        onChange={handleEmailChange}
-                        required
-                        pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
-                        title="Please enter a valid email address."
-                    />
-                    <button className='btn btn-secondary' type="submit">Submit</button>
-                    <div id="error" className="error">{errorMessage}</div>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={handleClickOutside}>
+            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md" ref={formRef}>
+                <button className="absolute top-4 right-4 text-gray-600 text-2xl" onClick={onClose}>
+                    &times;
+                </button>
+                <h1 className="text-2xl font-semibold mb-4 text-center">Invite Employee</h1>
+                <p className="text-center text-gray-700 mb-6">Enter the email of the employee you would like to invite.</p>
+                <form id="emailForm" onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email:</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value={email}
+                            onChange={handleEmailChange}
+                            required
+                            pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$"
+                            title="Please enter a valid email address."
+                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+                    <button
+                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        type="submit"
+                    >
+                        Submit
+                    </button>
+                    {errorMessage && (
+                        <div id="error" className="text-sm text-red-600 mt-2">
+                            {errorMessage}
+                        </div>
+                    )}
                 </form>
             </div>
         </div>

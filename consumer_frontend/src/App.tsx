@@ -16,6 +16,8 @@ import OutlineEditor from './CourseManagement/OutlineEditor';
 import CourseDashboard from './CourseManagement/CourseDashboard';
 import CompleteCourse from './CourseManagement/CompleteCourse';
 import PageViewer from './CourseManagement/PageViewer';
+import AcceptInvite from './EmployeePages/AcceptInvite';
+import EmployeeCourseDashboard from './EmployeePages/EmployeeCourseDashboard';
 
 function Navbar() {
   const [showSettings, setShowSettings] = useState(false);
@@ -102,6 +104,7 @@ function App() {
           <Route path="/" element={<Welcome />} /> 
           <Route path="/login" element={<Login />} />
           <Route path="/create-organization" element={<CreateOrganization />} />
+          <Route path="/accept-invite/:token" element={<AcceptInvite />} />
 
           {/* Home Pahes */}
           <Route path="/home" element={<HomeRedirect />} />
@@ -120,6 +123,8 @@ function App() {
 
           {/* Course View */}
           <Route path="/view/:docId" element={<PageViewer />} />
+
+          <Route path="/employee/course-dashboard" element={<EmployeeCourseDashboard />}></Route>
         </Routes>
         <Footer />
       </div>
