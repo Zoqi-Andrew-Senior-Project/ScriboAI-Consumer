@@ -93,6 +93,6 @@ Effective customer service is essential for any business aiming to thrive in tod
 
         data = response.json()
 
-        course_outline = data.get("response").get("output_validator").get("valid_replies")
+        course_outline = data.get("response",  {}).get("output_validator", {}).get("valid_replies", [])
 
         return json.loads(course_outline)
