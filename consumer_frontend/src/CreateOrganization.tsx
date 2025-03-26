@@ -63,7 +63,26 @@ const OwnerPrompt: React.FC<PromptProps> = ({ formData, handleChange }) => {
     )
 }
 
-function CreateOrganization() {
+interface Member {
+    first_name: string;
+    last_name: string;
+    email: string;
+    organization: string;
+    role: string;
+    status: string;
+    user_name: string;
+}
+
+interface Organization {
+    name: string;
+}
+
+interface ResponseData {
+    organization: Organization;
+    member: Member;
+}
+
+export default function CreateOrganization() {
     const [formData, setFormData] = useState<FormData>({
         first_name: '',
         last_name: '',
@@ -72,7 +91,9 @@ function CreateOrganization() {
         name: ''
     });
 
-    const [message, setMessage] = useState('');
+    const [organizationName, setOrganizationName] = useState<string>("");
+    const [userName, setUserName] = useState<string>("");
+    const [error, setError] = useState<string>("");
     const [status, setStatus] = useState<string>("");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -80,37 +101,34 @@ function CreateOrganization() {
         setFormData((prevData) => ({ ...prevData, [name]: value }));
     };
 
-    const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
         console.log(formData);
 
-        axios.post(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/organization/`, formData)
-            .then(response => {
-                setMessage(response.data.message);
-                setStatus('success')
-                setFormData({
-                    first_name: '',
-                    last_name: '',
-                    email: '',
-                    password: '',
-                    name: ''
-                });
-            })
-            .then(data => {
-                console.log(data);
-            })
-            .catch(error => {
-                try {
-                    setMessage('Error: ' + error.response.data.message + "\n" + JSON.stringify(error.response.data.data));
-                    setStatus('error')
-                } catch (error) {
-                    setStatus('error')
-                }
+        try {
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/organization/`, formData);
+            console.log(response.data.data);
+            setUserName(response.data.data.member.user_name);
+            setOrganizationName(response.data.data.organization.name);
+            setStatus('success');
+            setFormData({
+                first_name: '',
+                last_name: '',
+                email: '',
+                password: '',
+                name: ''
             });
-    }
+        } catch (error: any) {
+            const errorMessage = error.response?.data?.message || 'An unknown error occurred';
+            const errorDetails = error.response?.data?.data ? JSON.stringify(error.response.data.data) : '';
+            setError(`${errorMessage}\n${errorDetails}`);
+            console.log(`${errorMessage}\n${errorDetails}`)
+            setStatus('error');
+        }
+    };
 
     return (
         <div className="flex items-center justify-center min-h-screen">
-            <div className='bg-tertiary p-8 rounded-lg shadow-md w-full max-w-md'>
+            <div className="bg-tertiary p-8 rounded-lg shadow-md w-full max-w-md">
                 <h2 className="text-3xl font-bold mb-6 text-center">Create an Organization!</h2>
                 {status === '' && (
                     <div>
@@ -125,24 +143,26 @@ function CreateOrganization() {
                         </button>
                     </div>
                 )}
+
                 {status === 'success' && (
                     <div id="success-message" className="mt-6 space-y-3 text-green-950 w-full max-w-lg text-center">
-                        <p>{message}</p>
-                        <Link to="/login" 
+                        <p>{organizationName} created successfully!</p>
+                        <p>You can now sign in using the username {userName}</p>
+                        <Link
+                            to="/login"
                             className="block w-3/4 mx-auto bg-button-primary-bg text-button-primary-txt py-3 rounded-lg text-lg font-semibold hover:bg-button-hover"
                         >
                             Log in now!
                         </Link>
                     </div>
                 )}
+
                 {status === 'error' && (
                     <div id="error-message" className="mt-4 text-red-600">
-                        <p>{message}</p>
+                        <p>{error}</p>
                     </div>
                 )}
             </div>
         </div>
-      );
+    );
 }
-    
-export default CreateOrganization;

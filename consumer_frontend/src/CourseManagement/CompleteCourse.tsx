@@ -89,30 +89,31 @@ const CourseDashboard = () => {
 
     return (        
         <div className="flex justify-center min-h-screen">
-            <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-                <h1 className="text-3xl font-semibold text-center">Complete Course</h1>
-
-                {/* Buttons with proper styling and spacing */}
-                <div className="flex justify-between items-center space-x-4">
-                    <button
-                    onClick={onPublish}
-                    className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 transition-all"
-                    >
-                    Publish
-                    </button>
-
-                    <button
-                    onClick={onDraft}
-                    className="bg-gray-500 text-white px-6 py-3 rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 transition-all"
-                    >
-                    Save as a Draft
-                    </button>
-                </div>
+            <div className="max-w-3xl px-4 py-6 space-y-6 bg-tertiary">
+                <h1 className="text-3xl font-semibold text-center text-gray-900">Complete Course</h1>
 
                 {/* Course Information */}
                 <div className="space-y-2 text-center">
-                    <p className="text-lg font-medium">{courseId}</p>
-                    <p className="text-xl font-semibold text-gray-800">{course.title}</p>
+                <p className="text-xl font-semibold text-gray-800">{course.title}</p>
+                <p className="text-xl font-semibold text-gray-800">Duration: {course.duration}</p>
+                <p className="text-xl font-semibold text-gray-800">Summary: {course.summary}</p>
+                </div>
+
+                {/* Buttons with proper styling and spacing */}
+                <div className="flex justify-between items-center space-x-4">
+                <button
+                    onClick={onPublish}
+                    className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+                >
+                    Publish
+                </button>
+
+                <button
+                    onClick={onDraft}
+                    className="bg-gray-500 text-white px-6 py-3 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all"
+                >
+                    Save as a Draft
+                </button>
                 </div>
             </div>
         </div>
