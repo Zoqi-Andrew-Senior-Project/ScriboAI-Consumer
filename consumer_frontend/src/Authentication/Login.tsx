@@ -58,47 +58,52 @@ function Login() {
     }, [user, navigate]);
 
     return (
-        <div className="container-fluid main-content d-flex align-items-center">
-            <div className="row w-100">
+        <div className="flex justify-center min-h-screen">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl p-4">
                 {/* Left Column: Logo and Welcome Message */}
-                <div className="col-lg-6 d-flex flex-column align-items-center justify-content-center text-center mb-4">
-                    <div className="logo-placeholder mb-3"></div>
-                    <h1>Welcome to Scribo!</h1>
-                    <p>Your training solutions are just a few clicks away.</p>
+                <div className="flex flex-col justify-center items-center p-6">
+                    <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden">
+                        <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover" />
+                    </div>
+                    <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome to Scribo!</h1>
+                    <p className="text-lg text-gray-600">Your training solutions are just a few clicks away.</p>
                 </div>
 
                 {/* Right Column: Login Form */}
-                <div className="col-lg-6 d-flex flex-column align-items-center justify-content-center">
-                    <div className="form-container">
-                        <form onSubmit={handleLogin} className="w-100">
-                            <div className="mb-3">
-                                <label>Username</label>
+                <div className="flex flex-col justify-center items-center p-6">
+                    <div className='bg-tertiary p-8 rounded-lg shadow-md w-full max-w-md'>
+                        <form onSubmit={handleLogin} className="space-y-4">
+                            <div className="space-y-2">
+                                <label className="block text-gray-700">Username</label>
                                 <input
                                     type="text"
                                     name="username"
                                     value={loginData.username}
                                     onChange={handleChange}
-                                    className="form-control"
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-white text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-primary"
                                     required
                                 />
                             </div>
-                            <div className="mb-3">
-                                <label>Password</label>
+                            <div className="space-y-2">
+                                <label className="block text-gray-700">Password</label>
                                 <input
                                     type="password"
                                     name="password"
                                     value={loginData.password}
                                     onChange={handleChange}
-                                    className="form-control"
+                                    className="shadow appearance-none border rounded w-full py-2 px-3 bg-white text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-primary"
                                     required
                                 />
                             </div>
-                            <button type="submit" className="btn btn-primary w-100">
+                            <button
+                                type="submit"
+                                className="bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+                            >
                                 Log In
                             </button>
                         </form>
-                        {message && <p className="mt-3 text-success">{message}</p>}
-                        {error && <p className="mt-3 text-danger">{error}</p>}
+                        {message && <p className="mt-4 text-green-600">{message}</p>}
+                        {error && <p className="mt-4 text-red-600">{error}</p>}
                     </div>
                 </div>
             </div>

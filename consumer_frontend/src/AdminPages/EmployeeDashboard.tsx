@@ -39,35 +39,37 @@ const MemberTable = () => {
 
     return (
         <div>
-            <h2>Member List</h2>
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th>Username</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {members.map((member) => (
-                        <tr key={member.user_name}>
-                            <td>{member.user_name}</td>
-                            <td>{member.first_name} {member.last_name}</td>
-                            <td>{member.email}</td>
-                            <td>{member.role}</td>
-                            <td>{member.status}</td>
-                            <td>
-                                <button onClick={() => handleShowForm(member)} className="btn btn-secondary">
-                                    🛠️
-                                </button>
-                            </td>
+            <h2 className="text-2xl font-semibold mb-4">Member List</h2>
+            <div className="overflow-x-auto bg-white rounded-lg shadow-lg">
+                <table className="table-auto w-full text-sm text-left">
+                    <thead className="bg-gray-100">
+                        <tr>
+                            <th className="px-4 py-2">Username</th>
+                            <th className="px-4 py-2">Name</th>
+                            <th className="px-4 py-2">Email</th>
+                            <th className="px-4 py-2">Role</th>
+                            <th className="px-4 py-2">Status</th>
+                            <th className="px-4 py-2">Actions</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {members.map((member) => (
+                            <tr key={member.user_name} className="border-t hover:bg-gray-50">
+                                <td className="px-4 py-2">{member.user_name}</td>
+                                <td className="px-4 py-2">{member.first_name} {member.last_name}</td>
+                                <td className="px-4 py-2">{member.email}</td>
+                                <td className="px-4 py-2">{member.role}</td>
+                                <td className="px-4 py-2">{member.status}</td>
+                                <td className="px-4 py-2">
+                                    <button onClick={() => handleShowForm(member)} className="btn btn-secondary">
+                                        🛠️
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
             <MemberActionForm isOpen={isMemberActionFormOpen} onClose={handleCloseForm} member={selectedMember}/>
         </div>
     )
@@ -166,38 +168,74 @@ const MemberActionForm: React.FC<MemberActionFormProps> = ({isOpen, onClose, mem
     if (!isOpen || !member) return null;
 
     return (
-        <div className='overlay' onClick={handleClickOutside}>
-            <div className='form-container' ref={formRef}>
-                <button className="close-button" onClick={handleClose}>&times;</button>
-                <h1>Member Actions</h1>
-                <p>{member.user_name}</p>
-                <div>
-                    <button className='btn btn-tertiary' onClick={openRoleForm}> 🔁 Change Role </button>
+        <div 
+            className={`fixed inset-0 flex justify-center items-center z-50 ${isOpen ? 'block' : 'hidden'}`}
+            onClick={handleClickOutside}
+        >
+            <div
+                className='bg-white rounded-lg p-6 w-full max-w-md shadow-lg relative'
+                ref={formRef}
+            >
+                <button
+                    className="absolute top-2 right-2 text-xl font-bold text-gray-600 hover:text-gray-900"
+                    onClick={onClose}
+                >
+                    &times;
+                </button>
+
+                <h1 className="text-2xl font-semibold mb-4">Member Actions</h1>
+                <p className="mb-4">User: {member.user_name}</p>
+                <div className="mb-4">
+                    <button
+                        className="w-full py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
+                        onClick={openRoleForm}
+                    >
+                        🔁 Change Role
+                    </button>
                 </div>
-                <div>
-                    <button className='btn btn-tertiary' onClick={openDeleteForm}> 🗑️ Remove </button>
+                <div className="mb-4">
+                    <button
+                        className="w-full py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200"
+                        onClick={openDeleteForm}
+                    >
+                        🗑️ Remove
+                    </button>
                 </div>
                 {isRoleFormOpen && (
-                    <div className='form-container'>
-                        <h2>Change Role</h2>
+                    <div className="mt-4">
+                        <h2 className="text-xl font-semibold mb-4">Change Role</h2>
                         {(member.role !== 'AD'  && member.role !== 'OW' && user?.role === 'OW') && (
-                            <button className='btn btn-tertiary' onClick={() => handleRoleChange(UserRole.ADMIN)}>TO ADMIN</button>
+                            <button
+                                className="w-full py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-200 mb-2"
+                                onClick={() => handleRoleChange(UserRole.ADMIN)}
+                            >
+                                TO ADMIN
+                            </button>
                         )}
                         {(member.role !== 'EM' && member.role !== 'OW' && user?.role === 'OW') && (
-                            <button className='btn btn-tertiary' onClick={() => handleRoleChange(UserRole.EMPLOYEE)}>TO EMPLOYEE</button>
-                        )}
+                            <button
+                                className="w-full py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-200 mb-2"
+                                onClick={() => handleRoleChange(UserRole.EMPLOYEE)}
+                            >
+                                TO EMPLOYEE
+                            </button>                        )}
                         {member.role === 'OW' && (
-                            <p>No Actions Available.</p>
+                            <p className="text-gray-500">No Actions Available.</p>
                         )}
-                        <button className='btn btn-tertiary' onClick={closeRoleForm}>Cancel</button>
+                        <button
+                            className="w-full py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200 mt-4"
+                            onClick={closeRoleForm}
+                        >
+                            Cancel
+                        </button>
                     </div>
                 )}
                 {isDeleteFormOpen && (
-                    <div className='form-container'>
+                    <div className=''>
                         <h2>Remove Member</h2>
                         <p>Are you sure you want to remove {member.user_name} from the organization?</p>
-                        <button className='btn btn-tertiary' onClick={closeDeleteForm}>Cancel</button>
-                        <button className='btn btn-tertiary' onClick={handleDelete}>Remove</button>
+                        <button className='' onClick={closeDeleteForm}>Cancel</button>
+                        <button className='' onClick={handleDelete}>Remove</button>
                     </div>
                 )}
             </div>
@@ -247,31 +285,44 @@ const InvitationsTable = () => {
     
 
     return (
-        <div>
-            <h2>Invite List</h2>
-            <p className="text-muted"> Invite more employees to your organization.<button className="btn btn-secondary" onClick={handleShowCreateForm}>+</button></p> 
-            <table className="table">
-                <thead>
-                    <tr>
-                        <th>Email</th>
-                        <th>Sent At</th>
-                        <th>Actions</th>
+        <div className="p-6 bg-white rounded-lg shadow-md">
+            <p className="text-lg font-semibold mb-4">
+                Invite more employees to your organization.
+                <button
+                    className="ml-2 py-1 px-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition duration-200"
+                    onClick={handleShowCreateForm}
+                >
+                    +
+                </button>
+            </p>
+
+            <div className="overflow-auto max-h-80">
+                <table className="min-w-full table-auto">
+                    <thead>
+                        <tr className="bg-gray-100">
+                        <th className="py-2 px-4 text-left">Email</th>
+                        <th className="py-2 px-4 text-left">Sent At</th>
+                        <th className="py-2 px-4 text-left">Actions</th>
                     </tr>
-                </thead>
-                <tbody>
-                    {invites.map((invite) => (
-                        <tr key={invite.email}>
-                            <td>{invite.email}</td>
-                            <td>{invite.created_at}</td>
-                            <td>
-                                <button onClick={() => handleShowForm(invite)} className="btn btn-secondary">
-                                    🛠️
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {invites.map((invite) => (
+                            <tr key={invite.email} className="border-t">
+                                <td className="py-2 px-4">{invite.email}</td>
+                                <td className="py-2 px-4">{invite.created_at}</td>
+                                <td className="py-2 px-4">
+                                    <button
+                                        onClick={() => handleShowForm(invite)}
+                                        className="text-yellow-600 hover:text-yellow-800"
+                                    >
+                                        🛠️
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
             <InviteActionForm isOpen={isInviteActionFormOpen} onClose={handleCloseForm} invite={selectedInvite} />
             <CreateInviteForm isOpen={isCreateInviteFormOpen} onClose={handleCloseCreateForm} />
         </div>
@@ -436,6 +487,7 @@ const CreateInviteForm: React.FC<CreateInviteFormProps> = ({ isOpen, onClose }) 
 
 const EmployeeDashboard = () => {
     const { user, loading } = useAuth();
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
 
     if (loading) return <div>Loading...</div>;
 
@@ -443,19 +495,47 @@ const EmployeeDashboard = () => {
 
     if (user.role !== 'OW' && user.role !== 'AD') return <div>Permission denied.</div>;
 
+    const toggleInviteModal = () => {
+        setIsInviteModalOpen(!isInviteModalOpen);
+    }
+
     return (        
-        <div className="container-fluid main-content">
-            <h1>Employee Dashboard</h1>
-            <div className='d-flex justify-content-between align-items-center mb-3'>
+        <div className="justify-center min-h-screen text-center">
+            <h1 className="text-3xl font-semibold mb-6">Employee Dashboard</h1>
+            <button 
+                    onClick={toggleInviteModal} 
+                    className="mb-6 py-2 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
+                >
+                    Manage Invitations
+                </button>
+
+            <div className= "p-6">
+                <MemberTable />
             </div>
-            <div className='row'>
-                <div className="col">
-                    <MemberTable />
-                </div>
-                <div className='col'>
-                    <InvitationsTable />
-                </div>
-            </div>
+            
+            {/* Modal for Invitations Table */}
+            {isInviteModalOpen && (
+                    <div
+                        className="fixed inset-0 flex justify-center items-center z-50"
+                        onClick={toggleInviteModal} // Clicking outside the modal closes it
+                    >
+                        <div
+                            className="bg-white rounded-lg shadow-lg p-6 w-3/4 md:w-2/3 xl:w-1/2"
+                            onClick={(e) => e.stopPropagation()} // Prevent the modal from closing when clicking inside
+                        >
+                            <div className="flex justify-between items-center mb-4">
+                                <h2 className="text-2xl font-semibold">Invite List</h2>
+                                <button
+                                    onClick={toggleInviteModal}
+                                    className="text-lg font-bold text-gray-600"
+                                >
+                                    &times;
+                                </button>
+                            </div>
+                            <InvitationsTable />
+                        </div>
+                    </div>
+                )}
         </div>
     );
   }

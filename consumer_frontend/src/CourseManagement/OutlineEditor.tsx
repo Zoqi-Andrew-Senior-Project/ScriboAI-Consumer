@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import debounce from "lodash.debounce";
 import { useParams } from "react-router-dom";
-import './courseoutline.css'
 import isEqual from "lodash/isEqual";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
@@ -66,7 +65,7 @@ const EditableLine: React.FC<EditableLineProps> = ({ text, onSave, type = "text"
     };
 
     return (
-        <div className="editable-line" onDoubleClick={handleDoubleClick}>
+        <div className="cursor-pointer" onDoubleClick={handleDoubleClick}>
           {isEditing ? (
                   type === "text" ? (
                       <input
@@ -76,6 +75,7 @@ const EditableLine: React.FC<EditableLineProps> = ({ text, onSave, type = "text"
                           onBlur={handleBlur}
                           onKeyDown={handleKeyDown}
                           autoFocus
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                       />
                   ) : (
                       <textarea
@@ -84,10 +84,12 @@ const EditableLine: React.FC<EditableLineProps> = ({ text, onSave, type = "text"
                           onBlur={handleBlur}
                           onKeyDown={handleKeyDown}
                           autoFocus
+                          rows={4}
+                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                       />
                   )
               ) : (
-                  <span>{newText || "No data available."}</span>
+                  <span className="text-gray-700">{newText || "No data available."}</span>
               )}
         </div>
     );
@@ -103,35 +105,50 @@ const Module = ({ module, updateModule }: { module: Module; updateModule: (updat
     }
 
     return (
-        <div className="module">
-            <h4>Title:
-                <EditableLine 
-                    text={module.name} 
-                    onSave={(newName) =>
-                    updateModule({ ...module, name: newName })
-                    }
-                />
-            </h4>
-            <h4>Duration: {module.duration}</h4>
-            <ul>
-                <h5>Subtopics:</h5>
-                {module.subtopics.map((subtopic, index) => (
-                    <li key={index}>
-                        <EditableLine 
-                            text={subtopic} 
-                            onSave={(newText) =>
-                                handleSubtopicChange(index, newText)
-                            }
-                        />
-                    </li>
-                ))}
+        <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h4 className="text-lg font-semibold">Module</h4>
+            <button className="text-red-500 hover:text-red-700 text-xl">X</button>
+          </div>
+
+          
+          <div className="mb-4">
+            <h5 className="text-base font-medium">Title:</h5>
+            <EditableLine 
+              text={module.name} 
+              onSave={(newName) =>
+              updateModule({ ...module, name: newName })
+              }
+            />
+          </div>
+
+          <div className="mb-4">
+            <h5 className="text-base font-medium">Duration:</h5>
+            <p className="text-sm text-gray-700">{module.duration}</p>
+          </div>
+
+          <div className="mb-4">
+            <h5 className="text-base font-medium">Subtopics:</h5>
+            <ul className="list-disc pl-5">
+              {module.subtopics.map((subtopic, index) => (
+                <li key={index} className="mb-2">
+                  <EditableLine 
+                    text={subtopic} 
+                    onSave={(newText) => handleSubtopicChange(index, newText)}
+                  />
+                </li>
+              ))}
             </ul>
-            <ul>
-                <h5>Features:</h5>
-                {module.features.map((feature, index) => (
-                    <Feature key={index} feature={feature} />
-                ))}
+          </div>
+
+          <div className="mb-4">
+            <h5 className="text-base font-medium">Features:</h5>
+            <ul className="list-disc pl-5">
+              {module.features.map((feature, index) => (
+                <Feature key={index} feature={feature} />
+              ))}
             </ul>
+          </div>
         </div>
     )
 }
@@ -159,31 +176,55 @@ const RegenerateDialog: React.FC<RegenerateDialogProps> = ({ setRegenerateDialog
   }
 
   return (
-    <div className="course-outline" id="outline menu">
-        <div className='outline-menu'>
-            <p>Enter notes for the model to follow as it regenerates the outline!</p>
-            <textarea 
-                value={notes} 
-                onChange={handleChange}
-            ></textarea>
-            <div className='menu-buttons'>
-                <div className='button-wrapper'>
-                    <button className='btn-primary btn-group' onClick={onCancel}>Cancel</button>
-                </div>
-                <div className='button-wrapper'>
-                    <button className='btn-primary btn-group' onClick={onRegenerateAction}>Submit</button>
-                </div>
-            </div>
-            {/* {isLoading && (
-                <div className="spinner-container">
-                <div className="spinner-border" role="status">
-                    <span className="visually-hidden">Loading...</span>
-                </div>
-                <p>Loading...</p>
-                </div>
-            )} */}
+    <div className="fixed inset-0 flex items-center justify-center">
+      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h5 className="text-2xl font-semibold">Regenerate Course Outline</h5>
+          <button
+            type="button"
+            className="text-gray-600 hover:text-gray-900"
+            onClick={onCancel}
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
         </div>
-    </div>
+        <p className="mb-4 text-gray-600">Enter notes for the model to follow as it regenerates the outline!</p>
+        <textarea
+          className="w-full p-3 border border-gray-300 rounded-md mb-4"
+          value={notes}
+          onChange={handleChange}
+          rows={4}
+          placeholder="Enter your notes here"
+        ></textarea>
+        <div className="flex justify-end space-x-4">
+          <button
+            className="bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-md hover:bg-gray-400"
+            onClick={onCancel}
+          >
+            Cancel
+          </button>
+          <button
+            className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600"
+            onClick={onRegenerateAction}
+          >
+            Submit
+          </button>
+        </div>
+      </div>
+    </div>  
   )
 }
 
@@ -194,64 +235,51 @@ interface OutlineEditorMenuProps {
 }
 
 const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onRegenerate, onAccept }) => {
-  const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [regenerateDialogPressed, setRegenerateDialogPressed] = useState<boolean>(false);
-  
-  const handleMouseEnter = (buttonName: string) => {
-    setHoveredButton(buttonName);
-  };
-
-  const handleMouseLeave = () => {
-    setHoveredButton(null);
-  };
 
   const onRegenerateClick = () => {
     setRegenerateDialogPressed(true);
   }
+
   return (
-    <div className="course-outline" id="outline menu">
-      <div className="outline-menu">
-        <h2>Course Outline Editor</h2>
-          <div className="menu-buttons">
-            <div
-                className="button-wrapper"
-                onMouseEnter={() => handleMouseEnter('newPrompt')}
-                onMouseLeave={handleMouseLeave}
-            >
-              <button className="btn-primary btn-group" onClick={onNewPrompt}>Restart</button>
-              {hoveredButton === 'newPrompt' && (
-              <span className="tooltip">Reset the course and start fresh.</span>
-              )}
-            </div>
-            <div
-                className="button-wrapper"
-                onMouseEnter={() => handleMouseEnter('regenerate')}
-                onMouseLeave={handleMouseLeave}
-            >
-              <button className="btn-primary btn-group" onClick={onRegenerateClick}>Regenerate</button>
-              {hoveredButton === 'regenerate' && (
-              <span className="tooltip">Send the current course outline and notes to prompt for an entire new outline.</span>
-              )}
-            </div>
-            <div
-                className="button-wrapper"
-                onMouseEnter={() => handleMouseEnter('accept')}
-                onMouseLeave={handleMouseLeave}
-            >
-              <button className="btn-primary btn-group" onClick={onAccept}>Accept</button>
-              {hoveredButton === 'accept' && (
-              <span className="tooltip">Accept the current course outline and move onto script generation.</span>
-              )}
-            </div>
-          </div>
+    <div className="p-6 rounded-lg shadow-lg">
+      <h2 className="text-3xl font-bold mb-6 text-center">Course Outline Editor</h2>
+
+      <div className="space-y-4 w-full max-w-xs">
+        <div>
+          <button
+            className="w-full bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            onClick={onNewPrompt}
+          >
+            Restart
+          </button>
         </div>
-        {regenerateDialogPressed && (
-                <RegenerateDialog 
-                  setRegenerateDialogPressed={setRegenerateDialogPressed}
-                  onRegenerate={onRegenerate}
-                />
-            )}
-    </div>
+
+        <div>
+          <button
+            className="w-full bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            onClick={onRegenerateClick}
+          >
+            Regenerate
+          </button>
+        </div>
+
+        <div>
+          <button
+            className="w-full bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            onClick={onAccept}
+          >
+            Accept
+          </button>
+        </div>
+      </div>
+      {regenerateDialogPressed && (
+              <RegenerateDialog 
+                setRegenerateDialogPressed={setRegenerateDialogPressed}
+                onRegenerate={onRegenerate}
+              />
+          )}
+  </div>
   )
 }
 
@@ -522,70 +550,99 @@ const OutlineEditor = () => {
   };
 
   return (
-    <div>
-      <OutlineEditorMenu onNewPrompt={onNewPrompt} onRegenerate={onRegenerate} onAccept={onAccept} />
-      <div className="course-outline" id="course outline">
-        <button onClick={sendSave}>SAVE</button>
-        <h1>Title:
-          <EditableLine 
-            text={outlineData?.title ?? "No data."} 
-            onSave={(newTitle) => {
-              setOutlineData((prev) => prev ? { ...prev, title: newTitle } : prev);
-            }}
-          />
-        </h1>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl p-4">
+        <div className="flex items-center justify-center md:col-span-1">
+          <OutlineEditorMenu onNewPrompt={onNewPrompt} onRegenerate={onRegenerate} onAccept={onAccept} />
+        </div>
 
-        <h4>Duration:</h4>
-        <p>{outlineData?.duration || "No duration specified"}</p>
+        <div className="bg-tertiary p-8 rounded-lg shadow-md w-full md:col-span-2 h-screen overflow-y-auto">
+          
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-xl font-semibold text-gray-700">Course Outline</h1>
+            <button 
+              onClick={sendSave} 
+              className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              SAVE
+            </button>
+          </div>
 
-        <h3>Summary:</h3>
-        <EditableLine 
-            text={outlineData?.summary ?? "No data."} 
-            onSave={(newSummary) => {
-              setOutlineData((prev) => prev ? { ...prev, summary: newSummary } : prev);
-            }} 
-            type="textbox"
-        />
+          <div className="mb-4">
+            <h1 className="block text-gray-700 text-lg font-bold mb-2">Title:</h1>
+            <EditableLine 
+              text={outlineData?.title ?? "No data."} 
+              onSave={(newTitle) => {
+                setOutlineData((prev) => prev ? { ...prev, title: newTitle } : prev);
+              }}
+            />
+          </div>
+          
+          <div className="mb-4">
+            <h4 className="block text-gray-700 text-lg font-bold mb-2">Duration:</h4>
+            <p className="">{outlineData?.duration || "No duration specified"}</p>
+          </div>
 
-        <h3>Objectives:</h3>
-        <ul>
-            {outlineData?.objectives && outlineData.objectives.length  > 0 ? (
-              outlineData.objectives.map((objective, index) => (
-                <li key={index}>
-                  <EditableLine 
-                          text={objective}
-                          onSave={(newObjective) => {
-                            setOutlineData((prev) => {
-                              if (!prev) return prev; // Prevents null errors
-                              const updatedObjectives = [...prev.objectives];
-                              updatedObjectives[index] = newObjective;
-                              return { ...prev, objectives: updatedObjectives };
-                            });
-                          }}
-                      />
-                </li>
+          <div className="mb-4">
+            <h3 className="block text-gray-700 text-lg font-bold mb-2">Summary:</h3>
+            <EditableLine 
+                text={outlineData?.summary ?? "No data."} 
+                onSave={(newSummary) => {
+                  setOutlineData((prev) => prev ? { ...prev, summary: newSummary } : prev);
+                }} 
+                type="textbox"
+            />
+          </div>
+
+          <div className="mb-4">
+            <h3 className="block text-gray-700 text-lg font-bold mb-2">Objectives:</h3>
+            <ul className="">
+                {outlineData?.objectives && outlineData.objectives.length  > 0 ? (
+                  outlineData.objectives.map((objective, index) => (
+                    <li key={index} className="">
+                      <EditableLine 
+                              text={objective}
+                              onSave={(newObjective) => {
+                                setOutlineData((prev) => {
+                                  if (!prev) return prev; // Prevents null errors
+                                  const updatedObjectives = [...prev.objectives];
+                                  updatedObjectives[index] = newObjective;
+                                  return { ...prev, objectives: updatedObjectives };
+                                });
+                              }}
+                          />
+                    </li>
+                  ))
+                ) : (
+                  <li>No objectives specified</li>
+                )}
+            </ul>
+          </div>
+
+          <div className="mb-4">
+            <h3 className="block text-gray-700 text-lg font-bold mb-2">Modules:</h3>
+            {outlineData?.objectives && outlineData.modules?.length > 0 ? (
+              outlineData.modules.map((module, index) => (
+                <Module
+                  key={index}
+                  module={module}
+                  updateModule={(updatedModule) => updateModule(index, updatedModule)}
+                />
               ))
             ) : (
-              <li>No objectives specified</li>
+              <p>No modules available</p>
             )}
-        </ul>
+          </div>
 
-        <h3>Modules:</h3>
-        {outlineData?.objectives && outlineData.modules?.length > 0 ? (
-          outlineData.modules.map((module, index) => (
-            <Module
-              key={index}
-              module={module}
-              updateModule={(updatedModule) => updateModule(index, updatedModule)}
-            />
-          ))
-        ) : (
-          <p>No modules available</p>
-        )}
-        <h4>Raw JSON</h4>
-        <p>{JSON.stringify(outlineData, null, 2)}</p>
-        <h4>Raw JSON Previous</h4>
-        <p>{JSON.stringify(prevOutlineData, null, 2)}</p>
+          <div className="">
+            <button className="">Add Module</button>
+          </div>
+
+          <div className="">
+            <h4>View Raw JSON</h4>
+            <pre className="bg-gray-100 p-4 rounded-md overflow-auto">{JSON.stringify(outlineData, null, 2)}</pre>
+          </div>
+        </div>
       </div>
     </div>
   );

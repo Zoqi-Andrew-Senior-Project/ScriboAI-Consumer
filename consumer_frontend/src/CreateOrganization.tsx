@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './App.css';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 
@@ -19,11 +18,19 @@ interface PromptProps {
 const OrganizationPrompt: React.FC<PromptProps> = ({ formData, handleChange }) => {
     return (
         <div>
-            <h1>Tell us about your organization!</h1>
+            <h1 className="text-2xl font-bold mb-4">Tell us about your organization!</h1>
             <form>
-                <div className="form-group">
-                    <label htmlFor="organization">Organization</label>
-                    <input type="text" id="organization" name="name" value={formData.name} onChange={handleChange} required />
+                <div className="mb-4">
+                    <label htmlFor="organization" className="block text-gray-700 text-sm font-bold mb-2">Organization</label>
+                    <input 
+                        type="text"
+                        id="organization"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        required 
+                        className="shadow appearance-none border rounded w-full py-2 px-3 bg-white text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-primary"
+                    />
                 </div>
             </form>
         </div>
@@ -33,23 +40,23 @@ const OrganizationPrompt: React.FC<PromptProps> = ({ formData, handleChange }) =
 const OwnerPrompt: React.FC<PromptProps> = ({ formData, handleChange }) => {
     return (
         <div>
-            <h1>Let's create your account!</h1>
+            <h1 className="text-2xl font-bold mb-4">Let's create your account!</h1>
             <form>
-                <div className="form-group">
-                    <label htmlFor="first_name">First Name</label>
-                    <input type="text" id="first_name" name="first_name" value={formData.first_name} onChange={handleChange} required />
+                <div className="mb-4">
+                    <label htmlFor="first_name" className="block text-gray-700 text-sm font-bold mb-2">First Name</label>
+                    <input type="text" id="first_name" name="first_name" value={formData.first_name} onChange={handleChange} required className="shadow appearance-none border rounded w-full py-2 px-3 bg-white text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-primary"/>
                 </div>
-                <div className="form-group">
-                    <label htmlFor="last_name">Last Name</label>
-                    <input type="text" id="last_name" name="last_name" value={formData.last_name} onChange={handleChange} required />
+                <div className="mb-4">
+                    <label htmlFor="last_name" className="block text-gray-700 text-sm font-bold mb-2">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" value={formData.last_name} onChange={handleChange} required className="shadow appearance-none border rounded w-full py-2 px-3 bg-white text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-primary"/>
                 </div>
-                <div className="form-group">
-                    <label htmlFor="email">Email</label>
-                    <input type="text" id="email" name="email" value={formData.email} onChange={handleChange} required />
+                <div className="mb-4">
+                    <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                    <input type="text" id="email" name="email" value={formData.email} onChange={handleChange} required className="shadow appearance-none border rounded w-full py-2 px-3 bg-white text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-primary"/>
                 </div>
-                <div className="form-group">
-                    <label htmlFor="password">Password</label>
-                    <input type="text" id="password" name="password" value={formData.password} onChange={handleChange} required />
+                <div className="mb-4">
+                    <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">Password</label>
+                    <input type="password" id="password" name="password" value={formData.password} onChange={handleChange} required className="shadow appearance-none border rounded w-full py-2 px-3 bg-white text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-primary"/>
                 </div>
             </form>
         </div>
@@ -66,7 +73,7 @@ function CreateOrganization() {
     });
 
     const [message, setMessage] = useState('');
-    const [status, setStatus] = useState<string>("failure");
+    const [status, setStatus] = useState<string>("");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
@@ -102,32 +109,37 @@ function CreateOrganization() {
     }
 
     return (
-        <div>
-            <div className="course-outline" id="outline menu">
-                <div className="outline-menu">
-                    <h2>Create an Organization!</h2>
-                    <OrganizationPrompt formData={formData} handleChange={handleChange} />
-                    <OwnerPrompt formData={formData} handleChange={handleChange} />
-                    <button
-                        className="submit-btn mt-4"
-                        onClick={handleSubmit}
-                        disabled={false}
-                        type="submit"
-                    >
-                        Submit
-                    </button>
-                    {status === 'success' && (
-                        <div id="success-message" className="message success">
-                            <p>{message}</p>
-                            <Link to="/signup" className="btn btn-primary btn-big mb-3 w-75">Log in now!</Link>
-                        </div>
-                    )}
-                    {status === 'error' && (
-                        <div id="error-message" className="message error">
-                            <p>{message}</p>
-                        </div>
-                    )}
-                </div>
+        <div className="flex items-center justify-center min-h-screen">
+            <div className='bg-tertiary p-8 rounded-lg shadow-md w-full max-w-md'>
+                <h2 className="text-3xl font-bold mb-6 text-center">Create an Organization!</h2>
+                {status === '' && (
+                    <div>
+                        <OrganizationPrompt formData={formData} handleChange={handleChange} />
+                        <OwnerPrompt formData={formData} handleChange={handleChange} />
+                        <button
+                            className="bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+                            onClick={handleSubmit}
+                            type="button"
+                        >
+                            Submit
+                        </button>
+                    </div>
+                )}
+                {status === 'success' && (
+                    <div id="success-message" className="mt-6 space-y-3 text-green-950 w-full max-w-lg text-center">
+                        <p>{message}</p>
+                        <Link to="/login" 
+                            className="block w-3/4 mx-auto bg-button-primary-bg text-button-primary-txt py-3 rounded-lg text-lg font-semibold hover:bg-button-hover"
+                        >
+                            Log in now!
+                        </Link>
+                    </div>
+                )}
+                {status === 'error' && (
+                    <div id="error-message" className="mt-4 text-red-600">
+                        <p>{message}</p>
+                    </div>
+                )}
             </div>
         </div>
       );

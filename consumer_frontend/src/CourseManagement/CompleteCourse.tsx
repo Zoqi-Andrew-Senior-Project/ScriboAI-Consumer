@@ -88,12 +88,33 @@ const CourseDashboard = () => {
     }
 
     return (        
-        <div className="container-fluid main-content">
-            <h1>Complete Course</h1>
-            <button onClick={onPublish}>Publish</button>
-            <button onClick={onDraft}>Save as a Draft</button>
-            <p>{courseId}</p>
-            <p>{course.title}</p>
+        <div className="flex justify-center min-h-screen">
+            <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+                <h1 className="text-3xl font-semibold text-center">Complete Course</h1>
+
+                {/* Buttons with proper styling and spacing */}
+                <div className="flex justify-between items-center space-x-4">
+                    <button
+                    onClick={onPublish}
+                    className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 transition-all"
+                    >
+                    Publish
+                    </button>
+
+                    <button
+                    onClick={onDraft}
+                    className="bg-gray-500 text-white px-6 py-3 rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 transition-all"
+                    >
+                    Save as a Draft
+                    </button>
+                </div>
+
+                {/* Course Information */}
+                <div className="space-y-2 text-center">
+                    <p className="text-lg font-medium">{courseId}</p>
+                    <p className="text-xl font-semibold text-gray-800">{course.title}</p>
+                </div>
+            </div>
         </div>
     );
   }

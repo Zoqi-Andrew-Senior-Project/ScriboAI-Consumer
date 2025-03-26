@@ -93,16 +93,29 @@ const PageViewer: React.FC = () => {
     );
   
     return (
-        <div>      
-            <div className='doc-buttons'>
-                <button onClick={debouncedAction.prev}>Back</button>
-                <p>{metaData?.current_order}/{metaData?.total}</p>
-                <button onClick={debouncedAction.next}>Next</button>
-            </div>
-            <div className="editor">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
-            </div>
+      <div className="container mx-auto p-6">
+        <div className="flex justify-between items-center mb-4">
+          <button
+            onClick={debouncedAction.prev}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+          >
+            Back
+          </button>
+          <p className="text-lg font-medium">
+            {metaData?.current_order}/{metaData?.total}
+          </p>
+          <button
+            onClick={debouncedAction.next}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+          >
+            Next
+          </button>
         </div>
+
+        <div className="prose lg:prose-xl mx-auto bg-white rounded-md p-10 h-screen overflow-auto">
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+        </div>
+      </div>
     );
   };
   

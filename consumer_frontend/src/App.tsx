@@ -1,7 +1,5 @@
 import React from 'react';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import './App.css';
 import CreateCourse from './CourseManagement/CreateCourse';
 import Login from './Authentication/Login';
 import CreateOrganization from './CreateOrganization';
@@ -23,52 +21,64 @@ function Navbar() {
   const [showSettings, setShowSettings] = useState(false);
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
-      <div className="container-fluid">
-        <a className="navbar-brand" href="#">Scribo.AI</a>
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span className="navbar-toggler-icon"></span>
+    <nav className="bg-secondary text-accent-1">
+      <div className="container mx-auto flex items-center justify-between px-4 py-3">
+        {/* Brand Logo */}
+        <a className="text-xl font-bold" href="#">
+          <img src="/logo.png" alt="Scribo.AI Logo" className="w-12 h-12 mr-2 inline-block" />
+          Scribo.AI
+        </a>
+
+        {/* Mobile Menu Button */}
+        <button
+          className="block md:hidden text-white focus:outline-none"
+          onClick={() => setShowSettings((prev) => !prev)}
+        >
+          ☰
         </button>
-        <div className="collapse navbar-collapse" id="navbarNav">
-          <ul className="navbar-nav ms-auto">
-            <li className="nav-item">
-              <Link className="nav-link" to="/home">Home</Link>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="#">Training Programs</a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="#">Employees</a>
-            </li>
-            <li className="nav-item">
-              <a className="nav-link" href="#">Analytics</a>
-            </li>
-            <li className="nav-item">
-              <button
-                onClick={() => setShowSettings((prev) => !prev)}
-                className="nav-link btn btn-link"
-              > 
-              Settings
-              </button>
-              {showSettings && <Settings />}
-            </li>
-          </ul>
+
+        {/* Desktop Menu */}
+        <div className="hidden md:flex space-x-6">
+          <Link to="/home" className="hover:text-gray-400">Home</Link>
+          <button
+            onClick={() => setShowSettings((prev) => !prev)}
+            className="hover:text-gray-400"
+          >
+            Settings
+          </button>
         </div>
       </div>
+      {/* Settings Modal */}
+      {showSettings && <Settings />}
     </nav>
   );
 }
 
 function Welcome() {
   return (
-    <div className="container-fluid main-content d-flex align-items-center">
-      <div className="row w-100">
-        <div className="d-flex flex-column align-items-center justify-content-center text-center mb-4">
-          <div className="logo-placeholder mb-3"></div> {/* Placeholder for circular logo */}
-          <h1>Hello from Scribo!</h1>
-          <p>All of your training problems solved with just a few clicks!</p>
-          <Link to="/create-organization" className="btn btn-primary btn-big mb-3 w-75">Create an Organization</Link>
-          <Link to="/login" className="btn btn-primary btn-big mb-3 w-75">Log in</Link>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="w-full max-w-lg text-center">
+        {/* Placeholder for circular logo */}
+        <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden">
+          <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover" />
+        </div>
+
+        <h1 className="text-3xl font-bold text-accent-2">Hello from Scribo!</h1>
+        <p className="text-accent-2 mt-2">All of your training problems solved with just a few clicks!</p>
+
+        <div className="mt-6 space-y-3">
+          <Link 
+            to="/create-organization" 
+            className="block w-3/4 mx-auto bg-button-primary-bg text-button-primary-txt py-3 rounded-lg text-lg font-semibold hover:bg-button-hover"
+          >
+            Create an Organization
+          </Link>
+          <Link 
+            to="/login" 
+            className="block w-3/4 mx-auto bg-button-primary-bg text-button-primary-txt py-3 rounded-lg text-lg font-semibold hover:bg-button-hover"
+          >
+            Log in
+          </Link>
         </div>
       </div>
     </div>
@@ -77,16 +87,16 @@ function Welcome() {
 
 function Footer() {
   return (
-    <footer className="footer">
-      <p>&copy; 2024 Scribo.AI | Corporate Training Platform</p>
-    </footer>
+  <footer className="w-full bg-secondary text-accent-1 text-center py-4">
+    <p>&copy; 2024 Scribo.AI | Corporate Training Platform</p>
+  </footer>
   );
 }
 
 function App() {
   return (
     <Router>
-      <div className="app-container">
+      <div className="bg-primary">
         <Navbar />
         <Routes>
           <Route path="/" element={<Welcome />} /> 

@@ -1,5 +1,4 @@
 import React, { useState, ChangeEvent } from 'react';
-import '../App.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,60 +17,62 @@ interface PromptMenuProps {
 
 const PromptMenu: React.FC<PromptMenuProps> = ({ promptData, handleChange, handleSubmit, isLoading }) => {
   return (
-  <div className="container mt-5" id="initial form">
-    <h2>Insert Relevant Information Here for Scribo</h2>
-    <form onSubmit={handleSubmit}>
-      <div>
-        <label>
-          Topic:
-          <input
-            type="text"
-            name="topic"
-            value={promptData.topic}
-            onChange={handleChange}
-            placeholder="Enter Topic"
-            required
-          />
-        </label>
-      </div>
-      <div>
-        <label>
-          Duration:
-          <div>
-            <label>
+    <div className="flex items-center justify-center min-h-screen">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl p-4">
+        <div>
+            <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden">
+              <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover" />
+            </div>
+            <h2 className="text-3xl font-bold mb-6 text-center">Provide Information for Scribo</h2>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Topic:</label>
+            <input
+              type="text"
+              name="topic"
+              value={promptData.topic}
+              onChange={handleChange}
+              placeholder="Enter Topic"
+              className="shadow appearance-none border rounded w-full py-2 px-3 bg-white text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-primary"
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label className="block text-gray-700 text-sm font-bold mb-2">Duration:</label>
+            <div className="">
               <input
                 type="radio"
                 name="duration"
                 value="short"
                 checked={promptData.duration === "short"}
                 onChange={handleChange}
+                className="h-5 w-5 text-primary focus:ring-primary"
               />
-              Short (up to 1 hour)
-            </label>
-          </div>
-          <div>
-            <label>
+              <label className="ml-2 text-base font-light">Short (up to 1 hour)</label>
+            </div>
+            <div className="">
               <input
                 type="radio"
                 name="duration"
                 value="long"
                 checked={promptData.duration === "long"}
                 onChange={handleChange}
+                className="h-5 w-5 text-primary focus:ring-primary"
               />
-              Long (more than 1 hour)
-            </label>
+              <label className="ml-2 text-base font-light">Long (more than 1 hour)</label>
+            </div>
           </div>
-        </label>
+          <button
+            className="bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+            onClick={handleSubmit}
+            disabled={isLoading}
+          >
+            {isLoading ? 'Submitting...' : 'Submit'}
+          </button>
+        </form>
       </div>
-      <button
-        className="submit-btn mt-4"
-        onClick={handleSubmit}
-        disabled={isLoading} // Disable the button while loading
-      >
-        Submit
-      </button>
-    </form>
-  </div>
+    </div>
   )
 }
 

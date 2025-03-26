@@ -111,43 +111,63 @@ const PageEditor = () => {
   };
 
   return (
-  <div>
-    <div data-color-mode="light">
-      <h1>Hello {metaData?.currentPage}</h1>
+    <div className="w-full mx-auto px-4 py-6">
+      <div data-color-mode="light" className="space-y-6">
+        <h1 className="text-3xl font-semibold text-center">{metaData?.currentPage}</h1>
 
-      <button onClick={debouncedAction.save}>Save</button>
-      <button onClick={()=>navigate(`/complete-course/${docId}`)}>Accept</button>
-      <div className='doc-buttons'>
-        <button onClick={debouncedAction.prev}>Back</button>
-        <p>{metaData?.current_order}/{metaData?.total}</p>
-        <button onClick={debouncedAction.next}>Next</button>
+        <div className="flex space-x-3 items-center justify-between">
+          <button
+            onClick={debouncedAction.save}
+            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 transition-all"
+          >
+            Save
+          </button>
+
+          <button
+            onClick={() => navigate(`/complete-course/${docId}`)}
+            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:ring-2 focus:ring-green-400 transition-all"
+          >
+            Accept
+          </button>
+        </div>
+
+        <div className="flex space-x-3 items-center justify-center">
+          <button
+            onClick={debouncedAction.prev}
+            className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 transition-all"
+          >
+            Back
+          </button>
+          <p className="text-lg font-medium">{metaData?.current_order}/{metaData?.total}</p>
+          <button
+            onClick={debouncedAction.next}
+            className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 transition-all"
+          >
+            Next
+          </button>
+        </div>
+
+        <div className="editor bg-white shadow-lg rounded-lg p-4">
+          <MDXEditor ref={ref} markdown={content} onChange={handleChange} plugins={[
+            toolbarPlugin({
+              toolbarClassName: 'my-classname',
+              toolbarContents: () => (
+                <>
+                  <DiffSourceToggleWrapper>
+                    <UndoRedo />
+                    <BoldItalicUnderlineToggles />
+                    <BlockTypeSelect />
+                  </DiffSourceToggleWrapper>
+                </>
+              ),
+            }),
+            headingsPlugin(),
+            diffSourcePlugin(),
+            listsPlugin()
+          ]}/>
+        </div>    
       </div>
-      {/* <MDEditor
-        value={content}
-        onChange={handleChange}
-      /> */}
-
-      <div className='editor'>
-        <MDXEditor ref={ref} markdown={content} onChange={handleChange} plugins={[
-          toolbarPlugin({
-            toolbarClassName: 'my-classname',
-            toolbarContents: () => (
-              <>
-                <DiffSourceToggleWrapper>
-                  <UndoRedo />
-                  <BoldItalicUnderlineToggles />
-                  <BlockTypeSelect />
-                </DiffSourceToggleWrapper>
-              </>
-            ),
-          }),
-          headingsPlugin(),
-          diffSourcePlugin(),
-          listsPlugin()
-        ]}/>
-      </div>    
     </div>
-  </div>
   );
 };
 
