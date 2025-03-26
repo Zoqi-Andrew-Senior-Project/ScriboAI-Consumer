@@ -85,9 +85,6 @@ Effective customer service is essential for any business aiming to thrive in tod
             raise Exception('No notes are provided')
         
         url = self.api_address + '/update-outline'
-
-        print("inside update course outline")
-        print(data)
         
         response = requests.post(url, json=data)
 

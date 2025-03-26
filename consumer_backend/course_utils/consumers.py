@@ -210,10 +210,6 @@ class OutlineConsumer(AsyncWebsocketConsumer):
             }
             content, status = OutlineActions().save(message)
 
-        print(action)
-        print(content)
-        print()
-
         if content:
             redis_client.set(f"course:{self.room_name}", json.dumps(content))
         else:
@@ -256,24 +252,12 @@ class OutlineActions():
 
         course_outline = self.scribo.update_course_outline(data)
 
-        print("scribo gave back:\n", course_outline)
-
         message = {
             "original": content,
             "changes": course_outline
         }
 
         updated, status = self.change(message)
-
-        print(updated)
-
-        # course_serializer = CourseWithModulesSerializer(data=course_outline)
-        
-        # if course_serializer.is_valid():
-        #     course_serializer.save()
-        #     return course_serializer.data, "good"
-        # else:
-        #     print(course_serializer.errors)
         
         return updated, status
     
@@ -282,11 +266,6 @@ class OutlineActions():
         Saves the outline to the db
         """
         content = data["script"]
-
-        print("saving...")
-        print(content)
-
-        print(content)
 
         course_serializer = CourseWithModulesSerializer(data=content, context={'action': 'update'})
 
@@ -315,7 +294,7 @@ class OutlineActions():
         Data:
         {
             original: Outline,
-            changes: Partial<Outline>
+            changes: Partial<Outline & moduleChanges{"add":[Module], "remove":[Module.uuid], "update":[Module]}>
         }
         """
         original = data.get("original", None)
@@ -325,19 +304,19 @@ class OutlineActions():
 
         if modulesChanges:
             # add new module
-            print(original["modules"])
-            print(type(original["modules"]))
             if "add" in modulesChanges:
                 if original["modules"]:
                     original["modules"].extend(modulesChanges["add"])
                 else:
                     original["modules"] = modulesChanges["add"]
 
+            # remove module
             if "remove" in modulesChanges:
                 original["modules"] = [
                     module for module in original["modules"] if module["uuid"] not in modulesChanges["remove"]
                 ]
 
+            # update existing module
             if "update" in modulesChanges:
                 for changed_module in modulesChanges["update"]:
                     module_index = next(
@@ -346,8 +325,9 @@ class OutlineActions():
                         None
                     )
                     if module_index is not None:
-                        original["modules"][module_index] = changed_module            
-            
+                        original["modules"][module_index] = changed_module 
+
+        # update keys where original matches with changes
         for key in original:
             if key in changes:
                 original[key] = changes[key]

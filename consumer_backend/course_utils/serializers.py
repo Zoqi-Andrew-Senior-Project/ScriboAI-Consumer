@@ -23,20 +23,6 @@ class BaseSerializer(DocumentSerializer):
         if model is None:
             raise ValidationError("Model class is not provided in the context!")
         
-        print("validate:\n", data)
-        
-        # if self.context.get('action') == 'update':
-        #     print("\t update")
-        #     print("\t", data.get("uuid"))
-        #     if 'uuid' not in data:
-        #         # If it's a nested object (e.g., Module), allow missing UUIDs
-        #         if self.context.get('is_nested'):
-        #             return data
-        #         raise ValidationError("UUID is required for updating this object!")
-            
-                        
-        #     if not model.objects.filter(uuid=data['uuid']).first():
-        #         raise ValidationError(f"Object with uuid {data['uuid']} does not exist!")
         return data
 
 class CourseSerializer(BaseSerializer):
@@ -140,7 +126,6 @@ class CourseWithModulesSerializer(CourseSerializer):
         Update the course and all its modules.
         If a module is not included in the request, it will be deleted.
         """
-        print("in update....")
         modules_data = validated_data.pop('modules', [])
 
         if "organization" in validated_data:
@@ -152,7 +137,6 @@ class CourseWithModulesSerializer(CourseSerializer):
                 except Organization.DoesNotExist:
                     raise serializers.ValidationError("Invalid organization reference.")
                 
-        print("super")
 
         course = super().update(instance, validated_data)
 
@@ -160,22 +144,16 @@ class CourseWithModulesSerializer(CourseSerializer):
 
         updated_module_uuids = set()
 
-        print("in update... going into modules")
-
         for i, module_data in enumerate(modules_data):
             module_uuid = module_data.pop("uuid", None)
             module_data['course_uuid'] = course.uuid
             module_data['order'] = i
 
-            print("Has module uuid? ", module_uuid)
-
             if module_uuid and module_uuid in existing_modules:
-                print(f"module {i} exists")
                 module = existing_modules[module_uuid]
                 ModuleSerializer(context=self.context).update(module, module_data)
                 updated_module_uuids.add(module_uuid)
             else:
-                print(f"module {i} does not exist")
                 new_module = ModuleSerializer(context=self.context).create(module_data)
                 updated_module_uuids.add(new_module.uuid)
 
@@ -188,28 +166,16 @@ class CourseWithModulesSerializer(CourseSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
 
-        # Fetch modules, order by 'order', and serialize them, if the representation wasn't provided with a modules field
-        # if not 'modules' in representation.keys():
-        #     representation['modules'] = ModuleSerializer(
-        #         Module.objects.filter(course=instance).order_by('order'), many=True
-        #     ).data
-
-        print("instance \n", type(instance))
-
         if isinstance(instance, str):  # Check if it's a Course instance
             course = Course.objects.get(uuid=instance)
         else:
         # If instance is a UUID or some other identifier, use it to fetch the Course
             course = Course.objects.get(uuid=instance["uuid"])
 
-        print("course \n", course)
-
         representation['modules'] = ModuleSerializer(
             Module.objects.filter(course=course).order_by('order'),
             many = True
         ).data
-
-        print("respresenting")
 
         return representation
     
