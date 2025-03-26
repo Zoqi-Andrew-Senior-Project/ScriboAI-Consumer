@@ -76,7 +76,7 @@ class ModuleSerializer(BaseSerializer):
     #     data = super().to_internal_value(data)  # Let DRF handle standard conversion]
         
     #     # Provide defaults to avoid validation errors
-    #     data.setdefault('course_uuid', None)
+    # #     data.setdefault('course_uuid', None)
     #     data.setdefault('order', None)
 
     #     return data
@@ -86,7 +86,7 @@ class ModuleSerializer(BaseSerializer):
         Create the module and attach it to the course.
         """
         course_uuid = validated_data.pop('course_uuid')
-        order = validated_data.pop('order', None)
+        order = validated_data.get('order', None)
 
         try:
             course = Course.objects.get(uuid=course_uuid)
