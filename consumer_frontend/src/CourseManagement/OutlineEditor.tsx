@@ -333,7 +333,7 @@ const OutlineEditor = () => {
     if (!prev || !curr) return curr;
     console.log("passed!")
 
-    let changes: Partial<Outline> = {};
+    let changes: Partial<Outline & { moduleChanges?: { add?: Module[]; remove?: string[]; update?: Module[] } }> = {};
     
     if (prev && curr) {
       (["title", "summary", "duration"] as Array<keyof Pick<Outline, "title" | "summary" | "duration">>).forEach((field) => {
@@ -346,17 +346,44 @@ const OutlineEditor = () => {
     if (!isEqual(prev.objectives, curr.objectives)) {
       changes.objectives = curr.objectives;
     }
-    
-    const updatedModules = curr.modules?.filter((mod, index) =>
-      !prev.modules || !prev.modules[index] || !isEqual(prev.modules[index], mod)
-    );
-  
-    if (updatedModules && updatedModules.length > 0) {
-      changes.modules = updatedModules;
+
+    const moduleChanges: {
+      add?: Module[];
+      remove?: string[];
+      update?: Module[];
+    } = {};
+
+    const prevModules = prev.modules || [];
+    const currModules = curr.modules || [];
+
+    const prevModulesMap = new Map(prevModules.map(mod => [mod.uuid, mod]));
+
+    currModules.forEach(mod => {
+        if (!prevModulesMap.has(mod.uuid)) {
+            // Module is newly added
+            moduleChanges.add = moduleChanges.add || [];
+            moduleChanges.add.push(mod);
+        } else if (!isEqual(prevModulesMap.get(mod.uuid), mod)) {
+            // Module has been updated
+            moduleChanges.update = moduleChanges.update || [];
+            moduleChanges.update.push(mod);
+        }
+    });
+
+    prevModules.forEach(mod => {
+        if (!currModules.find(m => m.uuid === mod.uuid)) {
+            // Module has been removed
+            moduleChanges.remove = moduleChanges.remove || [];
+            moduleChanges.remove.push(mod.uuid);
+        }
+    });
+
+    if (Object.keys(moduleChanges).length > 0) {
+        changes.moduleChanges = moduleChanges;
     }
 
     return Object.keys(changes).length > 0 ? changes : null;
-  };
+};
 
   // Debounced function to send updates with batching
   const sendUpdate = useCallback(
@@ -446,6 +473,10 @@ const OutlineEditor = () => {
         "script": outlineData
       }
     }
+
+    console.log("regenerate")
+
+    console.log(data)
 
     if (ws.current?.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify(data));
