@@ -200,6 +200,7 @@ class OutlineConsumer(AsyncWebsocketConsumer):
             }
             content, status = OutlineActions().update(messsage)
 
+
         if action == "save":
             """
             Saves the state of in-memory outline to the db
@@ -208,6 +209,10 @@ class OutlineConsumer(AsyncWebsocketConsumer):
                 "script": cached_data,
             }
             content, status = OutlineActions().save(message)
+
+        print(action)
+        print(content)
+        print()
 
         if content:
             redis_client.set(f"course:{self.room_name}", json.dumps(content))
@@ -251,19 +256,37 @@ class OutlineActions():
 
         course_outline = self.scribo.update_course_outline(data)
 
-        course_serializer = CourseWithModulesSerializer(data=course_outline)
+        print("scribo gave back:\n", course_outline)
+
+        message = {
+            "original": content,
+            "changes": course_outline
+        }
+
+        updated, status = self.change(message)
+
+        print(updated)
+
+        # course_serializer = CourseWithModulesSerializer(data=course_outline)
         
-        if course_serializer.is_valid():
-            course_serializer.save()
-            return course_serializer.data, "good"
+        # if course_serializer.is_valid():
+        #     course_serializer.save()
+        #     return course_serializer.data, "good"
+        # else:
+        #     print(course_serializer.errors)
         
-        return data["script"], "bad"
+        return updated, status
     
     def save(self, data):
         """
         Saves the outline to the db
         """
         content = data["script"]
+
+        print("saving...")
+        print(content)
+
+        print(content)
 
         course_serializer = CourseWithModulesSerializer(data=content, context={'action': 'update'})
 
@@ -283,6 +306,7 @@ class OutlineActions():
 
             return content, "good"
         else:
+            print(course_serializer.errors)
             return content, "bad"
         
     def change(self, data):
@@ -297,6 +321,33 @@ class OutlineActions():
         original = data.get("original", None)
         changes = data.get("changes", None)
 
+        modulesChanges = changes.pop("moduleChanges", None)
+
+        if modulesChanges:
+            # add new module
+            print(original["modules"])
+            print(type(original["modules"]))
+            if "add" in modulesChanges:
+                if original["modules"]:
+                    original["modules"].extend(modulesChanges["add"])
+                else:
+                    original["modules"] = modulesChanges["add"]
+
+            if "remove" in modulesChanges:
+                original["modules"] = [
+                    module for module in original["modules"] if module["uuid"] not in modulesChanges["remove"]
+                ]
+
+            if "update" in modulesChanges:
+                for changed_module in modulesChanges["update"]:
+                    module_index = next(
+                        (index for index, module in enumerate(original["modules"]) 
+                        if module["uuid"] == changed_module["uuid"]), 
+                        None
+                    )
+                    if module_index is not None:
+                        original["modules"][module_index] = changed_module            
+            
         for key in original:
             if key in changes:
                 original[key] = changes[key]
