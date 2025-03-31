@@ -1,7 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import debounce from "lodash.debounce";
 import { useParams } from "react-router-dom";
-import MDEditor from '@uiw/react-md-editor';
 import { MDXEditor, MDXEditorMethods, UndoRedo, BoldItalicUnderlineToggles, toolbarPlugin, BlockTypeSelect, DiffSourceToggleWrapper } from '@mdxeditor/editor'
 import { headingsPlugin, diffSourcePlugin, listsPlugin } from '@mdxeditor/editor'
 import { useNavigate } from 'react-router-dom';
@@ -56,6 +55,8 @@ const PageEditor = () => {
   const debouncedAction = useWebSocketAction(ws);
   const ref = useRef<MDXEditorMethods>(null); // Adjust the type of ref as needed
   const navigate = useNavigate();
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [savingStatus, setSavingStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
 
   useEffect(() => {
     if (ws.current) {
@@ -73,6 +74,9 @@ const PageEditor = () => {
           ref.current?.setMarkdown(data.data.content);
           setMetaData(data.meta);
         }
+        console.log("saved");
+        setSavingStatus('saved');
+        setLastSaved(new Date());
       } catch (error) {
         console.error("Error parsing WebSocket message:", error);
       }
@@ -88,13 +92,20 @@ const PageEditor = () => {
   const sendUpdate = useCallback(
     debounce((newContent) => {
       if (ws.current?.readyState === WebSocket.OPEN) {
-        console.log({ content: newContent })
+        console.log("saving");
+        setSavingStatus('saving');
         const message = {
           "data": {
             content: newContent
           }
         }
         ws.current.send(JSON.stringify(message));
+
+        setTimeout(() => {
+          console.log('saved');
+          setSavingStatus('saved');
+          setLastSaved(new Date());
+        }, 1000);
       }
       isTyping.current = false;
     }, 500), // Delay WebSocket updates by 500ms
@@ -110,42 +121,91 @@ const PageEditor = () => {
     }
   };
 
+  const getLastSavedText = () => {
+    if (!lastSaved) return "Not saved yet";
+    const diff = Math.round((new Date().getTime() - lastSaved.getTime()) / 1000);
+    return diff < 60 ? `Saved ${diff} seconds ago` : `Saved ${Math.floor(diff / 60)} minutes ago`;
+  }
+
+  interface ProgressBarProps {
+    progress: number;
+  }
+
+  const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
+    // Ensure progress is a number between 0 and 100
+    const safeProgress = Math.round(Math.min(Math.max(progress, 0), 100));
+  
+    return (
+      <div className="w-full bg-gray-300 rounded-lg h-6 overflow-hidden relative">
+  
+        {/* Top bar (progress) */}
+        <div
+          className="bg-blue-500 h-full transition-all relative"
+          style={{ width: `${safeProgress}%` }}
+          role="progressbar"
+          aria-valuenow={safeProgress}
+          aria-valuemin={0}
+          aria-valuemax={100}
+        >
+          {/* Percentage Text */}
+          <div className="absolute inset-0 flex items-center justify-center text-white font-semibold">
+            {safeProgress}%
+          </div>
+        </div>
+        {/* Bottom bar (background) */}
+        <div className="w-full bg-gray-400 h-full rounded-lg min-w-[20em] " />
+      </div>
+    );
+  };
+
   return (
-    <div className="w-full mx-auto px-4 py-6">
-      <div data-color-mode="light" className="space-y-6">
+    <div className="w-full mx-auto px-4 py-6 flex flex-col items-center space-y-6">
         <h1 className="text-3xl font-semibold text-center">Page Editor</h1>
         <p className="text-center">Edit each page in the course!</p>
 
-        <div className="flex space-x-3 items-center justify-between">
-          <button
-            onClick={debouncedAction.save}
-            className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 transition-all"
-          >
-            Save
-          </button>
+        <div className="w-full max-w-4xl">
+          <div className="flex items-center justify-between space-x-3 bg-gray-100 p-4 rounded-lg shadow-md">
+            
+            <div className="flex items-center gap-2 flex-1 justify-center">
+              <button
+                onClick={debouncedAction.prev}
+                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 transition-all"
+              >
+                Back
+              </button>
 
-          <button
-            onClick={() => navigate(`/complete-course/${docId}`)}
-            className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:ring-2 focus:ring-green-400 transition-all"
-          >
-            Accept
-          </button>
-        </div>
+              <ProgressBar progress={(metaData?.current_order / metaData?.total) * 100} />
 
-        <div className="flex space-x-3 items-center justify-center">
-          <button
-            onClick={debouncedAction.prev}
-            className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 transition-all"
-          >
-            Back
-          </button>
-          <p className="text-lg font-medium">{metaData?.current_order}/{metaData?.total}</p>
-          <button
-            onClick={debouncedAction.next}
-            className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 transition-all"
-          >
-            Next
-          </button>
+              <button
+                onClick={debouncedAction.next}
+                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 transition-all"
+              >
+                Next
+              </button>
+            </div>
+
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={debouncedAction.save}
+                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 transition-all"
+              >
+                Save
+              </button>
+              <button
+                onClick={() => navigate(`/complete-course/${docId}`)}
+                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:ring-2 focus:ring-green-400 transition-all"
+              >
+                Accept
+              </button>
+            </div>
+          </div>
+          {/* Save Status Indicator */}
+          <div className="text-sm text-gray-600 text-right mt-2">
+            {savingStatus === 'saving' && <span className="text-yellow-500">Saving...</span>}
+            {savingStatus === 'saved' && <span className="text-green-500">{getLastSavedText()}</span>}
+            {savingStatus === 'idle' && <span className="text-gray-500">No changes</span>}
+          </div>
         </div>
 
         <div className="editor bg-white shadow-lg rounded-lg p-4">
@@ -166,7 +226,6 @@ const PageEditor = () => {
             diffSourcePlugin(),
             listsPlugin()
           ]}/>
-        </div>    
       </div>
     </div>
   );
