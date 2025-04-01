@@ -15,3 +15,8 @@ class MongoEngineSessionAuthentication(BaseAuthentication):
             except AuthProfile.DoesNotExist:
                 return None
         return None
+    def get_user(self, auth_profile_id):
+        try:
+            return AuthProfile.objects(id=auth_profile_id).first()
+        except AuthProfile.DoesNotExist:
+            return None

@@ -312,7 +312,7 @@ class InviteMemberView(APIView):
 
                 context = {
                     "organization_name": organization.name,
-                    "link": os.getenv("REACT_APP_BACKEND_ADDRESS") + f"/api/org/validate-invite/{invitation_token}/",
+                    "link": os.getenv("FRONTEND_ADDRESS") + f"/accept-invite/{invitation_token}/",
                     "image": "http://scriboai.tech/static/media/logo.58c00fb0d1fb34fa34b4.png",
                 }
 

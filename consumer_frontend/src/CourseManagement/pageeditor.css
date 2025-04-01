@@ -1,0 +1,21 @@
+.editor {
+    background-color: white;
+    margin: 20px auto;
+    height: 80vh;
+    box-sizing: border-box;
+    padding: 10px;
+    width: 80%;
+    border-radius: 15px;
+    overflow-y: auto;
+}
+
+.doc-buttons{
+    display: flex;
+    align-items: center; /* Vertically aligns the items */
+    gap: 10px; /* Adds space between the elements */
+    justify-content: center; /* Horizontally centers the items */
+}
+
+.doc-buttons button{
+    border-radius: 10px;
+}

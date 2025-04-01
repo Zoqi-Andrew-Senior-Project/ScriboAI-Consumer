@@ -5,6 +5,7 @@ from authentication.models import AuthProfile
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.decorators import api_view
 from django.middleware.csrf import get_token
+from .jwt import CustomJWTTokenGenerator
 
 
 
@@ -18,7 +19,9 @@ class LoginView(APIView):
         if auth_profile and auth_profile.check_password(password):
             request.session["auth_profile_id"] = str(auth_profile.id)
             request.session.set_expiry(3600)  # Set session expiry to 1 hour
-            return Response({"message": "Login successful", "logged_in": True}, status=status.HTTP_200_OK)
+
+            token = CustomJWTTokenGenerator.generate_token(str(auth_profile))
+            return Response({"message": "Login successful", "logged_in": True, "token": token}, status=status.HTTP_200_OK)
         else:
             return Response({"error": "Invalid credentials", "logged_in": False}, status=status.HTTP_401_UNAUTHORIZED)
         

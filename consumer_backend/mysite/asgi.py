@@ -4,6 +4,7 @@ from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 from organization_utils.routing import websocket_urlpatterns
+from course_utils import routing as course_routing
 
 print("loading asgi.py")
 
@@ -18,7 +19,7 @@ application = ProtocolTypeRouter({
     "http": get_asgi_application(),  # Standard Django ASGI application
     "websocket": AuthMiddlewareStack(
         URLRouter(
-            websocket_urlpatterns
+            course_routing.websocket_urlpatterns
         )
     ),
 })
