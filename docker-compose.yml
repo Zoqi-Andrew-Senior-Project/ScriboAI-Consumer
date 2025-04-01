@@ -1,25 +1,40 @@
+version: "1.0"
 services:
-  # Frontend service
+  # Frontend build (separate from Nginx)
   frontend:
-    image: consumer-frontend:latest # Replace with your frontend Docker image
+    image: node:18
+    working_dir: /app
+    volumes:
+      - .:/app
+      - frontend_build:/app/dist
+    command: sh -c "npm install && npm run build"
+    environment:
+      - NODE_ENV=production
+
+  # Nginx service
+  nginx:
+    image: nginx:latest
     ports:
-      - "3000:3000" # Maps port 3000 of the host to port 3000 of the container
-    env_file: .env
+      - "80:80"
     networks:
       - app-network
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - frontend_build:/usr/share/nginx/html:ro
     depends_on:
+      - frontend
       - backend
 
   # Backend service
   backend:
-    image: consumer-backend:latest # Replace with your backend Docker image
+    image: consumer-backend:latest
     ports:
-      - "8000:8000" # Maps port 7001 of the host to port 7001 of the container
+      - "8000:8000" # Maps port 8000 of the host to port 8000 of the container
     networks:
       - app-network
     env_file: .env
     environment:
-      DB_HOST: mongo # Referencing the Mongo service by its container name
+      DB_HOST: mongo
       REDIS_HOST: redis
       DJANGO_SETTINGS_MODULE: mysite.settings
     depends_on:
@@ -31,9 +46,9 @@ services:
     image: mongo:latest
     container_name: mongo-db
     ports:
-      - "27017:27017" # Maps port 27017 of the host to port 27017 of the container
+      - "27017:27017"
     volumes:
-      - mongo_data:/data/db # Persistent storage for MongoDB
+      - mongo_data:/data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
@@ -46,24 +61,11 @@ services:
     image: redis:latest
     container_name: redis-db
     ports:
-      - "6379:6379" # Maps port 6379 of the host to port 6379 of the container
+      - "6379:6379"
     volumes:
-      - redis_data:/data # Persistent storage for Redis
+      - redis_data:/data
     networks:
       - app-network
-
-  # Nginx service
-  nginx:
-    image: nginx:latest
-    ports:
-      - "80:80" # Maps port 80 of the host to port 80 of the container
-    networks:
-      - app-network
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf # Replace with your nginx configuration
-    depends_on:
-      - frontend
-      - backend
 
 # Define a common network for all services
 networks:
@@ -74,3 +76,4 @@ networks:
 volumes:
   mongo_data:
   redis_data:
+  frontend_build:
