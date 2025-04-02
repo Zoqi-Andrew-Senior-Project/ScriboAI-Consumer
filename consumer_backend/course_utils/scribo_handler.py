@@ -7,7 +7,14 @@ class ScriboHandler():
         self.api_address = os.environ.get('REACT_APP_HUGGINGFACE_ADDRESS')
 
     def generate_page(self, data):
-        return """#ENDPOINT TO BE PROVIDED"""
+        url = self.api_address + '/generate-module-conten'
+
+        data = data
+
+        response = requests.post(url, json=data)
+
+        content = data.get('response').get(data.title)
+        return content
     
 
     def generate_course_outline(self, data):
