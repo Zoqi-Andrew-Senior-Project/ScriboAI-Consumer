@@ -21,6 +21,10 @@ jobs:
         DEBUG: ${{ secrets.DEBUG }}
         REACT_APP_BACKEND_ADDRESS: ${{ secrets.REACT_APP_BACKEND_ADDRESS}}
         REACT_APP_HUGGINGFACE_ADDRESS: ${{ secrets.REACT_APP_HUGGINGFACE_ADDRESS }}
+        NGINX_SERVER_NAME: ${{ secrets.NGINX_SERVER_NAME }}
+        REDIS_HOST: ${{ secrets.REDIS_HOST }}
+        REDIS_PORT: ${{ secrets.REDIS_PORT }}
+        REDIS_DB: ${{ secrets.REDIS_DB }}
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
