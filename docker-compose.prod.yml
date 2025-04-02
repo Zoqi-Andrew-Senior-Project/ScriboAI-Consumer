@@ -11,15 +11,29 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - "8080:8080"
+      - "80:80"
+      - "443:443"
     networks:
       - app-network
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
       - frontend_build:/usr/share/nginx/html
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
     depends_on:
       - frontend
       - backend
+
+  certbot:
+    image: certbot:certbot
+    environment:
+      - EMAIL=${CERTBOT_EMAIL}
+      - DOMAIN=${ALLOWED_HOSTS}
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    entrypoint: "/bin/sh -c 'certbot certonly --webroot -w /var/www/certbot --email ${EMAIL} --agree-tos --no-eff-email --force-renewal -d ${DOMAIN}'"
+    command: "/bin/sh -c 'while :; do certbot renew; sleep 12h; done'"
 
   # Backend service
   backend:
