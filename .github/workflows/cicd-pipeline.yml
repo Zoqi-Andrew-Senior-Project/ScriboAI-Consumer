@@ -25,6 +25,7 @@ jobs:
         REDIS_HOST: ${{ secrets.REDIS_HOST }}
         REDIS_PORT: ${{ secrets.REDIS_PORT }}
         REDIS_DB: ${{ secrets.REDIS_DB }}
+        VITE_BACKEND_ADDRESS: ${{ secrets.VITE_BACKEND_ADDRESS }}
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
@@ -63,19 +64,11 @@ jobs:
           DB_USERNAME=${DB_USERNAME}
           DEBUG=${DEBUG}
           SECRET_KEY=${SECRET_KEY}
-          NGINX_SERVER_NAME: ${{ secrets.NGINX_SERVER_NAME }}
-          REDIS_HOST: ${{ secrets.REDIS_HOST }}
-          REDIS_PORT: ${{ secrets.REDIS_PORT }}
-          REDIS_DB: ${{ secrets.REDIS_DB }}
-          EOF
-
-          echo "+++++++++++++++"
-          echo "📄 Creating frontend .env file......."
-          echo "+++++++++++++++"
-
-          cat > ~/AI-Training-Consumer/consumer_frontend/.env <<EOF
-          REACT_APP_BACKEND_ADDRESS=${REACT_APP_BACKEND_ADDRESS}
-          REACT_APP_HUGGINGFACE_ADDRESS=${REACT_APP_HUGGINGFACE_ADDRESS}
+          NGINX_SERVER_NAME: ${NGINX_SERVER_NAME}
+          REDIS_HOST: ${REDIS_HOST}
+          REDIS_PORT: ${REDIS_PORT}
+          REDIS_DB: ${REDIS_DB}
+          VITE_BACKEND_ADDRESS: ${VITE_BACKEND_ADDRESS}
           EOF
 
           echo "+++++++++++++++"
@@ -84,9 +77,6 @@ jobs:
           
           echo "Backend .env contents:"
           cat ~/AI-Training-Consumer/.env || { echo "❌ Backend .env file not found!"; exit 1; }
-
-          echo "Frontend .env contents:"
-          cat ~/AI-Training-Consumer/consumer_frontend/.env || { echo "❌ Frontend .env file not found!"; exit 1; }
           
           echo "+++++++++++++++"
           echo "🏗️ Composing docker setup......."
@@ -94,4 +84,9 @@ jobs:
           
           cd ~/AI-Training-Consumer/
           docker compose down || { echo -e " ++++++++++++++++++++++++\n❌ Error composing down! ❌ \n ++++++++++++++++++++++++"; exit 1; }
-          docker compose up -d || { echo -e " ++++++++++++++++++++++++\n❌ Error composing up! ❌ \n ++++++++++++++++++++++++"; exit 1; }
+          docker compose up --build -d || { echo -e " ++++++++++++++++++++++++\n❌ Error composing up! ❌ \n ++++++++++++++++++++++++"; exit 1; }
+
+          echo "+++++++++++++++"
+          echo "🧹 Pruning unused Docker resources......."
+          echo "+++++++++++++++"
+          docker system prune -f || { echo -e " ++++++++++++++++++++++++\n❌ Error pruning Docker resources! ❌ \n ++++++++++++++++++++++++"; exit 1; }
