@@ -327,7 +327,7 @@ const OutlineEditor = () => {
        ws.current.close(); // Close previous connection before reconnecting
     }
     
-    ws.current = new WebSocket(`${import.meta.env.VITE_WS_BACKEND}/outline/${outId}/`);
+    ws.current = new WebSocket(`/outline/${outId}/`);
     ws.current.onopen = () => console.log("WebSocket Connected");
 
     ws.current.onmessage = (event) => {
