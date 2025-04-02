@@ -7,8 +7,15 @@ export default defineConfig({
     tailwindcss(),
     react()
   ],
+  preview: {
+    port: 8080,
+    strictPort: true,
+  },
   server: {
-    port: 3000, // Change this if needed
+    port: 8080,
+    strictPort: true,
+    host: "0.0.0.0",
+    origin: "http://0.0.0.0:8080",
   },
   base: "/",
 });

@@ -1,26 +1,22 @@
-version: "1.0"
 services:
   # Frontend build (separate from Nginx)
   frontend:
-    image: node:18
-    working_dir: /app
+    build:
+      context: ./consumer_frontend/
+      dockerfile: Dockerfile
     volumes:
-      - .:/app
       - frontend_build:/app/dist
-    command: sh -c "npm install && npm run build"
-    environment:
-      - NODE_ENV=production
 
   # Nginx service
   nginx:
     image: nginx:latest
     ports:
-      - "80:80"
+      - "8080:8080"
     networks:
       - app-network
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - frontend_build:/usr/share/nginx/html:ro
+      - frontend_build:/usr/share/nginx/html
     depends_on:
       - frontend
       - backend

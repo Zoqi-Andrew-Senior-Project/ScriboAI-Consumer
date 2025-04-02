@@ -1,12 +1,13 @@
 # Use an official Node.js runtime as a parent image
 FROM node:22 as build
 
-WORKDIR /usr/src/app
+WORKDIR /app/
 
 # Copy package.json and install dependencies
 COPY package*.json ./
-RUN npm install --frozen-lockfile
+RUN npm install
 
 # Copy source code and build the app
 COPY . .
 RUN npm run build
+
