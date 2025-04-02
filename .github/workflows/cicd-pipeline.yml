@@ -29,20 +29,20 @@ jobs:
           echo "+++++++++++++++"
 
           cat > ~/AI-Training-Consumer/.env <<EOF
-          ALLOWED_HOSTS=${secrets.ALLOWED_HOSTS}
-          DB_HOST=${secrets.DB_HOST}
-          DB_NAME=${secrets.DB_NAME}
-          DB_PASSWORD=${secrets.DB_PASSWORD}
-          DB_PORT=${secrets.DB_PORT}
-          DB_USERNAME=${secrets.DB_USERNAME}
-          DEBUG=${secrets.DEBUG}
-          SECRET_KEY=${secrets.SECRET_KEY}
-          NGINX_SERVER_NAME=${secrets.NGINX_SERVER_NAME}
-          REDIS_HOST=${secrets.REDIS_HOST}
-          REDIS_PORT=${secrets.REDIS_PORT}
-          REDIS_DB=${secrets.REDIS_DB}
-          VITE_BACKEND_ADDRESS=${secrets.VITE_BACKEND_ADDRESS}
-          EOF
+          ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
+          DB_HOST=${{ secrets.DB_HOST }}
+          DB_NAME=${{ secrets.DB_NAME }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          DB_PORT=${{ secrets.DB_PORT }}
+          DB_USERNAME=${{ secrets.DB_USERNAME }}
+          DEBUG=${{ secrets.DEBUG }}
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          NGINX_SERVER_NAME=${{ secrets.NGINX_SERVER_NAME }}
+          REDIS_HOST=${{ secrets.REDIS_HOST }}
+          REDIS_PORT=${{ secrets.REDIS_PORT }}
+          REDIS_DB=${{ secrets.REDIS_DB }}
+          VITE_BACKEND_ADDRESS=${{ secrets.VITE_BACKEND_ADDRESS }}
+          EOF     
           
           echo "+++++++++++++++"
           echo "🏗️ Composing docker setup......."
