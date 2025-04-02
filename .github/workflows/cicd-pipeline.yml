@@ -42,8 +42,8 @@ jobs:
           REDIS_PORT=${{ secrets.REDIS_PORT }}
           REDIS_DB=${{ secrets.REDIS_DB }}
           VITE_BACKEND_ADDRESS=${{ secrets.VITE_BACKEND_ADDRESS }}
-          EOF     
-          
+          EOF
+
           echo "+++++++++++++++"
           echo "🏗️ Composing docker setup......."
           echo "+++++++++++++++"
