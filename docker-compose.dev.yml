@@ -1,0 +1,88 @@
+services:
+  # Frontend build (with live reloading)
+  frontend:
+    build:
+      context: ./consumer_frontend/
+      dockerfile: Dockerfile.dev
+    volumes:
+      - frontend_build:/app/dist
+      - ./consumer_frontend:/app # Mount frontend source for live reloading
+    ports:
+      - "3000:3000" # Assuming the frontend dev server runs on port 3000 (e.g., React/Vite)
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true  # Optional for file-watching in Docker (useful for some environments)
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  # Nginx service for serving the frontend (only for proxying requests, not production optimized)
+  nginx:
+    image: nginx:latest
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - frontend_build:/usr/share/nginx/html
+    depends_on:
+      - frontend
+      - backend
+    environment:
+      - NGINX_HOST=localhost
+
+  # Backend service with dev-specific settings
+  backend:
+    image: consumer-backend:latest
+    ports:
+      - "8000:8000" # Maps port 8000 of the host to port 8000 of the container
+    networks:
+      - app-network
+    env_file: .env.dev # Assuming you have a .env.dev file for dev-specific variables
+    environment:
+      DB_HOST: mongo
+      REDIS_HOST: redis
+      DJANGO_SETTINGS_MODULE: mysite.settings
+    depends_on:
+      - mongo
+      - redis
+
+  # MongoDB service (dev version)
+  mongo:
+    image: mongo:latest
+    container_name: mongo-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./mongo-init:/docker-entrypoint-initdb.d # Mount initialization scripts for dev
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${DB_NAME}
+    networks:
+      - app-network
+
+  # Redis service
+  redis:
+    image: redis:latest
+    container_name: redis-db
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - app-network
+
+# Define a common network for all services
+networks:
+  app-network:
+    driver: bridge
+
+# Define volumes for persistent storage
+volumes:
+  mongo_data:
+  redis_data:
+  frontend_build:
