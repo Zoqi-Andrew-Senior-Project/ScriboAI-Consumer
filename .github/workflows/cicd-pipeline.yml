@@ -63,6 +63,10 @@ jobs:
           DB_USERNAME=${DB_USERNAME}
           DEBUG=${DEBUG}
           SECRET_KEY=${SECRET_KEY}
+          NGINX_SERVER_NAME: ${{ secrets.NGINX_SERVER_NAME }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+          REDIS_DB: ${{ secrets.REDIS_DB }}
           EOF
 
           echo "+++++++++++++++"
@@ -71,7 +75,6 @@ jobs:
 
           cat > ~/AI-Training-Consumer/consumer_frontend/.env <<EOF
           REACT_APP_BACKEND_ADDRESS=${REACT_APP_BACKEND_ADDRESS}
-          REACT_APP_HUGGINGFACE_ADDRESS=${REACT_APP_HUGGINGFACE_ADDRESS}
           EOF
 
           echo "+++++++++++++++"
