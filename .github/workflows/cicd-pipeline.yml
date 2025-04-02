@@ -46,6 +46,7 @@ jobs:
           REDIS_DB=${{ secrets.REDIS_DB }}
           RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
           VITE_BACKEND_ADDRESS=${{ secrets.VITE_BACKEND_ADDRESS }}
+          VITE_WS_BACKEND=${{ secrets.VITE_WS_BACKEND }}
           EOF
 
           echo "+++++++++++++++"
