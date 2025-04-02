@@ -7,13 +7,13 @@ class ScriboHandler():
         self.api_address = os.environ.get('REACT_APP_HUGGINGFACE_ADDRESS')
 
     def generate_page(self, data):
-        url = self.api_address + '/generate-module-conten'
+        url = self.api_address + '/generate-module-content'
 
         data = data
 
         response = requests.post(url, json=data)
 
-        content = data.get('response').get(data.title)
+        content = response.get('response').get(data.title)
         return content
     
 
