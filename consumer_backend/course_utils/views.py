@@ -152,7 +152,17 @@ class PageView(APIView):
 
             for module in modules:
                 if module.content == "No data.":
-                    module.content = scribo.generate_page(module)
+                    data = {
+                            "title": course.title,
+                            "modules": [
+                                {
+                                    "name": module.name,
+                                    "duration": module.duration,
+                                    "subtopics": list(module.subtopics)
+                                }
+                            ]
+                    }
+                    module.content = scribo.generate_page(data)
                     module.save()
 
             page_serializer = PageSerializer({"currentPage": modules[0].uuid})

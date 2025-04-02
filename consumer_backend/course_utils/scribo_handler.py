@@ -8,14 +8,16 @@ class ScriboHandler():
 
     def generate_page(self, data):
         url = self.api_address + '/generate-module-content'
+        data2 = data
+        print(data2)
+        response = requests.post(url, json=data2)
 
-        data = data
-
-        response = requests.post(url, json=data)
-
-        content = response.get('response').get(data.title)
-        return content
-    
+        if response.status_code == 200:
+            response_json = response.json()
+            content = response_json.get('response',{}).get(data2["modules"][0]["name"], "#No Data")
+            return content
+        else:
+            return "ERROR"
 
     def generate_course_outline(self, data):
         if data.get('topic') is None:
