@@ -11,21 +11,6 @@ jobs:
     steps:
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@v1.1.0
-      env:
-        ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
-        DB_HOST: ${{ secrets.DB_HOST }}
-        DB_NAME: ${{ secrets.DB_NAME }}
-        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-        DB_PORT: ${{ secrets.DB_PORT }}
-        DB_USERNAME: ${{ secrets.DB_USERNAME }}
-        DEBUG: ${{ secrets.DEBUG }}
-        REACT_APP_BACKEND_ADDRESS: ${{ secrets.REACT_APP_BACKEND_ADDRESS}}
-        REACT_APP_HUGGINGFACE_ADDRESS: ${{ secrets.REACT_APP_HUGGINGFACE_ADDRESS }}
-        NGINX_SERVER_NAME: ${{ secrets.NGINX_SERVER_NAME }}
-        REDIS_HOST: ${{ secrets.REDIS_HOST }}
-        REDIS_PORT: ${{ secrets.REDIS_PORT }}
-        REDIS_DB: ${{ secrets.REDIS_DB }}
-        VITE_BACKEND_ADDRESS: ${{ secrets.VITE_BACKEND_ADDRESS }}
       with:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
@@ -38,45 +23,26 @@ jobs:
           
           cd ~/AI-Training-Consumer/
           git pull || { echo -e " ++++++++++++++++++++++++\n❌ Error pulling changes! ❌ \n ++++++++++++++++++++++++"; exit 1; }
-          
-          echo "+++++++++++++++"
-          echo "🏗️ Building consumer-backend image......."
-          echo "+++++++++++++++"
-          
-          cd ~/AI-Training-Consumer/consumer_backend
-          docker build -t consumer-backend:latest . || { echo -e " ++++++++++++++++++++++++++++++++++++++++++++++++\n❌ Error building consumer-backend image! ❌ \n ++++++++++++++++++++++++++++++++++++++++++++++++"; exit 1; }
-          echo "+++++++++++++++"
-          echo "🏗️ Building consumer-frontend image......."
-          echo "+++++++++++++++"
-          cd ~/AI-Training-Consumer/consumer_frontend
-          docker build -t consumer-frontend:latest . || { echo -e " ++++++++++++++++++++++++\n❌ Error building consumer-frontend image! ❌ \n ++++++++++++++++++++++++"; exit 1; }
-          
+                    
           echo "+++++++++++++++"
           echo "📄 Creating backend .env file......."
           echo "+++++++++++++++"
 
           cat > ~/AI-Training-Consumer/.env <<EOF
-          ALLOWED_HOSTS=${ALLOWED_HOSTS}
-          DB_HOST=${DB_HOST}
-          DB_NAME=${DB_NAME}
-          DB_PASSWORD=${DB_PASSWORD}
-          DB_PORT=${DB_PORT}
-          DB_USERNAME=${DB_USERNAME}
-          DEBUG=${DEBUG}
-          SECRET_KEY=${SECRET_KEY}
-          NGINX_SERVER_NAME: ${NGINX_SERVER_NAME}
-          REDIS_HOST: ${REDIS_HOST}
-          REDIS_PORT: ${REDIS_PORT}
-          REDIS_DB: ${REDIS_DB}
-          VITE_BACKEND_ADDRESS: ${VITE_BACKEND_ADDRESS}
+          ALLOWED_HOSTS=${secrets.ALLOWED_HOSTS}
+          DB_HOST=${secrets.DB_HOST}
+          DB_NAME=${secrets.DB_NAME}
+          DB_PASSWORD=${secrets.DB_PASSWORD}
+          DB_PORT=${secrets.DB_PORT}
+          DB_USERNAME=${secrets.DB_USERNAME}
+          DEBUG=${secrets.DEBUG}
+          SECRET_KEY=${secrets.SECRET_KEY}
+          NGINX_SERVER_NAME=${secrets.NGINX_SERVER_NAME}
+          REDIS_HOST=${secrets.REDIS_HOST}
+          REDIS_PORT=${secrets.REDIS_PORT}
+          REDIS_DB=${secrets.REDIS_DB}
+          VITE_BACKEND_ADDRESS=${secrets.VITE_BACKEND_ADDRESS}
           EOF
-
-          echo "+++++++++++++++"
-          echo "✅ Verifying .env files......."
-          echo "+++++++++++++++"
-          
-          echo "Backend .env contents:"
-          cat ~/AI-Training-Consumer/.env || { echo "❌ Backend .env file not found!"; exit 1; }
           
           echo "+++++++++++++++"
           echo "🏗️ Composing docker setup......."
