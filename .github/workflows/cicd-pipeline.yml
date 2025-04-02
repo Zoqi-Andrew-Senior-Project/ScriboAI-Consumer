@@ -30,17 +30,21 @@ jobs:
 
           cat > ~/AI-Training-Consumer/.env <<EOF
           ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
+          CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
           DB_HOST=${{ secrets.DB_HOST }}
           DB_NAME=${{ secrets.DB_NAME }}
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           DB_PORT=${{ secrets.DB_PORT }}
           DB_USERNAME=${{ secrets.DB_USERNAME }}
           DEBUG=${{ secrets.DEBUG }}
-          SECRET_KEY=${{ secrets.SECRET_KEY }}
+          FRONTEND_ADDRESS=${{ secrets.FRONTEND_ADDRESS }}
           NGINX_SERVER_NAME=${{ secrets.NGINX_SERVER_NAME }}
+          REACT_APP_HUGGINGFACE_ADDRESS=${{ secrets.REACT_APP_HUGGINGFACE_ADDRESS }}
           REDIS_HOST=${{ secrets.REDIS_HOST }}
           REDIS_PORT=${{ secrets.REDIS_PORT }}
           REDIS_DB=${{ secrets.REDIS_DB }}
+          RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+          SECRET_KEY=${{ secrets.SECRET_KEY }}
           VITE_BACKEND_ADDRESS=${{ secrets.VITE_BACKEND_ADDRESS }}
           EOF
 
