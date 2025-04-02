@@ -86,4 +86,4 @@ jobs:
           
           cd ~/AI-Training-Consumer/
           docker compose down || { echo -e " ++++++++++++++++++++++++\n❌ Error composing down! ❌ \n ++++++++++++++++++++++++"; exit 1; }
-          docker compose up -d || { echo -e " ++++++++++++++++++++++++\n❌ Error composing up! ❌ \n ++++++++++++++++++++++++"; exit 1; }
+          docker-compose -f docker-compose.prod.yml up || { echo -e " ++++++++++++++++++++++++\n❌ Error composing up! ❌ \n ++++++++++++++++++++++++"; exit 1; }
