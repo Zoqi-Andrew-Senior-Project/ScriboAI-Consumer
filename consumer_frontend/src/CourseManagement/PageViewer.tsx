@@ -54,7 +54,7 @@ const PageViewer: React.FC = () => {
         if (ws.current) {
             ws.current.close(); // Close previous connection before reconnecting
         }
-        ws.current = new WebSocket(`wss:scriboai.tech/ws/document/${docId}/`);
+        ws.current = new WebSocket(`wss://scriboai.tech/ws/document/${docId}/`);
 
         ws.current.onopen = () => console.log("WebSocket Connected");
 
