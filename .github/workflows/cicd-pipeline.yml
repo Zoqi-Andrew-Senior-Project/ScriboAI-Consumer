@@ -31,6 +31,7 @@ jobs:
           cat > ~/AI-Training-Consumer/.env <<EOF
           ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
           CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
+          DJANGO_SECRET=${{ secrets.DJANO_SECRET }}
           DB_HOST=${{ secrets.DB_HOST }}
           DB_NAME=${{ secrets.DB_NAME }}
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
@@ -44,7 +45,6 @@ jobs:
           REDIS_PORT=${{ secrets.REDIS_PORT }}
           REDIS_DB=${{ secrets.REDIS_DB }}
           RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
-          SECRET_KEY=${{ secrets.SECRET_KEY }}
           VITE_BACKEND_ADDRESS=${{ secrets.VITE_BACKEND_ADDRESS }}
           EOF
 
