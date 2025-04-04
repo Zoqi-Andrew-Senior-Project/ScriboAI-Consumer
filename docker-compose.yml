@@ -35,6 +35,9 @@ services:
 
   # Backend service
   backend:
+    build:
+      context: ./consumer_backend/
+      dockerfile: Dockerfile
     image: consumer-backend:latest
     ports:
       - "8000:8000" # Maps port 8000 of the host to port 8000 of the container
