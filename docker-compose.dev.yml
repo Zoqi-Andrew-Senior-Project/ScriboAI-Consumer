@@ -35,6 +35,9 @@ services:
 
   # Backend service with dev-specific settings
   backend:
+    build:
+      context: ./consumer_backend/
+      dockerfile: Dockerfile.dev
     image: consumer-backend:latest
     ports:
       - "8000:8000" # Maps port 8000 of the host to port 8000 of the container
@@ -48,6 +51,8 @@ services:
     depends_on:
       - mongo
       - redis
+    volumes:
+      - ./consumer_backend/:/code
 
   # MongoDB service (dev version)
   mongo:
@@ -86,4 +91,3 @@ volumes:
   mongo_data:
   redis_data:
   frontend_build:
-
