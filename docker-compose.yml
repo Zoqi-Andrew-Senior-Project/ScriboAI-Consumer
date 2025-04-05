@@ -4,6 +4,7 @@ services:
     build:
       context: ./consumer_frontend/
       dockerfile: Dockerfile
+    image: consumer-frontend:latest
     volumes:
       - frontend_build:/app/dist
     environment:
