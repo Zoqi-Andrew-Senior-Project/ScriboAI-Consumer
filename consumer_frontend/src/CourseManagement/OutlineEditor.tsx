@@ -287,6 +287,7 @@ const OutlineEditor = () => {
   const { outId } = useParams();
   const [outlineData, setOutlineData] = useState<Outline | null>(null); // Local state for smooth typing
   const [prevOutlineData, setPreviousOutlineData] = useState<Outline | null>(null); // Local state for smooth typing
+  const [loading, setLoading] = useState<boolean>(false); // Loading state
 
   // const prevOutlineDataRef = useRef<Outline | null>(null);
 
@@ -520,6 +521,7 @@ const OutlineEditor = () => {
   }
 
   const onAccept = async () => {
+    setLoading(true);
 
     const uuid = outlineData?.uuid
 
@@ -537,6 +539,8 @@ const OutlineEditor = () => {
 
       } catch (error) {
         console.error("ERROR:", error)
+      } finally {
+        setLoading(false);
       }
 
     }
@@ -643,6 +647,13 @@ const OutlineEditor = () => {
           </div> */}
         </div>
       </div>
+      {loading && (
+        <div className="fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 bg-indigo-50/75">
+          <div className="animate-pulse" style={{ width: "50px", height: "50px" }}>
+            <img src="/minilogo.png" alt="logo" />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
