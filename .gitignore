@@ -10,6 +10,7 @@ consumer_backend/mysite/mysite/__pycache__
 .env
 # Allow logo.png
 !consumer_frontend/public/logo.png
+!consumer_frontend/public/minilogo.png
 
 .env.dev
 
