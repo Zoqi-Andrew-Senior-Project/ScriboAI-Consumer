@@ -25,6 +25,10 @@ jobs:
             git pull || { echo -e " ++++++++++++++++++++++++\n❌ Error pulling changes! ❌ \n ++++++++++++++++++++++++"; exit 1; }
                       
             echo "+++++++++++++++"
+            echo "📄 Creating frontend .env file......."
+            echo "+++++++++++++++"
+
+            echo "+++++++++++++++"
             echo "📄 Creating backend .env file......."
             echo "+++++++++++++++"
 

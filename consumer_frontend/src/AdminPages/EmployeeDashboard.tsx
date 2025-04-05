@@ -29,7 +29,7 @@ const MemberTable = () => {
 
     useEffect(() => {
         axios
-          .get(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/organization`, {
+          .get(`${import.meta.env.VITE_BACKEND_ADDRESS}/org/organization`, {
             withCredentials: true,  // Ensures cookies are sent
           })
           .then((response) => setMembers(response.data.members))
@@ -106,7 +106,7 @@ const MemberActionForm: React.FC<MemberActionFormProps> = ({isOpen, onClose, mem
 
     const handleDelete = () => {
         axios
-          .delete(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/member`, {
+          .delete(`${import.meta.env.VITE_BACKEND_ADDRESS}/org/member`, {
             withCredentials: true,  // Ensures cookies are sent
             data: {
                 member_username: member.user_name
@@ -132,7 +132,7 @@ const MemberActionForm: React.FC<MemberActionFormProps> = ({isOpen, onClose, mem
         if (newRole !== member.role) {
             setSelectedRole(newRole);
 
-            axios.put(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/member/`, {
+            axios.put(`${import.meta.env.VITE_BACKEND_ADDRESS}/org/member/`, {
                 member_username: member.user_name,
                 role: newRole
             }, {
@@ -276,7 +276,7 @@ const InvitationsTable = () => {
 
     useEffect(() => {
         axios
-          .get(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/invite/`, {
+          .get(`${import.meta.env.VITE_BACKEND_ADDRESS}/org/invite/`, {
             withCredentials: true,  // Ensures cookies are sent
           })
           .then((response) => setInvites(response.data.invites))
@@ -350,7 +350,7 @@ const InviteActionForm: React.FC<InviteActionFormProps> = ({ isOpen, onClose, in
             return;
         }
         
-        axios.delete(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/invite/`, {
+        axios.delete(`${import.meta.env.VITE_BACKEND_ADDRESS}/org/invite/`, {
             withCredentials: true,  // Ensures cookies are sent
             data: {
                 email: invite.email
@@ -371,7 +371,7 @@ const InviteActionForm: React.FC<InviteActionFormProps> = ({ isOpen, onClose, in
             console.error("No invite selected for resend.");
             return;
         }
-        axios.post(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/invite/`, {
+        axios.post(`${import.meta.env.VITE_BACKEND_ADDRESS}/org/invite/`, {
             email: invite.email
         }, {
             withCredentials: true
@@ -455,7 +455,7 @@ const CreateInviteForm: React.FC<CreateInviteFormProps> = ({ isOpen, onClose }) 
             setErrorMessage('Please enter a valid email address.');
         } else {
             setErrorMessage('');
-            axios.post(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/invite/`, {
+            axios.post(`${import.meta.env.VITE_BACKEND_ADDRESS}/org/invite/`, {
                 email: email
             }, {
                 withCredentials: true

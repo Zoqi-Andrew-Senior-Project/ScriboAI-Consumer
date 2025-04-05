@@ -39,7 +39,7 @@ const AcceptInvite = () => {
         };
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/member/`, payload);
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_ADDRESS}/org/member/`, payload);
             setStatusMessage("Successfully accepted the invite!");
 
             const data = {
@@ -75,7 +75,7 @@ const AcceptInvite = () => {
         }
 
         try {
-            const endpoint = `${import.meta.env.VITE_BACKEND_ADDRESS}/api/auth/login/`;
+            const endpoint = `${import.meta.env.VITE_BACKEND_ADDRESS}/auth/login/`;
             const response = await axios.post(endpoint, data, {
                 withCredentials: true,
                 headers: { 'Content-Type': 'application/json' },

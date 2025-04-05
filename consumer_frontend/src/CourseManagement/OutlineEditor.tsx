@@ -327,7 +327,7 @@ const OutlineEditor = () => {
        ws.current.close(); // Close previous connection before reconnecting
     }
     
-    ws.current = new WebSocket(`wss://scriboai.tech/ws/outline/${outId}/`);
+    ws.current = new WebSocket(`${import.meta.env.VITE_WS_BACKEND}/outline/${outId}/`);
     ws.current.onopen = () => console.log("WebSocket Connected");
 
     ws.current.onmessage = (event) => {
@@ -528,7 +528,7 @@ const OutlineEditor = () => {
         "course": uuid
       }
 
-      const url = `${import.meta.env.VITE_BACKEND_ADDRESS}/api/course/pages/`
+      const url = `${import.meta.env.VITE_BACKEND_ADDRESS}/course/pages/`
 
       try {
         const response: InitializePagesResponseData = await axios.post(url, data);
