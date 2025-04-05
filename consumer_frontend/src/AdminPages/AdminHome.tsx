@@ -17,20 +17,20 @@ function AdminHome() {
             <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden">
               <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover" />
             </div>
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Hello {user.first_name}!</h1>
-            <h2 className="text-2xl text-gray-600">Admin Dashboard</h2>
-            <p className="text-lg text-gray-500 mt-2">All of your training problems solved with just a few clicks!</p>
+            <h1 className="text-3xl font-bold text-tertiary mb-2">Hello {user.first_name}!</h1>
+            <h2 className="text-2xl text-tertiary">Admin Dashboard</h2>
+            <p className="text-lg text-tertiary mt-2">All of your training problems solved with just a few clicks!</p>
           </div>
   
           {/* Right Column: Buttons stacked on top of each other */}
           <div className="flex flex-col items-center justify-center space-y-4">
-            <Link to="/create-course" className="bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-3 px-6 rounded w-full md:w-3/4 text-center">
+            <Link to="/create-course" className="bg-[#2A6F97] hover:bg-[#1E88E5] text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-105">
               Create Course
             </Link>
-            <Link to="/course-dashboard" className="bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-3 px-6 rounded w-full md:w-3/4 text-center">
+            <Link to="/course-dashboard" className="bg-[#2A6F97] hover:bg-[#1E88E5] text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-105">
               Manage Courses
             </Link>
-            <Link to="/admin/employee-dashboard" className="bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-3 px-6 rounded w-full md:w-3/4 text-center">
+            <Link to="/admin/employee-dashboard" className="bg-[#2A6F97] hover:bg-[#1E88E5] text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-105">
               Employee Management
             </Link>
           </div>
