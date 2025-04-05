@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme {  
   --font-display: "Satoshi", "sans-serif";
@@ -6,10 +7,10 @@
 
   --color-primary: #70A9A1;
   --color-secondary: #0B2027;
-  --color-tertiary: #cfd7c7;
+  --color-tertiary: #FAF9F6;
 
   --color-accent-1: #CFD7C7;
-  --color-accent-2: #0B2027;
+  --color-accent-2: #F6F1D1;
   --color-accent-3: #40798C;
 
   --color-button-primary-bg: #40798C;
