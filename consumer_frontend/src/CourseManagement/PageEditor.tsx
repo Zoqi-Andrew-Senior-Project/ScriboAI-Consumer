@@ -207,8 +207,7 @@ const PageEditor = () => {
             {savingStatus === 'idle' && <span className="text-gray-500">No changes</span>}
           </div>
         </div>
-
-        <div className="editor bg-white shadow-lg rounded-lg p-4">
+        <div className="editor prose lg:prose-l mx-auto bg-white shadow-lg rounded-md p-10 max-w-none overflow-auto">
           <MDXEditor ref={ref} markdown={content} onChange={handleChange} plugins={[
             toolbarPlugin({
               toolbarClassName: 'my-classname',
