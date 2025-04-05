@@ -29,7 +29,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Memoized fetch function
     const fetchUser = useCallback(async () => {
         try {
-            const response = await fetch(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/member/`, {
+            const response = await fetch(`${import.meta.env.VITE_BACKEND_ADDRESS}/org/member/`, {
                 credentials: "include",
             });
 

@@ -95,7 +95,7 @@ function CreateCourse() {
   const handleSubmit = async () => {
       setIsLoading(true);
 
-      const url = `${import.meta.env.VITE_BACKEND_ADDRESS}/api/course/course/`
+      const url = `${import.meta.env.VITE_BACKEND_ADDRESS}/course/course/`
       console.log(url)
       const time = promptData.duration === "short" ? "up to one hour" : "between one and two hours"
       const data = {

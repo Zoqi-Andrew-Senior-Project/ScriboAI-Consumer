@@ -105,7 +105,7 @@ export default function CreateOrganization() {
         console.log(formData);
 
         try {
-            const response = await axios.post(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/org/organization/`, formData);
+            const response = await axios.post(`${import.meta.env.VITE_BACKEND_ADDRESS}/org/organization/`, formData);
             console.log(response.data.data);
             setUserName(response.data.data.member.user_name);
             setOrganizationName(response.data.data.organization.name);

@@ -32,7 +32,7 @@ function Login() {
         }
 
         try {
-            const endpoint = `${import.meta.env.VITE_BACKEND_ADDRESS}/api/auth/login/`;
+            const endpoint = `${import.meta.env.VITE_BACKEND_ADDRESS}/auth/login/`;
             const response = await axios.post(endpoint, loginData, {
                 withCredentials: true,
                 headers: { 'Content-Type': 'application/json' },

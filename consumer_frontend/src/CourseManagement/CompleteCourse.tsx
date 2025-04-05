@@ -41,7 +41,7 @@ const CourseDashboard = () => {
 
     useEffect(() => {
         axios
-          .get(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/course/course`, {
+          .get(`${import.meta.env.VITE_BACKEND_ADDRESS}/course/course`, {
             params: {
                 course: courseId,
             },
@@ -55,7 +55,7 @@ const CourseDashboard = () => {
         console.log("Publishing outline", course.uuid)
 
         axios
-            .put(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/course/course/`, {
+            .put(`${import.meta.env.VITE_BACKEND_ADDRESS}/course/course/`, {
                 action: "publish",
                 course: course.uuid,
                 withCredentials: true,  // Ensures cookies are sent
@@ -73,7 +73,7 @@ const CourseDashboard = () => {
         console.log("Drating outline", course.uuid)
 
         axios
-            .put(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/course/course/`, {
+            .put(`${import.meta.env.VITE_BACKEND_ADDRESS}/course/course/`, {
                 action: "draft",
                 course: course.uuid,
                 withCredentials: true,  // Ensures cookies are sent

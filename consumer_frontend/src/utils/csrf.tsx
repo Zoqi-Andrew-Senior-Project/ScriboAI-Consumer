@@ -1,6 +1,6 @@
 export const getCSRFToken = async () => {
     try {
-        const response = await fetch(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/auth/csrf/`, {
+        const response = await fetch(`${import.meta.env.VITE_BACKEND_ADDRESS}/auth/csrf/`, {
             credentials: "include",
         });
 

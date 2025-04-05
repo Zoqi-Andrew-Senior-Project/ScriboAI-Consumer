@@ -27,7 +27,7 @@ const CourseTable = () => {
 
     useEffect(() => {
         axios
-            .get(`${import.meta.env.VITE_BACKEND_ADDRESS}/api/course/course`, {
+            .get(`${import.meta.env.VITE_BACKEND_ADDRESS}/course/course`, {
                 withCredentials: true, // Ensures cookies are sent
             })
             .then((response) => setCourses(response.data.courses))
