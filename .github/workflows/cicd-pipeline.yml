@@ -9,55 +9,63 @@ jobs:
     runs-on: ubuntu-latest
     environment: PROD
     steps:
-    - name: executing remote ssh commands using password
-      uses: appleboy/ssh-action@v1.1.0
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        password: ${{ secrets.PASSWORD }}
-        port: ${{ secrets.PORT }}
-        script: |
-          echo "+++++++++++++++"
-          echo "🛻 Pulling changes......."
-          echo "+++++++++++++++"
-          
-          cd ~/AI-Training-Consumer/
-          git pull || { echo -e " ++++++++++++++++++++++++\n❌ Error pulling changes! ❌ \n ++++++++++++++++++++++++"; exit 1; }
-                    
-          echo "+++++++++++++++"
-          echo "📄 Creating backend .env file......."
-          echo "+++++++++++++++"
+      - name: executing remote ssh commands using password
+        uses: appleboy/ssh-action@v1.1.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          script: |
+            echo "+++++++++++++++"
+            echo "🛻 Pulling changes......."
+            echo "+++++++++++++++"
 
-          cat > ~/AI-Training-Consumer/.env <<EOF
-          ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
-          CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
-          DJANGO_SECRET=${{ secrets.DJANO_SECRET }}
-          DB_HOST=${{ secrets.DB_HOST }}
-          DB_NAME=${{ secrets.DB_NAME }}
-          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-          DB_PORT=${{ secrets.DB_PORT }}
-          DB_USERNAME=${{ secrets.DB_USERNAME }}
-          DEBUG=${{ secrets.DEBUG }}
-          FRONTEND_ADDRESS=${{ secrets.FRONTEND_ADDRESS }}
-          NGINX_SERVER_NAME=${{ secrets.NGINX_SERVER_NAME }}
-          REACT_APP_HUGGINGFACE_ADDRESS=${{ secrets.REACT_APP_HUGGINGFACE_ADDRESS }}
-          REDIS_HOST=${{ secrets.REDIS_HOST }}
-          REDIS_PORT=${{ secrets.REDIS_PORT }}
-          REDIS_DB=${{ secrets.REDIS_DB }}
-          RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
-          VITE_BACKEND_ADDRESS=${{ secrets.VITE_BACKEND_ADDRESS }}
-          VITE_WS_BACKEND=${{ secrets.VITE_WS_BACKEND }}
-          EOF
+            cd ~/AI-Training-Consumer/
+            git pull || { echo -e " ++++++++++++++++++++++++\n❌ Error pulling changes! ❌ \n ++++++++++++++++++++++++"; exit 1; }
+                      
+            echo "+++++++++++++++"
+            echo "📄 Creating backend .env file......."
+            echo "+++++++++++++++"
 
-          echo "+++++++++++++++"
-          echo "🏗️ Composing docker setup......."
-          echo "+++++++++++++++"
-          
-          cd ~/AI-Training-Consumer/
-          docker compose down || { echo -e " ++++++++++++++++++++++++\n❌ Error composing down! ❌ \n ++++++++++++++++++++++++"; exit 1; }
-          docker compose up --build -d || { echo -e " ++++++++++++++++++++++++\n❌ Error composing up! ❌ \n ++++++++++++++++++++++++"; exit 1; }
+            cat > ~/AI-Training-Consumer/.env <<EOF
+            ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
+            CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}
+            DJANGO_SECRET=${{ secrets.DJANO_SECRET }}
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DEBUG=${{ secrets.DEBUG }}
+            FRONTEND_ADDRESS=${{ secrets.FRONTEND_ADDRESS }}
+            NGINX_SERVER_NAME=${{ secrets.NGINX_SERVER_NAME }}
+            REACT_APP_HUGGINGFACE_ADDRESS=${{ secrets.REACT_APP_HUGGINGFACE_ADDRESS }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            REDIS_DB=${{ secrets.REDIS_DB }}
+            RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
+            VITE_BACKEND_ADDRESS=${{ secrets.VITE_BACKEND_ADDRESS }}
+            VITE_WS_BACKEND=${{ secrets.VITE_WS_BACKEND }}
+            EOF
 
-          echo "+++++++++++++++"
-          echo "🧹 Pruning unused Docker resources......."
-          echo "+++++++++++++++"
-          docker system prune -f || { echo -e " ++++++++++++++++++++++++\n❌ Error pruning Docker resources! ❌ \n ++++++++++++++++++++++++"; exit 1; }
+            echo "+++++++++++++++"
+            echo "🏗️ Composing docker setup......."
+            echo "+++++++++++++++"
+
+            cd ~/AI-Training-Consumer/
+
+            docker compose down || { echo -e " ++++++++++++++++++++++++\n❌ Error composing down! ❌ \n ++++++++++++++++++++++++"; exit 1; }
+
+            docker volume prune || { echo -e " ++++++++++++++++++++++++\n❌ Error pruning volumes! ❌ \n ++++++++++++++++++++++++"; exit 1; }
+
+            docker image prune || { echo -e " ++++++++++++++++++++++++\n❌ Error pruning images! ❌ \n ++++++++++++++++++++++++"; exit 1; }
+
+            docker volume rm ai-training-consumer_frontend_build || { echo -e " ++++++++++++++++++++++++\n❌ Error removing frontend volume! ❌ \n ++++++++++++++++++++++++"; exit 1; }
+
+            docker compose up --build -d || { echo -e " ++++++++++++++++++++++++\n❌ Error composing up! ❌ \n ++++++++++++++++++++++++"; exit 1; }
+
+            echo "+++++++++++++++"
+            echo "🧹 Pruning unused Docker resources......."
+            echo "+++++++++++++++"
+            docker system prune -f || { echo -e " ++++++++++++++++++++++++\n❌ Error pruning Docker resources! ❌ \n ++++++++++++++++++++++++"; exit 1; }
