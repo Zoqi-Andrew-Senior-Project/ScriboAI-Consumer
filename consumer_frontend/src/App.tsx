@@ -98,7 +98,7 @@ function Footer() {
 function App() {
   return (
     <Router>
-      <div className="min-h-screen w-full bg-linear-to-r from-primary to-secondary ">
+      <div className="min-h-screen flex flex-col  bg-linear-to-r from-primary to-secondary ">
         <Navbar />
         <Routes>
           <Route path="/" element={<Welcome />} /> 
