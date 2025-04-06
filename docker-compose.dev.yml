@@ -44,7 +44,7 @@ services:
       - "8000:8000" # Maps port 8000 of the host to port 8000 of the container
     networks:
       - app-network
-    env_file: .env.dev # Assuming you have a .env.dev file for dev-specific variables
+    env_file: .env # Assuming you have a .env.dev file for dev-specific variables
     environment:
       DB_HOST: mongo
       REDIS_HOST: redis
