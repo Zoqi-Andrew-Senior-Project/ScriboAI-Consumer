@@ -72,8 +72,8 @@ const CourseTable = () => {
     };
 
     return (
-        <div className="overflow-x-auto shadow-md rounded-lg bg-white p-6">
-            <h2 className="text-2xl font-semibold mb-4">Course List</h2>
+        <div className="overflow-x-auto shadow-md rounded-lg bg-tertiary p-6">
+            <h2 className="text-2xl font-semibold mb-4 text-center">Course Dashboard</h2>
             <table className="table-auto w-full text-left">
                 <thead className="bg-gray-100">
                     <tr>
@@ -129,7 +129,6 @@ const CourseDashboard = () => {
     return (
         <div className="flex justify-center min-h-screen">
             <div className="w-full max-w-4xl px-4 py-6">
-                <h1 className="text-3xl font-semibold text-center mb-6">Course Dashboard</h1>
                 <CourseTable />
             </div>
         </div>
