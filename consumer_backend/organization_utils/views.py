@@ -513,7 +513,6 @@ class MemberView(APIView):
             return Response({
                 "status": "error",
                 "message": "Invalid token.",
-                "data": member_serializer.errors
             }, status=status.HTTP_404_NOT_FOUND)
 
     @swagger_auto_schema(
