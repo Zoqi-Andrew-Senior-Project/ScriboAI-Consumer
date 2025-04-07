@@ -5,6 +5,8 @@ import isEqual from "lodash/isEqual";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import Tooltip from "@/components/Tooltip";
+import { createPortal } from 'react-dom';
+import { FaPlus, FaRedo, FaSave, FaTrash, FaCheck, FaEllipsisH, FaTimes, FaChevronDown } from 'react-icons/fa';
 
 enum FeatureType {
   IMAGE = "image",
@@ -109,7 +111,6 @@ const Module = ({ module, updateModule }: { module: Module; updateModule: (updat
         <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
             <h4 className="text-lg font-semibold">Module</h4>
-            <button className="text-red-500 hover:text-red-700 text-xl">X</button>
           </div>
 
           
@@ -154,6 +155,69 @@ const Module = ({ module, updateModule }: { module: Module; updateModule: (updat
     )
 }
 
+interface ConfirmationDialogProps {
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  confirmText?: string;
+  cancelText?: string;
+}
+const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({ 
+  title, 
+  message, 
+  onConfirm, 
+  onCancel, 
+  confirmText = "Confirm", 
+  cancelText = "Cancel" 
+}) => {
+  if (typeof document === 'undefined') {
+    return null;
+  }
+
+  return createPortal(
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+      <div 
+        className="absolute inset-0 bg-black/50" 
+        onClick={onCancel}
+      />
+      
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-bold text-gray-800">{title}</h3>
+          <button
+            onClick={onCancel}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+        
+        <div className="mb-6">
+          <p className="text-gray-700">{message}</p>
+        </div>
+        
+        <div className="flex justify-end space-x-3">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+          >
+            {cancelText}
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+};
 interface RegenerateDialogProps {
   setRegenerateDialogPressed: React.Dispatch<React.SetStateAction<boolean>>;
   onRegenerate: (comments: string) => void;
@@ -162,145 +226,281 @@ interface RegenerateDialogProps {
 const RegenerateDialog: React.FC<RegenerateDialogProps> = ({ setRegenerateDialogPressed, onRegenerate }) => {
   const [notes, setNotes] = useState("")
 
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement> | React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNotes(e.target.value);
   };
 
   const onCancel = () => {
-    setRegenerateDialogPressed(false)
+    setRegenerateDialogPressed(false);
+    setNotes("");
   }
 
   const onRegenerateAction = () => {
-    const comments = notes;
-    setRegenerateDialogPressed(false)
-    onRegenerate(comments);
+    if (notes.trim()) {
+      onRegenerate(notes);
+      setNotes("");
+    }
+    setRegenerateDialogPressed(false);
   }
 
-  return (
-    <div className="fixed inset-0 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
+  if (typeof document === 'undefined') {
+    return null; // For SSR
+  }
+
+  return createPortal(
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/50" 
+        onClick={onCancel}
+      />
+      
+      {/* Dialog box */}
+      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-4">
-          <h5 className="text-2xl font-semibold">Regenerate Course Outline</h5>
+          <h3 className="text-xl font-bold text-gray-800">Regenerate Course Outline</h3>
           <button
-            type="button"
-            className="text-gray-600 hover:text-gray-900"
             onClick={onCancel}
+            className="text-gray-500 hover:text-gray-700"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
-        <p className="mb-4 text-gray-600">Enter notes for the model to follow as it regenerates the outline!</p>
-        <textarea
-          className="w-full p-3 border border-gray-300 rounded-md mb-4"
-          value={notes}
-          onChange={handleChange}
-          rows={4}
-          placeholder="Enter your notes here"
-        ></textarea>
-        <div className="flex justify-end space-x-4">
-          <button
-            className="bg-gray-300 text-gray-700 font-semibold py-2 px-4 rounded-md hover:bg-gray-400"
-            onClick={onCancel}
-          >
-            Cancel
-          </button>
-          <button
-            className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-600"
-            onClick={onRegenerateAction}
-          >
-            Submit
-          </button>
+        
+        <div className="mb-6">
+          <label htmlFor="regenerate-notes" className="block text-sm font-medium text-gray-700 mb-2">
+            Provide feedback for regeneration:
+          </label>
+          <textarea
+            id="regenerate-notes"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            rows={4}
+            value={notes}
+            onChange={handleChange}
+            placeholder="What changes would you like to see in the new version?"
+          />
+        </div>
+        
+        <div className="flex justify-end space-x-3">
+          <Tooltip label="Exit the dialog." aria-label="Exit the dialog.">
+            <button
+              onClick={onCancel}
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              Cancel
+            </button>
+          </Tooltip>
+          <Tooltip label="Regenerate the outline with the feedback." aria-label="Regenerate the outline with the feedback.">
+            <button
+              onClick={onRegenerateAction}
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              disabled={!notes.trim()}
+            >
+              Regenerate
+            </button>
+          </Tooltip>
         </div>
       </div>
-    </div>  
-  )
-}
+    </div>,
+    document.body
+  );
+};
 
 interface OutlineEditorMenuProps {
   onRegenerate: (comments: string) => void;
   onNewPrompt: () => void;
   onAccept: () => void;
   onSave: () => void;
+  onDelete: () => void;
 }
 
-const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onRegenerate, onAccept, onSave }) => {
+const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onRegenerate, onAccept, onSave, onDelete }) => {
   const [regenerateDialogPressed, setRegenerateDialogPressed] = useState<boolean>(false);
+  const [deleteDialogPressed, setDeleteDialogPressed] = useState<boolean>(false);
+  const [acceptDialogPressed, setAcceptDialogPressed] = useState<boolean>(false);
+  const [newOutlineDialogPressed, setNewOutlineDialogPressed] = useState<boolean>(false);
+  const [isHovered, setIsHovered] = useState(false);
 
-  const onRegenerateClick = () => {
-    setRegenerateDialogPressed(true);
-  }
+  // Positions for the buttons when hovered (radial spread)
+  const hoverPositions = [
+    { top: 40, left: 20 },       // Center (main button)
+    { top: -20, left: -80 },   // Top-left
+    { top: -80, left: 0 },     // Top
+    { top: -20, left: 80 },    // Top-right
+    { top: 80, left: 60 },      // Bottom-right
+    { top: 80, left: -60 },      // Bottom-left
+  ];
 
   return (
-    <div className="max-w-screen-md mx-auto px-4 py-3 flex justify-between items-center space-x-4">
-      <div className="relative group">
-        <Tooltip label="Start over with a new outline" aria-label="Start over with a new outline">
+    <div 
+      className="fixed bottom-0 right-0 z-75"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{ 
+        width: isHovered ? '300px' : `128px`, 
+        height: isHovered ? '300px' : `128px`, 
+      }}
+    >
+      {/* Main container */}
+      <div className="relative">
+        {/* Main button that triggers the radial menu */}
+        
+        <div className="absolute" style={{ top: 100, left: 100 }}>
           <button
-            className="flex items-center space-x-2 bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-semibold py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-1500 ease-in-out w-16 max-w-16 group-hover:w-auto group-hover:max-w-xs group-hover:pl-4"
-            onClick={onNewPrompt}
+            onClick={() => !isHovered && setIsHovered(true)}
+            className={`absolute bg-indigo-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
+                ${isHovered ? "p-2 w-8 h-8" : "p-2 w-12 h-12"}`
+              }
+              style={{
+                top: isHovered ? hoverPositions[0].top : -40,
+                left: isHovered ? hoverPositions[0].left : -40,
+              }}
           >
-            <span className="text-xl">🆕</span>
-            <span className="text-sm opacity-0 group-hover:opacity-100 group-hover:delay-500 transition-opacity duration-500">New</span>
+            <FaEllipsisH className={`text-white
+                ${isHovered ? "w-3 h-3" : "w-6 h-6"}`
+              }/>
           </button>
-        </Tooltip>
+
+        {/* Radial menu buttons */}
+          {/* Accept Button */}
+          <Tooltip label="Accept the outline">
+            <button
+              onClick={() => setAcceptDialogPressed(true)}
+              className={
+                `absolute bg-green-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
+                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
+              }
+              style={{
+                top: isHovered ? hoverPositions[1].top : 0,
+                left: isHovered ? hoverPositions[1].left : 0,
+              }}
+            >
+              <FaCheck className="w-6 h-6" />
+            </button>
+          </Tooltip>
+
+          {/* New Button */}
+          <Tooltip label="Start new outline">
+            <button
+              onClick={() => setNewOutlineDialogPressed(true)}
+              className={`absolute bg-blue-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
+                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
+              }
+              style={{
+                top: isHovered ? hoverPositions[2].top : 0,
+                left: isHovered ? hoverPositions[2].left : 0,
+              }}
+            >
+              <FaPlus className="w-6 h-6" />
+            </button>
+          </Tooltip>
+
+          {/* Regenerate Button */}
+          <Tooltip label="Regenerate outline">
+            <button
+              onClick={() => setRegenerateDialogPressed(true)}
+              className={`absolute bg-yellow-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
+                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
+              }
+              style={{
+                top: isHovered ? hoverPositions[3].top : 0,
+                left: isHovered ? hoverPositions[3].left : 0,
+              }}
+            >
+              <FaRedo className="w-6 h-6" />
+            </button>
+          </Tooltip>
+
+          {/* Save Button */}
+          <Tooltip label="Save outline">
+            <button
+              onClick={onSave}
+              className={`absolute bg-teal-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
+                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
+              }
+              style={{
+                top: isHovered ? hoverPositions[4].top : 0,
+                left: isHovered ? hoverPositions[4].left : 0,
+              }}
+            >
+              <FaSave className="w-6 h-6" />
+            </button>
+          </Tooltip>
+
+          {/* Delete Button - positioned differently to be more accessible */}
+          <Tooltip label="Delete outline">
+            <button
+              onClick={() => setDeleteDialogPressed(true)}
+              className={`absolute bg-red-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
+                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
+              }
+              style={{
+                top: isHovered ? hoverPositions[5].top : 0,
+                left: isHovered ? hoverPositions[5].left : 0,
+              }}
+            >
+              <FaTrash className="w-6 h-6" />
+            </button>
+          </Tooltip>
+        </div>
       </div>
 
-      <div className="relative group">
-        <Tooltip label="Regenerate this outline" aria-label="Regenerate this outline">
-          <button
-            className="flex items-center space-x-2 bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-semibold py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-1500 ease-in-out w-16 max-w-16 group-hover:w-auto group-hover:max-w-xs group-hover:pl-4"
-            onClick={onRegenerateClick}
-          >
-            <span className="text-xl">🔄</span>
-            <span className="text-sm opacity-0 group-hover:opacity-100 group-hover:delay-500 transition-opacity duration-500">Regenerate</span>
-          </button>
-        </Tooltip>
-      </div>
-
-      <div className="relative group">
-        <Tooltip label="Save the outline" aria-label="Save the outline">
-          <button
-            className="flex items-center space-x-2 bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-semibold py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-1500 ease-in-out w-16 max-w-16 group-hover:w-auto group-hover:max-w-xs group-hover:pl-4"
-            onClick={onSave}
-          >
-            <span className="text-xl">💾</span>
-            <span className="text-sm opacity-0 group-hover:opacity-100 group-hover:delay-500 transition-opacity duration-500">Save</span>
-          </button>
-        </Tooltip>
-      </div>
-
-      <div className="relative group">
-        <Tooltip label="Accept and move to the next step" aria-label="Accept and move to the next step">
-          <button
-            className="flex items-center space-x-2 bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-semibold py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-1500 ease-in-out w-16 max-w-16 group-hover:w-auto group-hover:max-w-xs group-hover:pl-4"
-            onClick={onAccept}
-          >
-            <span className="text-xl">✅</span>
-            <span className="text-sm opacity-0 group-hover:opacity-100 group-hover:delay-500 transition-opacity duration-500">Save</span>
-          </button>
-        </Tooltip>
-      </div>
-
+      {/* Regenerate Dialog */}
       {regenerateDialogPressed && (
-              <RegenerateDialog 
-                setRegenerateDialogPressed={setRegenerateDialogPressed}
-                onRegenerate={onRegenerate}
-              />
-          )}
+        <RegenerateDialog 
+          setRegenerateDialogPressed={setRegenerateDialogPressed}
+          onRegenerate={onRegenerate}
+        />
+      )}
+
+      {deleteDialogPressed && (
+        <ConfirmationDialog
+          title="Delete Outline"
+          message="Are you sure you want to delete this outline? This action cannot be undone."
+          onConfirm={() => {
+            onDelete();
+            setDeleteDialogPressed(false);
+          }}
+          onCancel={() => setDeleteDialogPressed(false)}
+          confirmText="Delete"
+        />
+      )}
+
+      {acceptDialogPressed && (
+        <ConfirmationDialog
+          title="Accept Outline"
+          message="Are you ready to accept this outline and proceed to page creation?"
+          onConfirm={() => {
+            onAccept();
+            setAcceptDialogPressed(false);
+          }}
+          onCancel={() => setAcceptDialogPressed(false)}
+          confirmText="Accept"
+        />
+      )}
+
+      {newOutlineDialogPressed && (
+        <ConfirmationDialog
+          title="Start New Outline"
+          message="Are you sure you want to start a new outline? Any unsaved changes will be lost."
+          onConfirm={() => {
+            onNewPrompt();
+            setNewOutlineDialogPressed(false);
+          }}
+          onCancel={() => setNewOutlineDialogPressed(false)}
+          confirmText="Continue"
+        />
+      )}
     </div>
-  )
+  );
+};
+
+
+interface ExpandedSections {
+  objectives: boolean;
+  modules: boolean;
 }
 
 const OutlineEditor = () => {
@@ -308,6 +508,17 @@ const OutlineEditor = () => {
   const [outlineData, setOutlineData] = useState<Outline | null>(null); // Local state for smooth typing
   const [prevOutlineData, setPreviousOutlineData] = useState<Outline | null>(null); // Local state for smooth typing
   const [loading, setLoading] = useState<boolean>(false); // Loading state
+  const [expandedSections, setExpandedSections] = useState<ExpandedSections>({
+    objectives: true,
+    modules: true,
+  });
+  
+  const toggleSection = (section: keyof ExpandedSections) => {
+    setExpandedSections((prev) => ({
+      ...prev,
+      [section]: !prev[section], // Toggle the specific section
+    }));
+  };
   
   const navigate = useNavigate();
   /* Script JSON
@@ -353,6 +564,7 @@ const OutlineEditor = () => {
         const data = JSON.parse(event.data);
         const script = data.data.script;
         console.log("Received WebSocket Data:", script);
+        setLoading(false);
         if (!isTyping.current) {
           setOutlineData(script);
           setPreviousOutlineData(script);
@@ -370,11 +582,7 @@ const OutlineEditor = () => {
   }, [outId]);
 
   const detectChanges = ( prev: Outline | null, curr: Outline | null) => {
-    console.log("prev\n", prev)
-    console.log("curr\n", curr)
-    console.log("detecting changes...")
     if (!prev || !curr) return curr;
-    console.log("passed!")
 
     let changes: Partial<Outline & { moduleChanges?: { add?: Module[]; remove?: string[]; update?: Module[] } }> = {};
     
@@ -434,13 +642,7 @@ const OutlineEditor = () => {
       console.log("sending update...")
       const changes = detectChanges(oldOutlineData, newOutlineData);
 
-      console.log(changes);
-
       if (!changes) return;
-
-      // if (changes){
-      //   console.log("WebSocket Update:", {"changes": changes});
-      // }
 
       const data = { changes: changes };
       const action = "change"
@@ -449,8 +651,6 @@ const OutlineEditor = () => {
         action: "change",
         data: data
       }
-
-      console.log(message)
 
       if (ws.current?.readyState === WebSocket.OPEN) {
         ws.current.send(JSON.stringify({
@@ -464,29 +664,25 @@ const OutlineEditor = () => {
   );
 
   useEffect(() => {
-    console.log("outlineData changed:", outlineData);
-    console.log("previous:", prevOutlineData);
-    console.log()
+    console.log("outlineData changed");
     if (!isEqual(outlineData, prevOutlineData)) {
       sendUpdate(prevOutlineData, outlineData);
     }
   }, [outlineData, sendUpdate]);
 
   const handleChange = ( updatedOutline: Outline ) => {
-    console.log("handling change", updatedOutline)
+    console.log("handling change")
     setOutlineData(updatedOutline);
   }
 
   const debouncedSave = useCallback(
     debounce((outline) => {
-      console.log("WebSocket Save:", {"data": outline});
       const data = {
         "action": "save",
         "data": {
           "script": outline,
         }
       };
-      console.log("sending", data)
       if (ws.current?.readyState === WebSocket.OPEN) {
         ws.current.send(JSON.stringify(data));
       }
@@ -495,16 +691,17 @@ const OutlineEditor = () => {
   );
 
   const sendSave = () => {
-    console.log(outlineData);
+    console.log("saving");
     debouncedSave(outlineData);
   };
 
   const onNewPrompt = () => {
-    console.log("new prompt");
     navigate("/create-course")
   };
 
   const onRegenerate = (comments: string) => {
+    setLoading(true);
+
     // Send a message to the WebSocket server to handle the regenerate action
     const data = {
       "action": "update",
@@ -515,8 +712,6 @@ const OutlineEditor = () => {
     }
 
     console.log("regenerate")
-
-    console.log(data)
 
     if (ws.current?.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify(data));
@@ -551,7 +746,7 @@ const OutlineEditor = () => {
 
       try {
         const response: InitializePagesResponseData = await axios.post(url, data);
-        navigate(`/document/${response.data.course}`);
+        navigate(`/edit/page/${response.data.course}`);
         //navigate("/outline/" + response.data.uuid)
 
       } catch (error) {
@@ -561,16 +756,88 @@ const OutlineEditor = () => {
       }
 
     }
-
   };
+
+  const onDelete = async () => {
+    console.log("WOulda deleted")
+  }
+
+  const removeModule = (index: number) => {
+    if (outlineData) {
+      setPreviousOutlineData(outlineData); // Save the previous state before removing a module
+
+      setOutlineData((prevOutlineData) => {
+        if (prevOutlineData) {
+          const updatedModules = prevOutlineData.modules.filter((_, i) => i !== index); // Remove module at index
+          return {
+            ...prevOutlineData,
+            modules: updatedModules,
+          };
+        }
+        return prevOutlineData; // Just return if prevOutlineData is null
+      });
+    } else {
+      console.error("Outline data is not available");
+    }
+  }
+
+  const addNewModule = () => {
+    const newModule: Module = {
+      uuid: "new-uuid-123",
+      name: "New Module",
+      duration: "2 hours",
+      subtopics: ["Subtopic 1", "Subtopic 2"],
+      features: [
+        FeatureType.IMAGE,
+      ],
+    };
+
+    if (outlineData) {
+      setPreviousOutlineData(outlineData); // Save the previous state before updating
+
+      setOutlineData((prevOutlineData) => {
+        if (prevOutlineData) {
+          // Ensure that we return a complete Outline object with all required fields
+          return {
+            ...prevOutlineData,
+            modules: [...prevOutlineData.modules, newModule],
+          };
+        }
+        return prevOutlineData; // Just return if prevOutlineData is null
+      });
+    } else {
+      console.error("Outline data is not available");
+    }
+  }
+
+  interface EditableSectionProps {
+    title: string;
+    value?: string;  // Optional value, it could be undefined
+    onSave: (newValue: string) => void;  // Function to handle saving the new value
+    type?: "text" | "number" | "password";  // Default type is text, but you can change it
+    placeholder?: string;  // Default placeholder is "No data"
+  }
+  
+  // EditableSection component with TypeScript types
+  const EditableSection: React.FC<EditableSectionProps> = ({
+    title,
+    value,
+    onSave,
+    type = "text",
+    placeholder = "No data",
+  }) => (
+    <div className="mb-6">
+      <h3 className="text-lg font-semibold text-gray-800 mb-2">{title}:</h3>
+      <EditableLine 
+        text={value ?? placeholder}
+        onSave={onSave}
+        type={type}
+      />
+    </div>
+  );
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      {/* Toolbar */}
-      <div className="fixed bottom-0 inset-x-0 z-50 bg-white/80 backdrop-blur-md border-t border-gray-200 shadow-inner">
-        <OutlineEditorMenu onNewPrompt={onNewPrompt} onRegenerate={onRegenerate} onAccept={onAccept} onSave={sendSave} />
-      </div>
-
       <div className="grid grid-cols-1 gap-6 w-full max-w-6xl p-4">
         {/* The Header */}
         <div className="flex flex-col items-center justify-center text-center mb-12">
@@ -582,80 +849,95 @@ const OutlineEditor = () => {
         </div>
 
         {/* The Outline */}
-        <div className="bg-tertiary p-8 rounded-lg shadow-md w-full">
-          <div className="mb-4">
-            <h1 className="block text-gray-700 text-lg font-bold mb-2">Title:</h1>
-            <EditableLine 
-              text={outlineData?.title ?? "No data."} 
-              onSave={(newTitle) => {
-                setOutlineData((prev) => prev ? { ...prev, title: newTitle } : prev);
-              }}
-            />
-          </div>
-          
-          <div className="mb-4">
-            <h4 className="block text-gray-700 text-lg font-bold mb-2">Duration:</h4>
-            <p className="">{outlineData?.duration || "No duration specified"}</p>
-          </div>
+        <div className="bg-white p-8 rounded-lg shadow-md w-full border border-gray-200">
+          <div className="mb-8">
+            <div className="space-y-6">
+              <h1 className="block text-gray-700 text-lg font-bold mb-2">Title:</h1>
+              <EditableLine 
+                text={outlineData?.title ?? "No data."} 
+                onSave={(newTitle) => {
+                  setOutlineData((prev) => prev ? { ...prev, title: newTitle } : prev);
+                }}
+              />
+              <h4 className="block text-gray-700 text-lg font-bold mb-2">Duration:</h4>
+              <p className="">{outlineData?.duration || "No duration specified"}</p>
 
-          <div className="mb-4">
-            <h3 className="block text-gray-700 text-lg font-bold mb-2">Summary:</h3>
-            <EditableLine 
-                text={outlineData?.summary ?? "No data."} 
-                onSave={(newSummary) => {
-                  setOutlineData((prev) => prev ? { ...prev, summary: newSummary } : prev);
-                }} 
-                type="textbox"
-            />
-          </div>
-
-          <div className="mb-4">
-            <h3 className="block text-gray-700 text-lg font-bold mb-2">Objectives:</h3>
-            <ul className="">
-                {outlineData?.objectives && outlineData.objectives.length  > 0 ? (
-                  outlineData.objectives.map((objective, index) => (
-                    <li key={index} className="">
-                      <EditableLine 
-                              text={objective}
-                              onSave={(newObjective) => {
-                                setOutlineData((prev) => {
-                                  if (!prev) return prev; // Prevents null errors
-                                  const updatedObjectives = [...prev.objectives];
-                                  updatedObjectives[index] = newObjective;
-                                  return { ...prev, objectives: updatedObjectives };
-                                });
-                              }}
-                          />
-                    </li>
+              <h3 className="block text-gray-700 text-lg font-bold mb-2">Summary:</h3>
+              <EditableLine 
+                  text={outlineData?.summary ?? "No data."} 
+                  onSave={(newSummary) => {
+                    setOutlineData((prev) => prev ? { ...prev, summary: newSummary } : prev);
+                  }} 
+                  type="textbox"
+              />
+              <div className="border-b border-gray-200 pb-2 mb-4">
+                <button 
+                  onClick={() => toggleSection('objectives')}
+                  className="flex items-center w-full justify-between"
+                >
+                  <h3 className="block text-gray-700 text-lg font-bold mb-2">Objectives</h3>
+                  <FaChevronDown className={`transition-transform ${expandedSections.objectives ? 'rotate-180' : ''}`}/>
+                </button>
+                {expandedSections.objectives && (
+                  <div className="mt-4">
+                    <ul className="">
+                        {outlineData?.objectives && outlineData.objectives.length  > 0 ? (
+                          outlineData.objectives.map((objective, index) => (
+                            <li key={index} className="">
+                              <EditableLine 
+                                      text={objective}
+                                      onSave={(newObjective) => {
+                                        setOutlineData((prev) => {
+                                          if (!prev) return prev; // Prevents null errors
+                                          const updatedObjectives = [...prev.objectives];
+                                          updatedObjectives[index] = newObjective;
+                                          return { ...prev, objectives: updatedObjectives };
+                                        });
+                                      }}
+                                  />
+                            </li>
+                          ))
+                        ) : (
+                          <li>No objectives specified</li>
+                        )}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              <h3 className="block text-gray-700 text-lg font-bold mb-2">Modules:</h3>
+              <div className="space-y-4">
+                {outlineData?.modules?.length > 0 ? (
+                  outlineData.modules.map((module, index) => (
+                    <div key={module.uuid} className="relative group">
+                      <Module 
+                        module={module}
+                        updateModule={(updated) => updateModule(index, updated)}
+                      />
+                      <button 
+                        onClick={() => removeModule(index)}
+                        className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100
+                                  bg-red-500 text-white rounded-full p-1 transition-opacity"
+                      >
+                        <FaTimes size={12} />
+                      </button>
+                    </div>
                   ))
                 ) : (
-                  <li>No objectives specified</li>
+                  <div className="text-center py-8 text-gray-500">
+                    No modules yet. Click "Add Module" to get started.
+                  </div>
                 )}
-            </ul>
-          </div>
-
-          <div className="mb-4">
-            <h3 className="block text-gray-700 text-lg font-bold mb-2">Modules:</h3>
-            {outlineData?.objectives && outlineData.modules?.length > 0 ? (
-              outlineData.modules.map((module, index) => (
-                <Module
-                  key={index}
-                  module={module}
-                  updateModule={(updatedModule) => updateModule(index, updatedModule)}
-                />
-              ))
-            ) : (
-              <p>No modules available</p>
-            )}
-          </div>
-
-          <div className="mb-4">
-            {/* Add Module Button */}
-            <button 
-              className="flex items-center justify-center w-full py-3 px-6 bg-blue-500 text-white font-semibold rounded-lg hover:bg-blue-600 transition duration-200"
-            >
-              <span className="mr-2">+</span> {/* Plus sign */}
-            </button>
+              </div>
+                <button 
+                  onClick={addNewModule}
+                  className="w-full py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 
+                            rounded-lg border-2 border-dashed border-blue-300 transition-colors
+                            flex items-center justify-center gap-2"
+                >
+                  <FaPlus />
+                  <span>Add New Module</span>
+                </button>
+            </div>
           </div>
 
           {/* <div className="">
@@ -664,6 +946,7 @@ const OutlineEditor = () => {
           </div> */}
         </div>
       </div>
+      
       {loading && (
         <div className="fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 bg-indigo-50/75">
           <div className="animate-pulse" style={{ width: "50px", height: "50px" }}>
@@ -671,6 +954,21 @@ const OutlineEditor = () => {
           </div>
         </div>
       )}
+      {typeof document !== 'undefined' && createPortal(
+        <>
+          {loading && (
+            <div className="fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 bg-indigo-50/75">
+              <div className="animate-pulse" style={{ width: "50px", height: "50px" }}>
+                <img src="/minilogo.png" alt="logo" />
+              </div>
+            </div>
+          )}
+        </>,
+        document.body
+      )}
+      
+      {/* Toolbar */}
+      <OutlineEditorMenu onNewPrompt={onNewPrompt} onRegenerate={onRegenerate} onAccept={onAccept} onSave={sendSave} onDelete={onDelete} />      
     </div>
   );
 };

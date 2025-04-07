@@ -4,9 +4,12 @@ import { useParams } from "react-router-dom";
 import { MDXEditor, MDXEditorMethods, UndoRedo, BoldItalicUnderlineToggles, toolbarPlugin, BlockTypeSelect, DiffSourceToggleWrapper } from '@mdxeditor/editor'
 import { headingsPlugin, diffSourcePlugin, listsPlugin } from '@mdxeditor/editor'
 import { useNavigate } from 'react-router-dom';
-
+import { HiArrowsPointingOut , HiArrowsPointingIn, HiArrowLeft, HiArrowRight } from "react-icons/hi2";
+import { HiCheck, HiOutlineSave } from "react-icons/hi";
 import '@mdxeditor/editor/style.css'
 import './pageeditor.css'
+import Progressbar from "@/components/Progressbar";
+import Tooltip from "@/components/Tooltip";
 
 interface WebSocketAction {
   next: () => void;
@@ -18,9 +21,9 @@ interface WebSocketAction {
 const useWebSocketAction = (ws: React.RefObject<WebSocket | null>) => {
   const sendAction = useCallback(
     debounce((action) => {
-      console.log(`WebSocket Request: ${action}`);
       const data = { action };
       if (ws.current?.readyState === WebSocket.OPEN) {
+        console.log(data)
         ws.current.send(JSON.stringify(data));
       }
     }, 500), // 500ms debounce
@@ -49,7 +52,14 @@ interface MetaData{
 const PageEditor = () => {
   const { docId } = useParams();
   const [content, setContent] = useState<string>("No data.");  // Local state for smooth typing
-  const [metaData, setMetaData] = useState<MetaData | null>(null)
+  const [metaData, setMetaData] = useState<MetaData>({
+    prevPage: "",
+    nextPage: "",
+    currentPage: "",
+    course: "",
+    total: 1, // Default value
+    current_order: 0, // Default value
+  });
   const ws = useRef<WebSocket | null>(null);
   const isTyping = useRef(false); // Track typing activity
   const debouncedAction = useWebSocketAction(ws);
@@ -57,6 +67,25 @@ const PageEditor = () => {
   const navigate = useNavigate();
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [savingStatus, setSavingStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false)
+  
+  const toggleFullscreen = () => {
+    const doc = document as Document;
+    const docEl = document.documentElement;
+  
+    if (!document.fullscreenElement) {
+      docEl.requestFullscreen?.().catch((err) =>
+        console.error("Failed to enter fullscreen:", err)
+      );
+      setIsFullscreen(true);
+    } else {
+      doc.exitFullscreen?.().catch((err) =>
+        console.error("Failed to exit fullscreen:", err)
+      );
+      setIsFullscreen(false);
+    }
+  };
 
   useEffect(() => {
     if (ws.current) {
@@ -74,7 +103,6 @@ const PageEditor = () => {
           ref.current?.setMarkdown(data.data.content);
           setMetaData(data.meta);
         }
-        console.log("saved");
         setSavingStatus('saved');
         setLastSaved(new Date());
       } catch (error) {
@@ -92,7 +120,6 @@ const PageEditor = () => {
   const sendUpdate = useCallback(
     debounce((newContent) => {
       if (ws.current?.readyState === WebSocket.OPEN) {
-        console.log("saving");
         setSavingStatus('saving');
         const message = {
           "data": {
@@ -102,7 +129,6 @@ const PageEditor = () => {
         ws.current.send(JSON.stringify(message));
 
         setTimeout(() => {
-          console.log('saved');
           setSavingStatus('saved');
           setLastSaved(new Date());
         }, 1000);
@@ -127,88 +153,36 @@ const PageEditor = () => {
     return diff < 60 ? `Saved ${diff} seconds ago` : `Saved ${Math.floor(diff / 60)} minutes ago`;
   }
 
-  interface ProgressBarProps {
-    progress: number;
-  }
-
-  const ProgressBar: React.FC<ProgressBarProps> = ({ progress }) => {
-    // Ensure progress is a number between 0 and 100
-    const safeProgress = Math.round(Math.min(Math.max(progress, 0), 100));
-  
-    return (
-      <div className="w-full bg-gray-300 rounded-lg h-6 overflow-hidden relative">
-  
-        {/* Top bar (progress) */}
-        <div
-          className="bg-blue-500 h-full transition-all relative"
-          style={{ width: `${safeProgress}%` }}
-          role="progressbar"
-          aria-valuenow={safeProgress}
-          aria-valuemin={0}
-          aria-valuemax={100}
-        >
-          {/* Percentage Text */}
-          <div className="absolute inset-0 flex items-center justify-center text-white font-semibold">
-            {safeProgress}%
-          </div>
-        </div>
-        {/* Bottom bar (background) */}
-        <div className="w-full bg-gray-400 h-full rounded-lg min-w-[20em] " />
-      </div>
-    );
-  };
-
   return (
     <div className="w-full mx-auto px-4 py-6 flex flex-col items-center space-y-6">
-        <h1 className="text-3xl font-semibold text-center">Page Editor</h1>
-        <p className="text-center">Edit each page in the course!</p>
-
-        <div className="w-full max-w-4xl">
-          <div className="flex items-center justify-between space-x-3 bg-gray-100 p-4 rounded-lg shadow-md">
-            
-            <div className="flex items-center gap-2 flex-1 justify-center">
-              <button
-                onClick={debouncedAction.prev}
-                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 transition-all"
-              >
-                Back
-              </button>
-
-              <ProgressBar progress={(metaData?.current_order / metaData?.total) * 100} />
-
-              <button
-                onClick={debouncedAction.next}
-                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 transition-all"
-              >
-                Next
-              </button>
-            </div>
-
-            
-            <div className="flex items-center gap-2">
-              <button
-                onClick={debouncedAction.save}
-                className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:ring-2 focus:ring-blue-400 transition-all"
-              >
-                Save
-              </button>
-              <button
-                onClick={() => navigate(`/complete-course/${docId}`)}
-                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 focus:ring-2 focus:ring-green-400 transition-all"
-              >
-                Accept
-              </button>
-            </div>
-          </div>
-          {/* Save Status Indicator */}
-          <div className="text-sm text-gray-600 text-right mt-2">
-            {savingStatus === 'saving' && <span className="text-yellow-500">Saving...</span>}
-            {savingStatus === 'saved' && <span className="text-green-500">{getLastSavedText()}</span>}
-            {savingStatus === 'idle' && <span className="text-gray-500">No changes</span>}
-          </div>
+      {/* Header */}
+      <div className="flex flex-col items-center justify-center text-center mb-12">
+        <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden">
+          <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover shadow-lg" />
         </div>
-        <div className="editor prose lg:prose-l mx-auto bg-white shadow-lg rounded-md p-10 max-w-none overflow-auto">
-          <MDXEditor ref={ref} markdown={content} onChange={handleChange} plugins={[
+        <h2 className="text-4xl font-bold mb-6 text-tertiary">Page Editor</h2>
+        <p className="text-lg text-tertiary-light">
+          Congrats, Scribo generated pages for each module in your course outline!
+          Make changes, browse through each page, and save when needed to build your perfect course.
+        </p>
+        <h2 className="text-lg text-tertiary-light">{metaData.current_order}/{metaData.total}</h2>
+      </div>
+
+      {/* Editor */}
+      <div
+        className={
+          `${
+            isFullscreen
+            ? 'fixed top-0 left-0 w-screen h-screen p-15 overflow-auto bg-white prose max-w-none transition-all duration-1000 ease-in-out transform scale-100 opacity-100'
+            : 'prose bg-white rounded-[45px] p-2.5 max-w-none overflow-auto w-9/10 h-screen transition-all duration-1000 ease-in-out transform scale-95 opacity-100'
+          }`
+        }
+      >
+        <MDXEditor
+          ref={ref}
+          markdown={content}
+          onChange={handleChange}
+          plugins={[
             toolbarPlugin({
               toolbarClassName: 'my-classname',
               toolbarContents: () => (
@@ -223,9 +197,109 @@ const PageEditor = () => {
             }),
             headingsPlugin(),
             diffSourcePlugin(),
-            listsPlugin()
-          ]}/>
+            listsPlugin(),
+          ]}
+        />
       </div>
+
+      {/* Page Navigation */}
+      <div 
+        className="fixed bottom-0 left-0 right-0 py-4 z-40 group w-auto"
+      >      
+        <div className="flex items-center justify-center gap-8 mx-auto w-2/3 bg-gray-50/75 pl-5 pr-5 rounded-full">
+          {/* Left Arrow */}
+          <Tooltip label="Go to previous page.">
+            <button
+              onClick={debouncedAction.prev}
+              className={`text-black p-2 rounded-md hover:bg-gray-600 hover:text-white transition-all`}
+            >
+              <HiArrowLeft className="w-8 h-6" strokeWidth={3} />
+            </button>
+          </Tooltip>
+
+          {/* Progress Bar */}
+          <div 
+            className="flex-1 bg-gray-300 rounded-lg h-6 overflow-hidden transition-all duration-300"
+            style={{ pointerEvents: 'none' }}
+          >
+            <Progressbar progress={((metaData?.current_order - 1) / metaData?.total) * 100} />
+          </div>
+
+          {/* Right Arrow */}
+          <Tooltip label="Go to next page.">
+            <button
+              onClick={debouncedAction.next}
+              className={`text-black p-2 rounded-md hover:bg-gray-600 hover:text-white transition-all`}
+            >
+              <HiArrowRight className="w-8 h-6" strokeWidth={3} />
+            </button>
+          </Tooltip>
+        </div>
+        {/* Save Status Indicator */}
+        {/* <div className="text-sm text-gray-600 text-right mt-2">
+          {savingStatus === 'saving' && <span className="text-yellow-500">Saving...</span>}
+          {savingStatus === 'saved' && <span className="text-green-500">{getLastSavedText()}</span>}
+          {savingStatus === 'idle' && <span className="text-gray-500">No changes</span>}
+        </div> */}
+      </div>
+
+      {/* Actions */}
+      <div className="fixed bottom-0 right-0 z-75"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          style={{ width: '200px', height: '200px'}}
+          >
+
+        {/* Buttons container */}
+        <div
+          className={`relative transition-transform duration-300 ease-out ${isHovered ? 'scale-100' : 'scale-90'}`}
+          style={{ width: '128px', height: '128px' }}
+        >
+          {/* Save Button */}
+          <div className="absolute" style={{ top: 100, left: 100 }}>
+            <Tooltip label="Save your changes.">
+              <button
+                onClick={debouncedAction.save}
+                className={`absolute bg-blue-500 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
+                  ${isHovered ? 'p-4 w-16 h-16 -top-20 -left-20' : 'p-2 w-12 h-12 -top-0 -left-0'}`}
+              >
+                <HiOutlineSave className="w-full h-full" />
+              </button>
+            </Tooltip>
+          </div>
+
+          {/* Accept Button */}
+          <div className="absolute" style={{ top: 100, left: 100 }}>
+            <Tooltip label="Accept all pages">
+              <button
+                onClick={() => navigate(`/complete-course/${docId}`)}
+                className={`absolute bg-green-500 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
+                  ${isHovered ? 'p-4 w-16 h-16 -top-0 -left-30' : 'p-2 w-12 h-12 -top-0 left-0'}`}
+              >
+                <HiCheck className="w-full h-full" />
+              </button>
+            </Tooltip>
+          </div>
+
+          {/* Fullscreen Button */}
+          <div className="absolute" style={{ top: 100, left: 100 }}>
+            <Tooltip label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}>
+              <button
+                onClick={toggleFullscreen}
+                className={`absolute bg-gray-800 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
+                  ${isHovered ? 'p-4 w-16 h-16 -top-30 -left-0' : 'p-2 w-12 h-12 -top-0 -left-0'}`}
+              >
+                {isFullscreen ? (
+                  <HiArrowsPointingIn className="w-full h-full" />
+                ) : (
+                  <HiArrowsPointingOut className="w-full h-full" />
+                )}
+              </button>
+            </Tooltip>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 };

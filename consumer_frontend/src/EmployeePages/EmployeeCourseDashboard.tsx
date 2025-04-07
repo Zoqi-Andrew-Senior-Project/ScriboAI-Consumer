@@ -36,7 +36,7 @@ const CourseTable = () => {
 
     const onView = (outline: Outline) => {
         console.log("Viewing outline", outline.uuid);
-        navigate("/view/" + outline.uuid);
+        navigate("/view/outline/" + outline.uuid);
     };
 
     return (

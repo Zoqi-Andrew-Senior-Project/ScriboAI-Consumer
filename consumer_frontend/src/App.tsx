@@ -18,6 +18,7 @@ import CompleteCourse from './CourseManagement/CompleteCourse';
 import PageViewer from './CourseManagement/PageViewer';
 import AcceptInvite from './EmployeePages/AcceptInvite';
 import EmployeeCourseDashboard from './EmployeePages/EmployeeCourseDashboard';
+import OutlineView from './CourseManagement/OutlineView';
 
 function Navbar() {
   const [showSettings, setShowSettings] = useState(false);
@@ -98,7 +99,7 @@ function Footer() {
 function App() {
   return (
     <Router>
-      <div className="min-h-screen flex flex-col  bg-linear-to-r from-primary to-secondary ">
+      <div className="min-h-screen flex flex-col bg-linear-to-r from-primary to-secondary ">
         <Navbar />
         <Routes>
           <Route path="/" element={<Welcome />} /> 
@@ -116,13 +117,14 @@ function App() {
 
           {/* Course Management */}
           <Route path="/create-course" element={<CreateCourse />} />
-          <Route path="/document/:docId" element={<PageEditor />} />
-          <Route path="/outline/:outId" element={<OutlineEditor />} />
+          <Route path="/edit/page/:docId" element={<PageEditor />} />
+          <Route path="/edit/outline/:outId" element={<OutlineEditor />} />
           <Route path="/course-dashboard" element={<CourseDashboard />} />
           <Route path="/complete-course/:courseId" element={<CompleteCourse />} />
 
           {/* Course View */}
-          <Route path="/view/:docId" element={<PageViewer />} />
+          <Route path="/view/page/:docId" element={<PageViewer />} />
+          <Route path="/view/outline/:corId" element={<OutlineView />} />
 
           <Route path="/employee/course-dashboard" element={<EmployeeCourseDashboard />}></Route>
         </Routes>

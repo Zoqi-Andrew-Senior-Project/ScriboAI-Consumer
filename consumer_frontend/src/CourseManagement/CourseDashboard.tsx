@@ -62,12 +62,12 @@ const CourseTable = () => {
 
     const onEdit = (outline: Outline) => {
         console.log("Editing outline", outline.uuid)
-        navigate("/outline/" + outline.uuid)
+        navigate("/edit/outline/" + outline.uuid)
     }
 
     const onView = (outline: Outline) => {
         console.log("Viewing outline", outline.uuid)
-        navigate("/view/" + outline.uuid)
+        navigate("/view/outline/" + outline.uuid)
         
     };
 

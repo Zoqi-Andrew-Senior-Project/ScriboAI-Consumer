@@ -1,169 +1,266 @@
-import React, { useState, ChangeEvent } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useAuth } from '../utils/AuthContext';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { FiEye, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
+import { confirmAlert } from 'react-confirm-alert';
+import 'react-confirm-alert/src/react-confirm-alert.css';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
 
-interface PromptData {
-  topic: string;
+enum FeatureType {
+  IMAGE = "image",
+  INTER = "interactive",
+  VIDEO = "video"
+}
+
+interface Module {
+  uuid: string;
+  name: string;
   duration: string;
+  subtopics: string[];
+  features: FeatureType[];
 }
 
-interface PromptMenuProps {
-  promptData: PromptData;
-  handleChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  handleSubmit: (event: React.FormEvent<HTMLFormElement> | React.MouseEvent<HTMLButtonElement>) => void;
-  isLoading: boolean;
+interface Outline {
+  uuid: string;
+  title: string;
+  objectives: string[];
+  duration: string;
+  summary: string;
+  modules: Module[];
+  status: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
+const statusColors: Record<string, string> = {
+  draft: 'bg-yellow-100 text-yellow-800',
+  published: 'bg-green-100 text-green-800',
+  archived: 'bg-gray-100 text-gray-800',
+  in_review: 'bg-blue-100 text-blue-800',
+};
 
-const PromptMenu: React.FC<PromptMenuProps> = ({ promptData, handleChange, handleSubmit, isLoading }) => {
-  return (
-    <div className="flex items-center justify-center min-h-screen p-6">
-      <div className="w-full max-w-4xl">
-        <div className="flex flex-col items-center justify-center text-center mb-12">
-          <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden">
-            <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover shadow-lg" />
-          </div>
-          <h2 className="text-4xl font-bold mb-6 text-tertiary">Let's Build Your Course Outline!</h2>
-          <p className="text-lg text-tertiary-light">Share a few details, and we'll generate a structured outline tailored to your topic and time constraints.</p>
-        </div>
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-6 flex justify-center">
-            <div className="w-full sm:w-2/3 md:w-1/2">
-              <label htmlFor="topic" className="block text-tertiary text-sm font-bold mb-2">Topic:</label>
-              <input
-                type="text"
-                id="topic"
-                name="topic"
-                value={promptData.topic}
-                onChange={handleChange}
-                placeholder="Enter the topic you want to create a course on"
-                className="shadow appearance-none border rounded w-full py-3 px-4 bg-white text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-primary"
-                required
-                disabled={isLoading}
-              />
-            </div>
-          </div>
-
-          <div className="mb-6 flex justify-center">
-            <div className="w-full sm:w-2/3 md:w-1/2">
-              <label className="block text-tertiary text-sm font-bold mb-2">Duration:</label>
-              <div className="flex items-center mb-3">
-                <input
-                  type="radio"
-                  id="short"
-                  name="duration"
-                  value="short"
-                  checked={promptData.duration === "short"}
-                  onChange={handleChange}
-                  className="h-5 w-5 text-primary focus:ring-primary"
-                  disabled={isLoading}
-                />
-                <label htmlFor="short" className="ml-2 text-tertiary font-light">Short (up to 1 hour)</label>
-              </div>
-              
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  id="long"
-                  name="duration"
-                  value="long"
-                  checked={promptData.duration === "long"}
-                  onChange={handleChange}
-                  className="h-5 w-5 text-primary focus:ring-primary"
-                  disabled={isLoading}
-                />
-                <label htmlFor="long" className="ml-2 text-tertiary font-light">Long (more than 1 hour)</label>
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-6 flex justify-center">
-            <div className="w-full sm:w-2/3 md:w-1/2">
-              <button
-                onClick={handleSubmit}
-                className="bg-button-primary-bg hover:bg-button-hover text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-105"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <span className="flex justify-center items-center">
-                    Submitting...
-                  </span>
-                ) : (
-                  'Submit'
-                )}
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
-    </div>
-  )
-}
-
-function CreateCourse() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [promptData, setPromptData] = useState({
-    topic: "",
-    duration: "short",
-  });
-
-  const [responseContent, setResponseContent] = useState({});
-
+const CourseTable = () => {
+  const [courses, setCourses] = useState<Outline[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const { name, value } = e.target;
-      setPromptData((prevData) => ({ ...prevData, [name]: value }));
-  };
-
-  const handleSubmit = async () => {
-      setIsLoading(true);
-
-      const url = `${import.meta.env.VITE_BACKEND_ADDRESS}/course/course/`
-      console.log(url)
-      const time = promptData.duration === "short" ? "up to one hour" : "between one and two hours"
-      const data = {
-        topic: promptData.topic,
-        time: time
-      }
+  useEffect(() => {
+    const fetchCourses = async () => {
       try {
-          const response = await axios.post(url, data, {
-            withCredentials: true
+        const response = await axios.get(`${import.meta.env.VITE_BACKEND_ADDRESS}/course/course`, {
+          withCredentials: true,
         });
-          console.log(response);
-          alert(`Course created successfully! ${promptData.topic} ${promptData.duration}`);
-
-          navigate("/outline/" + response.data.uuid)
-
-          setResponseContent(response.data);
-
-      } catch (error) {
-          console.error("Error creating course:", error);
-          alert("There was an error creating the course.");
+        setCourses(response.data.courses);
+      } catch (err) {
+        console.error("Error fetching courses:", err);
+        setError('Failed to load courses. Please try again later.');
+        toast.error('Failed to load courses');
       } finally {
-          
-          setIsLoading(false);
+        setLoading(false);
       }
+    };
+
+    fetchCourses();
+  }, []);
+
+  const handleDelete = async (outline: Outline) => {
+    confirmAlert({
+      title: 'Confirm Deletion',
+      message: `Are you sure you want to delete "${outline.title}"?`,
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: async () => {
+            try {
+              await axios.delete(`${import.meta.env.VITE_BACKEND_ADDRESS}/course/course`, {
+                data: { course: outline.uuid },
+                withCredentials: true,
+              });
+              setCourses(courses.filter((course) => course.uuid !== outline.uuid));
+              toast.success('Course deleted successfully');
+            } catch (err) {
+              console.error("Error deleting course:", err);
+              toast.error('Failed to delete course');
+            }
+          }
+        },
+        {
+          label: 'No',
+          onClick: () => {}
+        }
+      ]
+    });
   };
+
+  const handleEdit = (outline: Outline) => {
+    navigate(`/edit/outline/${outline.uuid}`);
+  };
+
+  const handleView = (outline: Outline) => {
+    navigate(`/view/outline/${outline.uuid}`);
+  };
+
+  const handleCreate = () => {
+    navigate('/create/outline');
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <Skeleton height={40} count={5} />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-10">
+        <div className="text-red-500 mb-4">{error}</div>
+        <button 
+          onClick={() => window.location.reload()}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div id="page" className='relative'>
-      <PromptMenu
-        promptData={promptData}
-        handleChange={handleChange}
-        handleSubmit={handleSubmit}
-        isLoading={isLoading}
-      />
-      {isLoading && (
-        <div className="absolute top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 bg-indigo-50/75">
-          <div className="animate-pulse" style={{ width: "50px", height: "50px" }}>
-            <img src="/minilogo.png" alt="logo" />
-          </div>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+      <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+        <h2 className="text-2xl font-semibold text-gray-800">Course Dashboard</h2>
+        <button
+          onClick={handleCreate}
+          className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+        >
+          <FiPlus className="mr-2" />
+          Create New Course
+        </button>
+      </div>
+      
+      {courses.length === 0 ? (
+        <div className="p-8 text-center text-gray-500">
+          No courses found. Create your first course to get started.
+        </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {courses.map((course) => (
+                <tr key={course.uuid} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{course.title}</div>
+                    <div className="text-sm text-gray-500">{course.modules.length} modules</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {course.duration}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[course.status.toLowerCase()] || 'bg-gray-100 text-gray-800'}`}>
+                      {course.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {course.updated_at ? new Date(course.updated_at).toLocaleDateString() : 'N/A'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex justify-end space-x-2">
+                      <button
+                        onClick={() => handleView(course)}
+                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
+                        title="View"
+                      >
+                        <FiEye size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleEdit(course)}
+                        className="text-yellow-600 hover:text-yellow-900 p-1 rounded hover:bg-yellow-50"
+                        title="Edit"
+                      >
+                        <FiEdit2 size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(course)}
+                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
+                        title="Delete"
+                      >
+                        <FiTrash2 size={18} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       )}
     </div>
   );
-}
+};
 
-export default CreateCourse;
+const CourseDashboard = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="w-full max-w-4xl px-4 py-6">
+          <Skeleton height={40} count={10} />
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center p-6 max-w-md bg-white rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4">Please log in</h2>
+          <p className="mb-4 text-gray-600">You need to be logged in to access this page.</p>
+          <button
+            onClick={() => window.location.href = '/login'}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (user.role !== 'OW' && user.role !== 'AD') {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-center p-6 max-w-md bg-white rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4">Permission Denied</h2>
+          <p className="mb-4 text-gray-600">You don't have permission to access this page.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <CourseTable />
+      </div>
+    </div>
+  );
+};
+
+export default CourseDashboard;
