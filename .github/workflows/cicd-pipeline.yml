@@ -65,15 +65,17 @@ jobs:
 
             docker image prune || { echo -e " ++++++++++++++++++++++++\n❌ Error pruning images! ❌ \n ++++++++++++++++++++++++"; exit 1; }
 
-            docker volume rm ai-training-consumer_frontend_build 2>&1 | tee /tmp/volume_rm_output.txt | grep -q "No such volume" && {
-              echo -e "⚠️  Volume 'ai-training-consumer_frontend_build' does not exist, skipping removal.";
-              exit 0;
-            } || {
-              if grep -q "Error" /tmp/volume_rm_output.txt; then
-                echo -e "++++++++++++++++++++++++\n❌ Error removing frontend volume! ❌\n++++++++++++++++++++++++";
-                exit 1;
+            VOLUME_NAME=ai-training-consumer_frontend_build
+            if docker volume inspect "$VOLUME_NAME" > /dev/null 2>&1; then
+              if docker volume rm "$VOLUME_NAME"; then
+                echo "✅ Successfully removed volume: $VOLUME_NAME"
+              else
+                echo -e "++++++++++++++++++++++++\n❌ Error removing frontend volume! ❌\n++++++++++++++++++++++++"
+                exit 1
               fi
-            }
+            else
+              echo "⚠️  Volume '$VOLUME_NAME' does not exist, skipping removal."
+            fi
             docker compose up --build -d || { echo -e " ++++++++++++++++++++++++\n❌ Error composing up! ❌ \n ++++++++++++++++++++++++"; exit 1; }
 
             echo "+++++++++++++++"
