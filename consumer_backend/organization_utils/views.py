@@ -329,7 +329,7 @@ class InviteMemberView(APIView):
 
                 email.send()
 
-                return Response({"token": invitation_token.verification_token}, status=status.HTTP_201_CREATED)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 return Response({
                     "status": "error",
