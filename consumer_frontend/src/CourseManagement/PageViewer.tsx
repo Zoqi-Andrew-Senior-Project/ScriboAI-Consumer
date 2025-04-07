@@ -3,7 +3,11 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import './pageeditor.css'
 import debounce from "lodash.debounce";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import Progressbar from "@/components/Progressbar";
+import Tooltip from "@/components/Tooltip";
+import { HiArrowLeft, HiArrowRight, HiArrowsPointingIn, HiArrowsPointingOut, HiHome, HiBookOpen } from "react-icons/hi2";
+import confetti from "canvas-confetti";
 
 interface WebSocketAction {
   next: () => void;
@@ -43,12 +47,123 @@ interface MetaData{
 }
 
 const PageViewer: React.FC = () => {
+    const navigate = useNavigate();
     const { docId } = useParams();
     const [content, setContent] = useState<string>("No data.");  // Local state for smooth typing
     const [metaData, setMetaData] = useState<MetaData | null>(null)
     const ws = useRef<WebSocket | null>(null);
     const debouncedAction = useWebSocketAction(ws);
     const ref = useRef<any>(null); 
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const [scrollProgress, setScrollProgress] = useState(0);
+    const markdownRef = useRef<HTMLDivElement>(null);
+    const [hasCompleted, setHasCompleted] = useState(false);
+    const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+    const [showCelebratoryButton, setShowCelebratoryButton] = useState(false);
+    const prevProgress = useRef(0);
+    const [completionButtonStyle, setCompletionButtonStyle] = useState<'celebratory' | 'compact'>('celebratory');
+    const [hasFiredConfetti, setHasFiredConfetti] = useState(false);
+
+    const fireConfetti = () => {
+      confetti({
+        particleCount: 150,
+        spread: 70,
+        origin: { y: 0.6 },
+        colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff']
+      });
+    };
+
+    // Scroll handler
+    const handleScroll = useCallback(() => {
+      if (markdownRef.current) {
+        const { scrollTop, scrollHeight, clientHeight } = markdownRef.current;
+        const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
+        setScrollProgress(Math.round(scrollPercentage));
+      }
+    }, []);
+
+    // Add scroll event listener
+    useEffect(() => {
+      const currentRef = markdownRef.current;
+      if (currentRef) {
+        currentRef.addEventListener('scroll', handleScroll);
+        return () => currentRef.removeEventListener('scroll', handleScroll);
+      }
+    }, [handleScroll]);
+
+    // Calculate combined progress
+    const calculateCombinedProgress = useCallback(() => {
+      if (!metaData) return 0;
+      
+      // Page progress (0-100 based on current order)
+      const pageProgress = ((metaData.current_order - 1) / metaData.total) * 100;
+      
+      // Scroll progress (0-100 within current page)
+      const scrollContribution = scrollProgress / metaData.total;
+      
+      // Combined progress
+      return pageProgress + scrollContribution;
+    }, [metaData, scrollProgress]);
+
+    // Track completion
+    useEffect(() => {
+      const currentProgress = calculateCombinedProgress();
+      
+      if (currentProgress >= 100 && prevProgress.current < 100) {
+        setHasCompleted(true);
+        setShowCelebratoryButton(true);
+      }
+      
+      prevProgress.current = currentProgress;
+    }, [calculateCombinedProgress]);
+
+    // Fire confetti when course is completed
+    useEffect(() => {
+      if (hasCompleted && !hasFiredConfetti) {
+        fireConfetti();
+        setHasFiredConfetti(true);
+      }
+    }, [hasCompleted]);
+
+    // Completion button handler
+    const handleCompletionClick = () => {
+      setShowCompletionDialog(true);
+    };
+
+    // Dialog actions
+    const handleContinueReading = () => {
+      setCompletionButtonStyle('compact');
+      setShowCelebratoryButton(false); // Hide the initial celebratory button
+      setShowCompletionDialog(false);
+    };
+
+    const handleGoHome = () => {
+      // Navigate to home or wherever appropriate
+      navigate("/home")
+    };
+      
+    const toggleFullscreen = () => {
+      const doc = document as Document;
+      const docEl = document.documentElement;
+    
+      if (!document.fullscreenElement) {
+        docEl.requestFullscreen?.().catch((err) =>
+          console.error("Failed to enter fullscreen:", err)
+        );
+        setIsFullscreen(true);
+      } else {
+        doc.exitFullscreen?.().catch((err) =>
+          console.error("Failed to exit fullscreen:", err)
+        );
+        setIsFullscreen(false);
+      }
+    };
+
+    useEffect(() => {
+      if (markdownRef.current) {
+        markdownRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }, [metaData?.current_order]); // Trigger when page changes
     
     useEffect(() => {
         if (ws.current) {
@@ -125,28 +240,174 @@ const PageViewer: React.FC = () => {
   
     return (
       <div className="container mx-auto p-6">
-        <div className="flex items-center justify-between space-x-3 bg-gray-100 p-4 rounded-lg shadow-md mb-6">
-          
-          <div className="flex items-center gap-2 flex-1 justify-center">
+        {/* Initial Celebratory Button (only shows once) */}
+        {showCelebratoryButton && (
+          <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
             <button
-              onClick={debouncedAction.prev}
-              className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 transition-all"
+              onClick={handleCompletionClick}
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all transform hover:scale-105"
             >
-              Back
-            </button>
-
-            <ProgressBar progress={(metaData?.current_order / metaData?.total) * 100} />
-
-            <button
-              onClick={debouncedAction.next}
-              className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600 focus:ring-2 focus:ring-gray-400 transition-all"
-            >
-              Next
+              🎉 Course Completed! 🎉
             </button>
           </div>
+        )}
+
+        {/* Persistent Compact Completion Button (shows after Continue Reading) */}
+        {hasCompleted && !showCelebratoryButton && (
+          <div className="fixed bottom-24 right-4 z-50">
+            <Tooltip label="Course Completed">
+              <button
+                onClick={handleCompletionClick}
+                className="bg-green-500 hover:bg-green-600 text-white p-3 w-14 h-14 rounded-full shadow-lg transition-all duration-200 hover:scale-110 focus:outline-none flex items-center justify-center"
+              >
+                <span className="text-xl">🎉</span>
+              </button>
+            </Tooltip>
+          </div>
+        )}
+
+        {/* Completion Button - changes style based on state */}
+        {hasCompleted && (
+          <>
+            {completionButtonStyle === 'celebratory' ? (
+              <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
+                <button
+                  onClick={handleCompletionClick}
+                  className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full shadow-lg transition-all transform hover:scale-105"
+                >
+                  🎉 Course Completed! 🎉
+                </button>
+              </div>
+            ) : (
+              <div className="fixed bottom-24 right-4 z-50">
+                <Tooltip label="Course Completed">
+                  <button
+                    onClick={handleCompletionClick}
+                    className="bg-green-500 hover:bg-green-600 text-white p-3 w-14 h-14 rounded-full shadow-lg transition-all duration-200 hover:scale-110 focus:outline-none flex items-center justify-center"
+                  >
+                    <span className="text-xl">🎉</span>
+                  </button>
+                </Tooltip>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Completion Dialog */}
+        {showCompletionDialog && (
+          <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
+            <div className="bg-white p-8 rounded-xl max-w-md text-center">
+              <h2 className="text-2xl font-bold text-green-600 mb-4">Congratulations!</h2>
+              <p className="text-gray-700 mb-6">
+                You've successfully completed the entire course material. What would you like to do next?
+              </p>
+              <div className="flex justify-center gap-4">
+                <button
+                  onClick={handleContinueReading}
+                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md transition-all flex items-center justify-center gap-2 group"
+                >
+                  <span>Continue Reading</span>
+                  <HiBookOpen className="w-5 h-5 transition-transform group-hover:scale-110" />
+                </button>
+                <button
+                  onClick={handleGoHome}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-md transition-all flex items-center justify-center gap-2 group"
+                >
+                  <span>Go Home</span>
+                  <HiHome className="w-5 h-5 transition-transform group-hover:scale-110" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Page Navigation */}
+        <div 
+          className="fixed bottom-0 left-0 right-0 py-4 z-40 group w-auto"
+        >      
+          <div className="flex items-center justify-center gap-8 mx-auto w-2/3 bg-gray-50/75 pl-5 pr-5 rounded-full">
+            {/* Left Arrow */}
+            <Tooltip label={metaData?.current_order === 1 ? "You're on the first page" : "Go to previous page"}>
+              <button
+                onClick={debouncedAction.prev}
+                disabled={metaData?.current_order === 1}
+                className={`text-black p-2 rounded-md transition-all ${
+                  metaData?.current_order === 1 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-gray-600 hover:text-white'
+                }`}
+              >
+                <HiArrowLeft className="w-8 h-6" strokeWidth={3} />
+              </button>
+            </Tooltip>
+
+            {/* Progress Bar */}
+            <div 
+              className="flex-1 bg-gray-300 rounded-lg h-6 overflow-hidden transition-all duration-300"
+              style={{ pointerEvents: 'none' }}
+            >
+              <Progressbar progress={calculateCombinedProgress()} />
+            </div>
+
+            {/* Right Arrow */}
+            <Tooltip label={
+              metaData?.current_order === metaData?.total 
+                ? "You're on the last page" 
+                : scrollProgress < 100
+                  ? "Finish reading this page to continue"
+                  : "Go to next page"
+            }>
+              <button
+                onClick={debouncedAction.next}
+                disabled={metaData?.current_order === metaData?.total || scrollProgress < 100}
+                className={`text-black p-2 rounded-md transition-all ${
+                  metaData?.current_order === metaData?.total || scrollProgress < 100
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:bg-gray-600 hover:text-white'
+                }`}
+              >
+                <HiArrowRight className="w-8 h-6" strokeWidth={3} />
+              </button>
+            </Tooltip>
+          </div>
+          {/* Save Status Indicator */}
+          {/* <div className="text-sm text-gray-600 text-right mt-2">
+            {savingStatus === 'saving' && <span className="text-yellow-500">Saving...</span>}
+            {savingStatus === 'saved' && <span className="text-green-500">{getLastSavedText()}</span>}
+            {savingStatus === 'idle' && <span className="text-gray-500">No changes</span>}
+          </div> */}
         </div>
-        <div className="prose lg:prose-l mx-auto bg-white rounded-md p-10 max-w-none overflow-auto">
+
+        {/* Page View */}
+        
+        <div
+          ref={markdownRef}
+          className={
+            `${
+              isFullscreen
+              ? 'fixed top-0 left-0 w-screen h-screen p-15 overflow-auto bg-white prose max-w-none transition-all duration-1000 ease-in-out transform scale-100 opacity-100'
+              : 'prose bg-white rounded-[30px] p-10 max-w-none overflow-auto w-9/10 h-screen transition-all duration-1000 ease-in-out transform scale-95 opacity-100'
+            }`
+          }
+        >
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+        </div>
+
+        {/* Full Screen */}
+        <div className="fixed bottom-4 right-4 z-50">
+          <Tooltip label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}>
+            <button
+              onClick={toggleFullscreen}
+              className="bg-gray-800/90 hover:bg-gray-700 text-white p-3 w-14 h-14 rounded-full shadow-lg 
+                        transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            >
+              {isFullscreen ? (
+                <HiArrowsPointingIn className="w-full h-full" />
+              ) : (
+                <HiArrowsPointingOut className="w-full h-full" />
+              )}
+            </button>
+          </Tooltip>
         </div>
       </div>
     );

@@ -241,8 +241,6 @@ const PageEditor = () => {
         </div> */}
       </div>
 
-
-
       {/* Actions */}
       <div className="fixed bottom-0 right-0 z-75"
           onMouseEnter={() => setIsHovered(true)}

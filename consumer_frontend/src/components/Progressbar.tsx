@@ -12,17 +12,13 @@ const Progressbar: React.FC<ProgressBarProps> = ({ progress }) => {
         <div className="w-full bg-gray-300 rounded-lg h-6 overflow-hidden relative border-2 border-black">
             {/* Top bar (progress) */}
             <div
-                className="bg-blue-500 h-full transition-all duration-500 ease-in-out relative"
+                className="bg-blue-500 h-full transition-all duration-1000 ease-in-out relative"
                 style={{ width: `${safeProgress}%` }}
                 role="progressbar"
                 aria-valuenow={safeProgress}
                 aria-valuemin={0}
                 aria-valuemax={100}
             >
-                {/* Percentage Text */}
-                <div className="absolute inset-0 flex items-center justify-center text-white font-semibold">
-                {safeProgress}%
-                </div>
             </div>
 
             {/* Bottom bar (background) */}
