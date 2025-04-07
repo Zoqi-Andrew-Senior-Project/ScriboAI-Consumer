@@ -6,8 +6,9 @@ import debounce from "lodash.debounce";
 import { useNavigate, useParams } from "react-router-dom";
 import Progressbar from "@/components/Progressbar";
 import Tooltip from "@/components/Tooltip";
-import { HiArrowLeft, HiArrowRight, HiArrowsPointingIn, HiArrowsPointingOut, HiHome, HiBookOpen } from "react-icons/hi2";
+import { HiArrowLeft, HiArrowRight, HiArrowsPointingIn, HiArrowsPointingOut, HiHome, HiBookOpen, HiClock, HiListBullet, HiFlag } from "react-icons/hi2";
 import confetti from "canvas-confetti";
+import { fetchCourseDetails, Course } from "@/api/course";
 
 interface WebSocketAction {
   next: () => void;
@@ -63,6 +64,23 @@ const PageViewer: React.FC = () => {
     const prevProgress = useRef(0);
     const [completionButtonStyle, setCompletionButtonStyle] = useState<'celebratory' | 'compact'>('celebratory');
     const [hasFiredConfetti, setHasFiredConfetti] = useState(false);
+    const [courseDetails, setCourseDetails] = useState<Course | null> (null);
+
+    useEffect(() => {
+      const loadCourseDetails = async () => {
+        if (docId) {
+          try {
+            console.log(docId)
+            const data = await fetchCourseDetails(docId);
+            setCourseDetails(data);
+          } catch (error) {
+            console.error('Failed to load course details:', error);
+          }
+        }
+      };
+    
+      loadCourseDetails();
+    }, [docId]);
 
     const fireConfetti = () => {
       confetti({
