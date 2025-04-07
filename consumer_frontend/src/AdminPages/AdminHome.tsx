@@ -24,13 +24,13 @@ function AdminHome() {
   
           {/* Right Column: Buttons stacked on top of each other */}
           <div className="flex flex-row items-center justify-center space-x-4">
-            <Link to="/create-course" className="bg-button-primary-bg hover:bg-button-hover text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-105">
+            <Link to="/create-course" className="bg-button-primary-bg hover:bg-button-hover text-white font-semibold py-4 px-8 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-110">
               Create Course
             </Link>
-            <Link to="/course-dashboard" className="bg-button-primary-bg hover:bg-button-hover text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-105">
+            <Link to="/course-dashboard" className="bg-button-primary-bg hover:bg-button-hover text-white font-semibold py-4 px-8 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-110">
               Manage Courses
             </Link>
-            <Link to="/admin/employee-dashboard" className="bg-button-primary-bg hover:bg-button-hover text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-105">
+            <Link to="/admin/employee-dashboard" className="bg-button-primary-bg hover:bg-button-hover text-white font-semibold py-4 px-8 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-110">
               Employee Management
             </Link>
           </div>
