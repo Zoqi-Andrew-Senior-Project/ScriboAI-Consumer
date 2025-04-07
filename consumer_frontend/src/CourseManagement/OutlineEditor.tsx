@@ -335,7 +335,7 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
 
   return (
     <div 
-      className="fixed bottom-4 right-4 z-75"
+      className="fixed bottom-0 right-0 z-75"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{ 

@@ -23,6 +23,7 @@ const useWebSocketAction = (ws: React.RefObject<WebSocket | null>) => {
     debounce((action) => {
       const data = { action };
       if (ws.current?.readyState === WebSocket.OPEN) {
+        console.log(data)
         ws.current.send(JSON.stringify(data));
       }
     }, 500), // 500ms debounce
@@ -164,6 +165,7 @@ const PageEditor = () => {
           Congrats, Scribo generated pages for each module in your course outline!
           Make changes, browse through each page, and save when needed to build your perfect course.
         </p>
+        <h2 className="text-lg text-tertiary-light">{metaData.current_order}/{metaData.total}</h2>
       </div>
 
       {/* Editor */}
@@ -257,7 +259,7 @@ const PageEditor = () => {
           <div className="absolute" style={{ top: 100, left: 100 }}>
             <Tooltip label="Save your changes.">
               <button
-                onClick={() => {}}
+                onClick={debouncedAction.save}
                 className={`absolute bg-blue-500 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
                   ${isHovered ? 'p-4 w-16 h-16 -top-20 -left-20' : 'p-2 w-12 h-12 -top-0 -left-0'}`}
               >
