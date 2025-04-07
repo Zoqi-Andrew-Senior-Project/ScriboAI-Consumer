@@ -7,7 +7,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 import json
 from .scribo_handler import ScriboHandler
-from organization_utils.models import Member, Organization
+from organization_utils.models import Member, Organization, Roles
 from rest_framework.permissions import IsAuthenticated
 from organization_utils.permissions import IsOwnerOrAdmin
 from rest_framework.views import APIView
@@ -98,7 +98,11 @@ class CourseView(APIView):
             user = request.user
 
             member: Member = Member.objects.get(user_name=user.username)
-            courses = Course.objects.filter(organization=member.organization)
+
+            if member.role in [Roles.ADMIN, Roles.OWNER]:
+                courses = Course.objects.filter(organization=member.organization)
+            else:
+                courses = Course.objects.filter(organization=member.organization).filter(status='published')
 
             courses_serializer = CourseWithModulesSerializer(courses, many=True)
 
