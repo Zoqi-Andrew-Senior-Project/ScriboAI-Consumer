@@ -21,7 +21,6 @@ interface WebSocketAction {
 const useWebSocketAction = (ws: React.RefObject<WebSocket | null>) => {
   const sendAction = useCallback(
     debounce((action) => {
-      console.log(`WebSocket Request: ${action}`);
       const data = { action };
       if (ws.current?.readyState === WebSocket.OPEN) {
         ws.current.send(JSON.stringify(data));
@@ -103,7 +102,6 @@ const PageEditor = () => {
           ref.current?.setMarkdown(data.data.content);
           setMetaData(data.meta);
         }
-        console.log("saved");
         setSavingStatus('saved');
         setLastSaved(new Date());
       } catch (error) {
@@ -121,7 +119,6 @@ const PageEditor = () => {
   const sendUpdate = useCallback(
     debounce((newContent) => {
       if (ws.current?.readyState === WebSocket.OPEN) {
-        console.log("saving");
         setSavingStatus('saving');
         const message = {
           "data": {
@@ -131,7 +128,6 @@ const PageEditor = () => {
         ws.current.send(JSON.stringify(message));
 
         setTimeout(() => {
-          console.log('saved');
           setSavingStatus('saved');
           setLastSaved(new Date());
         }, 1000);
@@ -167,7 +163,6 @@ const PageEditor = () => {
         <p className="text-lg text-tertiary-light">
           Congrats, Scribo generated pages for each module in your course outline!
           Make changes, browse through each page, and save when needed to build your perfect course.
-          {metaData.current_order}
         </p>
       </div>
 
