@@ -228,6 +228,13 @@ const CourseDashboard = () => {
   return (
     <div className="flex items-center justify-center min-h-screen">
         <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex flex-col items-center justify-center text-center mb-12">
+                <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden">
+                    <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover shadow-lg" />
+                </div>
+                <h2 className="text-4xl font-bold mb-6 text-tertiary">Course Dashboard</h2>
+                <p className="text-lg text-tertiary-light">Look over dashboards, view them as an employee, make changes, delete them, or make a new course.</p>
+            </div>
             <CourseTable />
         </div>
     </div>
