@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import isEqual from "lodash/isEqual";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import Tooltip from "@/components/Tooltip";
 
 enum FeatureType {
   IMAGE = "image",
@@ -75,7 +76,7 @@ const EditableLine: React.FC<EditableLineProps> = ({ text, onSave, type = "text"
                           onBlur={handleBlur}
                           onKeyDown={handleKeyDown}
                           autoFocus
-                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                          className="w-full p-2 bg-black/10 border border-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                       />
                   ) : (
                       <textarea
@@ -85,7 +86,7 @@ const EditableLine: React.FC<EditableLineProps> = ({ text, onSave, type = "text"
                           onKeyDown={handleKeyDown}
                           autoFocus
                           rows={4}
-                          className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                          className="w-full p-2 bg-black/10 border border-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition-all"
                       />
                   )
               ) : (
@@ -232,9 +233,10 @@ interface OutlineEditorMenuProps {
   onRegenerate: (comments: string) => void;
   onNewPrompt: () => void;
   onAccept: () => void;
+  onSave: () => void;
 }
 
-const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onRegenerate, onAccept }) => {
+const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onRegenerate, onAccept, onSave }) => {
   const [regenerateDialogPressed, setRegenerateDialogPressed] = useState<boolean>(false);
 
   const onRegenerateClick = () => {
@@ -242,44 +244,62 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
   }
 
   return (
-    <div className="p-6 rounded-lg shadow-lg">
-      <h2 className="text-3xl font-bold mb-6 text-center">Course Outline Editor</h2>
-
-      <div className="space-y-4 w-full max-w-xs">
-        <div>
+    <div className="max-w-screen-md mx-auto px-4 py-3 flex justify-between items-center space-x-4">
+      <div className="relative group">
+        <Tooltip label="Start over with a new outline" aria-label="Start over with a new outline">
           <button
-            className="w-full bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            className="flex items-center space-x-2 bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-semibold py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-1500 ease-in-out w-16 max-w-16 group-hover:w-auto group-hover:max-w-xs group-hover:pl-4"
             onClick={onNewPrompt}
           >
-            New
+            <span className="text-xl">🆕</span>
+            <span className="text-sm opacity-0 group-hover:opacity-100 group-hover:delay-500 transition-opacity duration-500">New</span>
           </button>
-        </div>
+        </Tooltip>
+      </div>
 
-        <div>
+      <div className="relative group">
+        <Tooltip label="Regenerate this outline" aria-label="Regenerate this outline">
           <button
-            className="w-full bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            className="flex items-center space-x-2 bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-semibold py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-1500 ease-in-out w-16 max-w-16 group-hover:w-auto group-hover:max-w-xs group-hover:pl-4"
             onClick={onRegenerateClick}
           >
-            Regenerate
+            <span className="text-xl">🔄</span>
+            <span className="text-sm opacity-0 group-hover:opacity-100 group-hover:delay-500 transition-opacity duration-500">Regenerate</span>
           </button>
-        </div>
+        </Tooltip>
+      </div>
 
-        <div>
+      <div className="relative group">
+        <Tooltip label="Save the outline" aria-label="Save the outline">
           <button
-            className="w-full bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            className="flex items-center space-x-2 bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-semibold py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-1500 ease-in-out w-16 max-w-16 group-hover:w-auto group-hover:max-w-xs group-hover:pl-4"
+            onClick={onSave}
+          >
+            <span className="text-xl">💾</span>
+            <span className="text-sm opacity-0 group-hover:opacity-100 group-hover:delay-500 transition-opacity duration-500">Save</span>
+          </button>
+        </Tooltip>
+      </div>
+
+      <div className="relative group">
+        <Tooltip label="Accept and move to the next step" aria-label="Accept and move to the next step">
+          <button
+            className="flex items-center space-x-2 bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-semibold py-2 px-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-1500 ease-in-out w-16 max-w-16 group-hover:w-auto group-hover:max-w-xs group-hover:pl-4"
             onClick={onAccept}
           >
-            Accept
+            <span className="text-xl">✅</span>
+            <span className="text-sm opacity-0 group-hover:opacity-100 group-hover:delay-500 transition-opacity duration-500">Save</span>
           </button>
-        </div>
+        </Tooltip>
       </div>
+
       {regenerateDialogPressed && (
               <RegenerateDialog 
                 setRegenerateDialogPressed={setRegenerateDialogPressed}
                 onRegenerate={onRegenerate}
               />
           )}
-  </div>
+    </div>
   )
 }
 
@@ -288,9 +308,6 @@ const OutlineEditor = () => {
   const [outlineData, setOutlineData] = useState<Outline | null>(null); // Local state for smooth typing
   const [prevOutlineData, setPreviousOutlineData] = useState<Outline | null>(null); // Local state for smooth typing
   const [loading, setLoading] = useState<boolean>(false); // Loading state
-
-  // const prevOutlineDataRef = useRef<Outline | null>(null);
-
   
   const navigate = useNavigate();
   /* Script JSON
@@ -364,7 +381,7 @@ const OutlineEditor = () => {
     if (prev && curr) {
       (["title", "summary", "duration"] as Array<keyof Pick<Outline, "title" | "summary" | "duration">>).forEach((field) => {
         if (prev[field] !== curr[field]) {
-          changes[field] = curr[field]; // Now TypeScript understands the expected type
+          changes[field] = curr[field];
         }
       });
     }
@@ -549,23 +566,23 @@ const OutlineEditor = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-6xl p-4">
-        <div className="flex items-center justify-center md:col-span-1">
-          <OutlineEditorMenu onNewPrompt={onNewPrompt} onRegenerate={onRegenerate} onAccept={onAccept} />
+      {/* Toolbar */}
+      <div className="fixed bottom-0 inset-x-0 z-50 bg-white/80 backdrop-blur-md border-t border-gray-200 shadow-inner">
+        <OutlineEditorMenu onNewPrompt={onNewPrompt} onRegenerate={onRegenerate} onAccept={onAccept} onSave={sendSave} />
+      </div>
+
+      <div className="grid grid-cols-1 gap-6 w-full max-w-6xl p-4">
+        {/* The Header */}
+        <div className="flex flex-col items-center justify-center text-center mb-12">
+          <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden">
+            <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover shadow-lg" />
+          </div>
+          <h2 className="text-4xl font-bold mb-6 text-tertiary">Outline Editor</h2>
+          <p className="text-lg text-tertiary-light"> This page allows you to create, edit, and organize your course outlines. You can easily update key details such as the course title, duration, summary, objectives, and modules. The interface is designed for smooth interaction, enabling you to make changes in real-time. Whether you’re starting a new course or refining an existing one, this editor provides all the tools you need to build and manage your course content efficiently.</p>
         </div>
 
-        <div className="bg-tertiary p-8 rounded-lg shadow-md w-full md:col-span-2 h-screen overflow-y-auto">
-          
-          <div className="flex justify-between items-center mb-4">
-            <h1 className="text-xl font-semibold text-gray-700">Course Outline</h1>
-            <button 
-              onClick={sendSave} 
-              className="px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              SAVE
-            </button>
-          </div>
-
+        {/* The Outline */}
+        <div className="bg-tertiary p-8 rounded-lg shadow-md w-full">
           <div className="mb-4">
             <h1 className="block text-gray-700 text-lg font-bold mb-2">Title:</h1>
             <EditableLine 

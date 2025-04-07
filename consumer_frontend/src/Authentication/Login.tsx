@@ -65,8 +65,8 @@ function Login() {
                     <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden">
                         <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover" />
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-800 mb-2">Welcome to Scribo!</h1>
-                    <p className="text-lg text-gray-600">Your training solutions are just a few clicks away.</p>
+                    <h1 className="text-3xl font-bold text-tertiary mb-2">Welcome to Scribo!</h1>
+                    <p className="text-lg text-tertiary">Your training solutions are just a few clicks away.</p>
                 </div>
 
                 {/* Right Column: Login Form */}

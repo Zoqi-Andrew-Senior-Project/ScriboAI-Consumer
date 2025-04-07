@@ -17,59 +17,84 @@ interface PromptMenuProps {
 
 const PromptMenu: React.FC<PromptMenuProps> = ({ promptData, handleChange, handleSubmit, isLoading }) => {
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl p-4">
-        <div>
-            <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden">
-              <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover" />
-            </div>
-            <h2 className="text-3xl font-bold mb-6 text-center">Provide Information for Scribo</h2>
+    <div className="flex items-center justify-center min-h-screen p-6">
+      <div className="w-full max-w-4xl">
+        <div className="flex flex-col items-center justify-center text-center mb-12">
+          <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden">
+            <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover shadow-lg" />
+          </div>
+          <h2 className="text-4xl font-bold mb-6 text-tertiary">Let's Build Your Course Outline!</h2>
+          <p className="text-lg text-tertiary-light">Share a few details, and we'll generate a structured outline tailored to your topic and time constraints.</p>
         </div>
+
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Topic:</label>
-            <input
-              type="text"
-              name="topic"
-              value={promptData.topic}
-              onChange={handleChange}
-              placeholder="Enter Topic"
-              className="shadow appearance-none border rounded w-full py-2 px-3 bg-white text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-primary"
-              required
-            />
-          </div>
-          <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2">Duration:</label>
-            <div className="">
+          <div className="mb-6 flex justify-center">
+            <div className="w-full sm:w-2/3 md:w-1/2">
+              <label htmlFor="topic" className="block text-tertiary text-sm font-bold mb-2">Topic:</label>
               <input
-                type="radio"
-                name="duration"
-                value="short"
-                checked={promptData.duration === "short"}
+                type="text"
+                id="topic"
+                name="topic"
+                value={promptData.topic}
                 onChange={handleChange}
-                className="h-5 w-5 text-primary focus:ring-primary"
+                placeholder="Enter the topic you want to create a course on"
+                className="shadow appearance-none border rounded w-full py-3 px-4 bg-white text-gray-700 leading-tight focus:outline-none focus:shadow-outline focus:border-primary"
+                required
+                disabled={isLoading}
               />
-              <label className="ml-2 text-base font-light">Short (up to 1 hour)</label>
-            </div>
-            <div className="">
-              <input
-                type="radio"
-                name="duration"
-                value="long"
-                checked={promptData.duration === "long"}
-                onChange={handleChange}
-                className="h-5 w-5 text-primary focus:ring-primary"
-              />
-              <label className="ml-2 text-base font-light">Long (more than 1 hour)</label>
             </div>
           </div>
-          <button
-            className="bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-            onClick={handleSubmit}
-            disabled={isLoading}
-          >
-            {isLoading ? 'Submitting...' : 'Submit'}
-          </button>
+
+          <div className="mb-6 flex justify-center">
+            <div className="w-full sm:w-2/3 md:w-1/2">
+              <label className="block text-tertiary text-sm font-bold mb-2">Duration:</label>
+              <div className="flex items-center mb-3">
+                <input
+                  type="radio"
+                  id="short"
+                  name="duration"
+                  value="short"
+                  checked={promptData.duration === "short"}
+                  onChange={handleChange}
+                  className="h-5 w-5 text-primary focus:ring-primary"
+                  disabled={isLoading}
+                />
+                <label htmlFor="short" className="ml-2 text-tertiary font-light">Short (up to 1 hour)</label>
+              </div>
+              
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="long"
+                  name="duration"
+                  value="long"
+                  checked={promptData.duration === "long"}
+                  onChange={handleChange}
+                  className="h-5 w-5 text-primary focus:ring-primary"
+                  disabled={isLoading}
+                />
+                <label htmlFor="long" className="ml-2 text-tertiary font-light">Long (more than 1 hour)</label>
+              </div>
+            </div>
+          </div>
+
+          <div className="mb-6 flex justify-center">
+            <div className="w-full sm:w-2/3 md:w-1/2">
+              <button
+                onClick={handleSubmit}
+                className="bg-button-primary-bg hover:bg-button-hover text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-105"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="flex justify-center items-center">
+                    Submitting...
+                  </span>
+                ) : (
+                  'Submit'
+                )}
+              </button>
+            </div>
+          </div>
         </form>
       </div>
     </div>

@@ -148,22 +148,28 @@ class PageView(APIView):
         try:
             course = Course.objects.get(uuid=request.data['course'])
 
-            modules = Module.objects.filter(course=course).order_by('order')
+            modules: list[Module] = Module.objects.filter(course=course).order_by('order')
+
+            data = {
+                "title": course.title,
+                "modules": []
+            }
 
             for module in modules:
                 if module.content == "No data.":
-                    data = {
-                            "title": course.title,
-                            "modules": [
-                                {
-                                    "name": module.name,
-                                    "duration": module.duration,
-                                    "subtopics": list(module.subtopics)
-                                }
-                            ]
-                    }
-                    module.content = scribo.generate_page(data)
+                    data["modules"].append({
+                        "name": module.name,
+                        "duration": module.duration,
+                        "subtopics": list(module.subtopics)
+                    })
+        
+            generated_pages: dict = scribo.generate_page(data)
+
+            for module in modules:
+                if module.content == "No data.":
+                    module.content = generated_pages.get(module.name, "No data.")
                     module.save()
+            
 
             page_serializer = PageSerializer({"currentPage": modules[0].uuid})
 

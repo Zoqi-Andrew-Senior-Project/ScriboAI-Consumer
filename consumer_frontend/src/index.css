@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 @theme {  
   --font-display: "Satoshi", "sans-serif";
@@ -6,17 +7,21 @@
 
   --color-primary: #70A9A1;
   --color-secondary: #0B2027;
-  --color-tertiary: #cfd7c7;
+  --color-tertiary: #FAF9F6;
+  --color-tertiary-light: #CFD7C7;
 
   --color-accent-1: #CFD7C7;
-  --color-accent-2: #0B2027;
+  --color-accent-2: #F6F1D1;
   --color-accent-3: #40798C;
 
   --color-button-primary-bg: #40798C;
   --color-button-primary-txt: #F6F1D1;
   --color-button-secondary-bg: #70A9A1;
   --color-button-secondary-txt: #0B2027;
-  --color-button-hover: #35796F;
+  --color-button-hover: #5B9E9B;
+
+  --color-background-dark: #1A3D35;
+  --color-highlight: #F6C85F;
 
   --ease-fluid: cubic-bezier(0.3, 0, 0, 1);
   --ease-snappy: cubic-bezier(0.2, 0, 0, 1);

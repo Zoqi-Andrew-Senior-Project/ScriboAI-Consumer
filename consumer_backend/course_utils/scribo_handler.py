@@ -14,7 +14,8 @@ class ScriboHandler():
 
         if response.status_code == 200:
             response_json = response.json()
-            content = response_json.get('response',{}).get(data2["modules"][0]["name"], "#No Data")
+            content = response_json.get('response',{})
+            print(content)
             return content
         else:
             return "ERROR"

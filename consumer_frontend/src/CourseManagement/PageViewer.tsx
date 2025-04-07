@@ -145,8 +145,7 @@ const PageViewer: React.FC = () => {
             </button>
           </div>
         </div>
-
-        <div className="prose lg:prose-xl mx-auto bg-white rounded-md p-10 h-screen overflow-auto">
+        <div className="prose lg:prose-l mx-auto bg-white rounded-md p-10 max-w-none overflow-auto">
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
         </div>
       </div>
