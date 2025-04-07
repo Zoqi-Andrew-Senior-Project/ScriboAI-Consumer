@@ -164,12 +164,11 @@ class PageView(APIView):
                     })
         
             generated_pages: dict = scribo.generate_page(data)
-            print(generated_pages)
 
             for module in modules:
-                print(module.name)
-                module.content = generated_pages.get(module.name, "No data.")
-                module.save()
+                if module.content == "No data.":
+                    module.content = generated_pages.get(module.name, "No data.")
+                    module.save()
             
 
             page_serializer = PageSerializer({"currentPage": modules[0].uuid})
