@@ -48,7 +48,6 @@ class DocumentConsumer(AsyncWebsocketConsumer):
     async def disconnect(self, close_code):
         redis_client.delete(f"page:{self.room_name}")
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
-        await self.close()
 
     async def receive(self, text_data):
         data = json.loads(text_data)
