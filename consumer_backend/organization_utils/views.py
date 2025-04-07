@@ -322,7 +322,7 @@ class InviteMemberView(APIView):
                     subject,
                     body,
                     "Scribo <sender@scriboai.tech>",
-                    ["martinezjandrew@gmail.com"], # request.data.get("email")
+                    [request.data.get("email")], # request.data.get("email")
                 )
 
                 email.attach_alternative(html_content, "text/html")
