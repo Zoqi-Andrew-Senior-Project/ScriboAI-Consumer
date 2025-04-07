@@ -134,7 +134,7 @@ function CreateCourse() {
           console.log(response);
           alert(`Course created successfully! ${promptData.topic} ${promptData.duration}`);
 
-          navigate("/outline/" + response.data.uuid)
+          navigate("/edit/outline/" + response.data.uuid)
 
           setResponseContent(response.data);
 

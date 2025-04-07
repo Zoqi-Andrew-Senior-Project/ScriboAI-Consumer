@@ -551,7 +551,7 @@ const OutlineEditor = () => {
 
       try {
         const response: InitializePagesResponseData = await axios.post(url, data);
-        navigate(`/document/${response.data.course}`);
+        navigate(`/edit/page/${response.data.course}`);
         //navigate("/outline/" + response.data.uuid)
 
       } catch (error) {
