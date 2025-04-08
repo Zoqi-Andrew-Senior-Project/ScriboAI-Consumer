@@ -268,7 +268,7 @@ const MemberActionForm: React.FC<MemberActionFormProps> = ({ isOpen, onClose, me
 
   return (
     <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       onClick={handleClickOutside}
     >
       <div
@@ -283,11 +283,12 @@ const MemberActionForm: React.FC<MemberActionFormProps> = ({ isOpen, onClose, me
         </button>
 
         <h2 className="text-xl font-semibold mb-4">Manage {member.first_name}'s Role</h2>
+        <button onClick={()=>console.log(selectedRole)}>Look!</button>
         
         <div className="space-y-3">
           {(user?.role === 'OW' && member.role !== 'OW') && (
             <button
-              onClick={() => handleRoleChange('AD')}
+              onClick={() => setSelectedRole('AD')}
               className={`w-full text-left p-3 rounded-lg border ${selectedRole === 'AD' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
             >
               <div className="flex items-center">
@@ -302,7 +303,7 @@ const MemberActionForm: React.FC<MemberActionFormProps> = ({ isOpen, onClose, me
 
           {(user?.role === 'OW' || (user?.role === 'AD' && member.role !== 'OW' && member.role !== 'AD')) && (
             <button
-              onClick={() => handleRoleChange('EM')}
+            onClick={() => setSelectedRole('EM')}
               className={`w-full text-left p-3 rounded-lg border ${selectedRole === 'EM' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
             >
               <div className="flex items-center">
