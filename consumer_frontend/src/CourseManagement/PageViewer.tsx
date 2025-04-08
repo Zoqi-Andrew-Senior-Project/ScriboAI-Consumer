@@ -397,14 +397,13 @@ const PageViewer: React.FC = () => {
         </div>
 
         {/* Page View */}
-        
         <div
           ref={markdownRef}
           className={
             `${
               isFullscreen
               ? 'fixed top-0 left-0 w-screen h-screen p-15 overflow-auto bg-white prose max-w-none transition-all duration-1000 ease-in-out transform scale-100 opacity-100'
-              : 'prose bg-white rounded-[30px] p-10 max-w-none overflow-auto w-9/10 h-screen transition-all duration-1000 ease-in-out transform scale-95 opacity-100'
+              : 'prose bg-white rounded-[30px] p-10 mx-auto max-w-7xl overflow-auto w-full h-screen transition-all duration-1000 ease-in-out transform scale-95 opacity-100'
             }`
           }
         >

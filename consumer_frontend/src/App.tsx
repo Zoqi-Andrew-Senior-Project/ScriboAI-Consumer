@@ -19,6 +19,8 @@ import PageViewer from './CourseManagement/PageViewer';
 import AcceptInvite from './EmployeePages/AcceptInvite';
 import EmployeeCourseDashboard from './EmployeePages/EmployeeCourseDashboard';
 import OutlineView from './CourseManagement/OutlineView';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Navbar() {
   const [showSettings, setShowSettings] = useState(false);
@@ -128,6 +130,7 @@ function App() {
 
           <Route path="/employee/course-dashboard" element={<EmployeeCourseDashboard />}></Route>
         </Routes>
+        <ToastContainer />
         <Footer />
       </div>
     </Router>
