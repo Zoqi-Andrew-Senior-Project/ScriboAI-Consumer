@@ -1,6 +1,9 @@
 import React, { useState, ChangeEvent } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Tooltip from '@/components/Tooltip';
 
 interface PromptData {
   topic: string;
@@ -131,16 +134,58 @@ function CreateCourse() {
           const response = await axios.post(url, data, {
             withCredentials: true
         });
-          console.log(response);
-          alert(`Course created successfully! ${promptData.topic} ${promptData.duration}`);
-
-          navigate("/edit/outline/" + response.data.uuid)
-
-          setResponseContent(response.data);
+        console.log(response.data)
+    
+        const toastId = toast.success(
+          <div className="flex flex-col gap-1 p-1">
+            <h4 className="font-semibold text-gray-100 text-base">Course Created Successfully!</h4>
+            <div className="flex justify-end mt-2">
+              <Tooltip label="Continue to editor.">
+                <button 
+                  onClick={() => {
+                    navigate("/edit/outline/" + response.data.uuid);
+                    toast.dismiss(toastId);
+                  }}
+                  className="bg-button-primary-bg hover:bg-button-hover text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-105"
+                >
+                  Continue
+                </button>
+              </Tooltip>
+            </div>
+          </div>, 
+          {
+            position: "top-right",
+            autoClose: 10000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            type: 'success',
+            theme: "colored",
+            style: {
+              background: '#059669', // emerald-600
+              borderLeft: '4px solid #10b981' // emerald-500
+            },
+            onClose: () => {
+              navigate("/edit/outline/" + response.data.uuid);
+            }
+          }
+        );
+    
+        setResponseContent(response.data);
 
       } catch (error) {
-          console.error("Error creating course:", error);
-          alert("There was an error creating the course.");
+        console.error("Error creating course:", error);
+        toast.error("Failed to create course. Please try again.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
       } finally {
           
           setIsLoading(false);
