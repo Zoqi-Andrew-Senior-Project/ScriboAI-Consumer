@@ -273,6 +273,35 @@ const RegenerateDialog: React.FC<RegenerateDialogProps> = ({ setRegenerateDialog
           <label htmlFor="regenerate-notes" className="block text-sm font-medium text-gray-700 mb-2">
             Provide feedback for regeneration:
           </label>
+          
+          {/* Suggested prompts */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            {[
+              "Add a new module",
+              "Re-evaluate the durations",
+              "Focus more on the practical aspects",
+              "Include more examples",
+              "Make it more concise",
+            ].map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                onClick={() => {
+                  const event = {
+                    target: {
+                      value: prompt,
+                      name: "regenerate-notes"
+                    }
+                  } as React.ChangeEvent<HTMLTextAreaElement>;
+                  handleChange(event);
+                }}
+                className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full transition-colors"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+
           <textarea
             id="regenerate-notes"
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
