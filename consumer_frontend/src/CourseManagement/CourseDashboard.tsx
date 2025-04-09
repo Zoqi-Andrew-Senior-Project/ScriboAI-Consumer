@@ -162,7 +162,7 @@ const CourseTable = () => {
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-tertiary divide-y divide-gray-200">
+            <tbody className="bg-tertiary-light/5 divide-y divide-gray-200">
               {courses.map((course) => (
                 <tr key={course.uuid} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">

@@ -127,7 +127,7 @@ const MemberTable = () => {
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-x-auto px-6 py-4">
+    <div className="bg-tertiary rounded-xl shadow-md border border-gray-200 overflow-x-auto">
       <div className="p-6 border-b border-gray-200 flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-gray-800">Team Members</h2>
 
@@ -138,7 +138,7 @@ const MemberTable = () => {
             className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
             >
             <FiUserPlus className="mr-2" />
-            Invite Member
+            Invite
             </button>
         </Tooltip>
       </div>
@@ -150,16 +150,16 @@ const MemberTable = () => {
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-tertiary-light/20">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th> */}
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-tertiary-light/5 divide-y divide-gray-200">
               {members.map((member) => (
                 <tr key={member.user_name} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -181,11 +181,11 @@ const MemberTable = () => {
                       {member.role === 'OW' ? 'Owner' : member.role === 'AD' ? 'Admin' : 'Employee'}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  {/* <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[member.status.toLowerCase()] || 'bg-gray-100 text-gray-800'}`}>
                       {member.status}
                     </span>
-                  </td>
+                  </td> */}
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end space-x-2">
                       <button
@@ -647,11 +647,11 @@ const EmployeeDashboard = () => {
     <div className="flex items-center justify-center min-h-screen p-6">
         <div className="w-full max-w-7xl mx-auto">
             <div className="flex flex-col items-center justify-center text-center mb-12">
-                <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden">
+                <div className="w-40 h-40 rounded-full mx-auto mb-6 overflow-hidden">
                     <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover shadow-lg" />
                 </div>
                 <h2 className="text-4xl font-bold mb-6 text-tertiary">Employee Dashboard</h2>
-                <p className="text-lg text-tertiary-light">Look over your current employes or invite new ones to your organization.</p>
+                <p className="text-xl text-tertiary-light">Look over your current employes or invite new ones to your organization.</p>
             </div>
             <MemberTable />
         </div>
