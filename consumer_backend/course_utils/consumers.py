@@ -302,7 +302,7 @@ class OutlineActions:
                 original["modules"] = [
                     module
                     for module in original["modules"]
-                    if module["uuid"] not in modulesChanges["remove"]
+                    if module.get("uuid", False) not in modulesChanges["remove"]
                 ]
 
             # update existing module
