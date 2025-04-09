@@ -100,7 +100,7 @@ const AcceptInvite = () => {
 
     return (
         <div className="flex items-center justify-center min-h-screen">
-            <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+            <div className="bg-tertiary p-8 rounded-lg shadow-lg w-full max-w-md">
                 <h1 className="text-2xl font-semibold mb-4 text-center">Accept Invite</h1>
                 <p className="text-center text-gray-700 mb-6">Please fill out your details to complete the invitation.</p>
 
@@ -126,7 +126,7 @@ const AcceptInvite = () => {
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
                             required
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="mt-1 block w-full px-4 py-2 bg-tertiary-light/15 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary/50"
                         />
                     </div>
 
@@ -139,7 +139,7 @@ const AcceptInvite = () => {
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
                             required
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="mt-1 block w-full px-4 py-2 bg-tertiary-light/15 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary/50"
                         />
                     </div>
 
@@ -152,7 +152,7 @@ const AcceptInvite = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="mt-1 block w-full px-4 py-2 bg-tertiary-light/15 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary/50"
                         />
                     </div>
 
@@ -165,13 +165,13 @@ const AcceptInvite = () => {
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             required
-                            className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="mt-1 block w-full px-4 py-2 bg-tertiary-light/15 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary/50"
                         />
                     </div>
 
                     <button
                         type="submit"
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full bg-primary hover:bg-button-hover text-white font-semibold py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/50"
                         disabled={loading}
                     >
                         {loading ? 'Processing...' : 'Submit'}
