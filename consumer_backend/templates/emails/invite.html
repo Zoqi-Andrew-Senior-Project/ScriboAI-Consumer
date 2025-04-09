@@ -3,66 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Invitation to Join ScriboAI</title>
     <style>
-        /* Basic Email Styling */
+        /* Base styles */
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            color: #333;
-            padding: 20px;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
         }
+        
+        /* Email container */
         .email-container {
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
             max-width: 600px;
-            margin: 0 auto;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        
+        /* Header with fallback background */
+        .header {
+            padding: 30px 20px;
+            background-color: #4F46E5; /* Fallback solid color */
+            background: linear-gradient(135deg, #70A9A1 0%, #0B2027 100%);
+            text-align: center;
+            color: white;
+        }
+        
+        /* Image with proper attributes for email clients */
+        .logo {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+            margin: 0 auto 20px auto;
+        }
+        
+        /* Content */
+        .content {
+            padding: 30px;
             text-align: center;
         }
+        
         h1 {
             font-size: 24px;
-            color: #4CAF50;
+            font-weight: 600;
+            color: #1F2937;
+            margin-top: 0;
+            margin-bottom: 20px;
         }
+        
         p {
             font-size: 16px;
-            margin: 15px 0;
+            color: #4B5563;
+            margin-bottom: 25px;
         }
+        
+        /* Button */
         .button {
             display: inline-block;
-            padding: 15px 30px;
-            background-color: #4CAF50;
+            padding: 14px 28px;
+            background-color: #70A9A1;
             color: white;
             text-decoration: none;
-            border-radius: 5px;
-            font-size: 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.3), 0 2px 4px -1px rgba(79, 70, 229, 0.2);
         }
+        
+        .button:hover {
+            background-color: #40798C;
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3), 0 4px 6px -2px rgba(79, 70, 229, 0.2);
+        }
+        
+        /* Footer */
         .footer {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #888;
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #9CA3AF;
+            border-top: 1px solid #E5E7EB;
         }
-        img {
-            max-width: 100%;
-            height: auto;
+
+        .highlight {
+            color: #70A9A1;
+            font-weight: 800;
+        }
+        
+        /* Responsive */
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                margin: 0;
+                border-radius: 12px;
+            }
+            
+            .content, .header {
+                padding: 25px 15px;
+            }
+            
+            .logo {
+                width: 140px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="email-container">
-        <!-- Image Section (optional) -->
-        <img src="{{image_url}}" alt="ScriboAI Logo">
-
-        <!-- Email Content -->
-        <h1>Hey there!</h1>
-        <p>You've been invited to join ScriboAI!</p>
+        <!-- Header with gradient background and image with alt text -->
+        <div class="header">
+            <!-- Image with explicit dimensions and alt text -->
+            <img src="https://scriboai.tech/minilogo.png" 
+                 alt="ScriboAI Logo" 
+                 class="logo" 
+                 width="180" 
+                 height="auto"
+                 style="display: block; width: 180px; height: auto; margin: 0 auto 20px auto;">
+        </div>
         
-        <!-- Accept Button -->
-        <p><a href="{{link}}" class="button">Accept Invitation</a></p>
-
-        <!-- Footer Section -->
+        <!-- Main content -->
+        <div class="content">
+            <h1>You're Invited to Join <span class="highlight">{{organization_name}}</span> on ScriboAI!</h1>
+            <p>Hello there! <span class="highlight">{{user}}</span> has invited you to join <span class="highlight">{{organization_name}}</span> on ScriboAI.</p>
+            <p>Accept your invitation to start viewing amazing courses designed to keep you on top of your job:</p>
+            
+            <!-- CTA Button -->
+            <a href="{{link}}" class="button" style="color: #ffffff; text-decoration: none;">Accept Invitation</a>
+            
+            <p style="margin-top: 30px; font-size: 14px;">
+                If the button doesn't work, copy and paste this link into your browser:<br>
+                <span style="color: #4F46E5; word-break: break-all; font-family: monospace;">{{link}}</span>
+            </p>
+        </div>
+        
+        <!-- Footer -->
         <div class="footer">
-            <p>If you didn't request this, please ignore this email.</p>
+            <p>If you didn't request this invitation, please ignore this email.</p>
+            <p>&copy; <script>document.write(new Date().getFullYear())</script> ScriboAI. All rights reserved.</p>
         </div>
     </div>
 </body>

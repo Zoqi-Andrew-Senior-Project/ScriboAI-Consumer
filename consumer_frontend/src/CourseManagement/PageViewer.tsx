@@ -9,6 +9,8 @@ import Tooltip from "@/components/Tooltip";
 import { HiArrowLeft, HiArrowRight, HiArrowsPointingIn, HiArrowsPointingOut, HiHome, HiBookOpen, HiClock, HiListBullet, HiFlag } from "react-icons/hi2";
 import confetti from "canvas-confetti";
 import { fetchCourseDetails, Course } from "@/api/course";
+import MiniOutlineView from "./MiniOutlineView";
+import { HiMenu, HiX } from "react-icons/hi";
 
 interface WebSocketAction {
   next: () => void;
@@ -65,6 +67,8 @@ const PageViewer: React.FC = () => {
     const [completionButtonStyle, setCompletionButtonStyle] = useState<'celebratory' | 'compact'>('celebratory');
     const [hasFiredConfetti, setHasFiredConfetti] = useState(false);
     const [courseDetails, setCourseDetails] = useState<Course | null> (null);
+    const [wsStatus, setWsStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
+    const [isMiniOutlineVisible, setIsMiniOutlineVisible] = useState(false); // New state for mini outline view visibility
 
     useEffect(() => {
       const loadCourseDetails = async () => {
@@ -89,6 +93,10 @@ const PageViewer: React.FC = () => {
         origin: { y: 0.6 },
         colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff']
       });
+    };
+
+    const toggleMiniOutlineView = () => {
+      setIsMiniOutlineVisible((prevState) => !prevState);
     };
 
     // Scroll handler
@@ -125,14 +133,20 @@ const PageViewer: React.FC = () => {
 
     // Track completion
     useEffect(() => {
-      const currentProgress = calculateCombinedProgress();
-      
-      if (currentProgress >= 100 && prevProgress.current < 100) {
-        setHasCompleted(true);
-        setShowCelebratoryButton(true);
-      }
-      
-      prevProgress.current = currentProgress;
+      const timeout = setTimeout(() => {
+        const currentProgress = calculateCombinedProgress();
+        console.log(currentProgress);
+    
+        if (currentProgress >= 100 && prevProgress.current < 100) {
+          setHasCompleted(true);
+          setShowCelebratoryButton(true);
+        }
+    
+        prevProgress.current = currentProgress;
+      }, 250); // 3000ms = 3 seconds
+    
+      // Cleanup in case the component unmounts before the timeout
+      return () => clearTimeout(timeout);
     }, [calculateCombinedProgress]);
 
     // Fire confetti when course is completed
@@ -184,12 +198,17 @@ const PageViewer: React.FC = () => {
     }, [metaData?.current_order]); // Trigger when page changes
     
     useEffect(() => {
+        setWsStatus('connecting');
+
         if (ws.current) {
             ws.current.close(); // Close previous connection before reconnecting
         }
         ws.current = new WebSocket(`${import.meta.env.VITE_WS_BACKEND}/document/${docId}/`);
 
-        ws.current.onopen = () => console.log("WebSocket Connected");
+        ws.current.onopen = () => {
+          console.log("WebSocket Connected");
+          setWsStatus('connected');
+        };
 
         ws.current.onmessage = (event) => {
             try {
@@ -203,8 +222,14 @@ const PageViewer: React.FC = () => {
             }
         };
 
-        ws.current.onerror = (error) => console.error("WebSocket Error:", error);
-        ws.current.onclose = () => console.log("WebSocket Disconnected");
+        ws.current.onerror = (error) =>  {
+          console.error("WebSocket Error:", error);
+          setWsStatus('disconnected');
+        };
+        ws.current.onclose = () => {
+          console.log("WebSocket Disconnected");
+          setWsStatus('disconnected');
+        };
 
         return () => ws.current?.close();
     }, [docId]);
@@ -258,6 +283,32 @@ const PageViewer: React.FC = () => {
   
     return (
       <div className="container mx-auto p-6">
+        {/* Hamburger Menu to Toggle Mini Outline View */}
+        <div className="fixed bottom-10 left-6 z-50">
+          <Tooltip label="View Course Details">
+            <button
+              onClick={toggleMiniOutlineView}
+              className="bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none"
+            >
+              <HiMenu className="w-6 h-6" />
+            </button>
+          </Tooltip>
+        </div>
+
+        {/* Mini Outline Card */}
+        {isMiniOutlineVisible && (
+          <div className="fixed bottom-4 left-4 z-50 shadow-lg rounded-lg w-72 overflow-y-auto">
+            {/* Close Button */}
+            <button
+              onClick={toggleMiniOutlineView}
+              className="absolute top-2 right-2 text-gray-700 hover:text-gray-900 focus:outline-none"
+            >
+              <HiX className="w-6 h-6" />
+            </button>
+
+            <MiniOutlineView corId={docId} />  {/* Pass course ID to MiniOutlineView */}
+          </div>
+        )}
         {/* Initial Celebratory Button (only shows once) */}
         {showCelebratoryButton && (
           <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
@@ -267,20 +318,6 @@ const PageViewer: React.FC = () => {
             >
               🎉 Course Completed! 🎉
             </button>
-          </div>
-        )}
-
-        {/* Persistent Compact Completion Button (shows after Continue Reading) */}
-        {hasCompleted && !showCelebratoryButton && (
-          <div className="fixed bottom-24 right-4 z-50">
-            <Tooltip label="Course Completed">
-              <button
-                onClick={handleCompletionClick}
-                className="bg-green-500 hover:bg-green-600 text-white p-3 w-14 h-14 rounded-full shadow-lg transition-all duration-200 hover:scale-110 focus:outline-none flex items-center justify-center"
-              >
-                <span className="text-xl">🎉</span>
-              </button>
-            </Tooltip>
           </div>
         )}
 
@@ -297,7 +334,7 @@ const PageViewer: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="fixed bottom-24 right-4 z-50">
+              <div className="fixed bottom-40 right-4 z-50">
                 <Tooltip label="Course Completed">
                   <button
                     onClick={handleCompletionClick}
@@ -314,7 +351,13 @@ const PageViewer: React.FC = () => {
         {/* Completion Dialog */}
         {showCompletionDialog && (
           <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50">
-            <div className="bg-white p-8 rounded-xl max-w-md text-center">
+            
+            <div className="bg-tertiary p-8 rounded-xl max-w-md text-center">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                <div className="animate-bounce" style={{ width: "50px", height: "50px" }}>
+                    <img src="/logohappy.png" alt="logo" />
+                </div>
+              </div>
               <h2 className="text-2xl font-bold text-green-600 mb-4">Congratulations!</h2>
               <p className="text-gray-700 mb-6">
                 You've successfully completed the entire course material. What would you like to do next?
@@ -322,7 +365,7 @@ const PageViewer: React.FC = () => {
               <div className="flex justify-center gap-4">
                 <button
                   onClick={handleContinueReading}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-md transition-all flex items-center justify-center gap-2 group"
+                  className="bg-primary hover:bg-button-hover text-white px-6 py-3 rounded-md transition-all flex items-center justify-center gap-2 group"
                 >
                   <span>Continue Reading</span>
                   <HiBookOpen className="w-5 h-5 transition-transform group-hover:scale-110" />
@@ -411,7 +454,7 @@ const PageViewer: React.FC = () => {
         </div>
 
         {/* Full Screen */}
-        <div className="fixed bottom-4 right-4 z-50">
+        <div className="fixed bottom-20 right-4 z-75">
           <Tooltip label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}>
             <button
               onClick={toggleFullscreen}
@@ -425,6 +468,26 @@ const PageViewer: React.FC = () => {
               )}
             </button>
           </Tooltip>
+        </div>
+
+        
+        <div className="fixed bottom-4 right-4 flex items-center gap-2 z-50 bg-white/90 rounded-md p-1">
+          <span
+            className={`h-3 w-3 rounded-full ${
+              wsStatus === 'connected'
+                ? 'bg-green-500'
+                : wsStatus === 'connecting'
+                ? 'bg-yellow-400 animate-pulse'
+                : 'bg-red-500'
+            }`}
+          ></span>
+          <span className="text-sm text-gray-700 bg-whi">
+            {wsStatus === 'connected'
+              ? 'Connected'
+              : wsStatus === 'connecting'
+              ? 'Connecting...'
+              : 'Offline'}
+          </span>
         </div>
       </div>
     );

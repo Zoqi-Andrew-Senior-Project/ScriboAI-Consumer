@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import Tooltip from "@/components/Tooltip";
 import { createPortal } from 'react-dom';
 import { FaPlus, FaRedo, FaSave, FaTrash, FaCheck, FaEllipsisH, FaTimes, FaChevronDown } from 'react-icons/fa';
+import { toast } from "react-toastify";
+import { getCSRFToken } from '@/utils/csrf';
 
 enum FeatureType {
   IMAGE = "image",
@@ -34,125 +36,153 @@ interface Outline {
 interface EditableLineProps {
   text: string;
   onSave: (newText: string) => void;
-  type?: string;
+  type?: 'text' | 'textarea';
+  className?: string;
+  inputClassName?: string; // Optional separate className for input/textarea
 }
 
-const EditableLine: React.FC<EditableLineProps> = ({ text, onSave, type = "text" }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [newText, setNewText] = useState(text);
+const EditableLine: React.FC<EditableLineProps> = ({ 
+  text, 
+  onSave, 
+  type = 'text', 
+  className = '',
+  inputClassName = ''
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [newText, setNewText] = useState(text);
 
-    useEffect(() => {
-      // Update newText when the text prop changes
-      setNewText(text);
-    }, [text]);
+  useEffect(() => {
+    setNewText(text);
+  }, [text]);
 
-    const handleDoubleClick = () => {
-      setIsEditing(true);
-    };
+  const handleDoubleClick = () => {
+    setIsEditing(true);
+  };
 
-    const handleBlur = () => {
-        // If you want to save when the input loses focus, use this
-        setIsEditing(false);
-        onSave(newText);
-    };
+  const handleBlur = () => {
+    setIsEditing(false);
+    onSave(newText);
+  };
 
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement> | React.ChangeEvent<HTMLInputElement>) => {
-      setNewText(e.target.value);
-    };
+  const handleChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement> | React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setNewText(e.target.value);
+  };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement> | React.KeyboardEvent<HTMLTextAreaElement> ) => {
-      if (e.key === 'Enter') {
-        setIsEditing(false);  // Stop editing on Enter key
-        onSave(newText);      // Call the save function
-        }
-    };
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement> | React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      setIsEditing(false);
+      onSave(newText);
+    }
+  };
 
-    return (
-        <div className="cursor-pointer" onDoubleClick={handleDoubleClick}>
-          {isEditing ? (
-                  type === "text" ? (
-                      <input
-                          type="text"
-                          value={newText}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          onKeyDown={handleKeyDown}
-                          autoFocus
-                          className="w-full p-2 bg-black/10 border border-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                      />
-                  ) : (
-                      <textarea
-                          value={newText}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          onKeyDown={handleKeyDown}
-                          autoFocus
-                          rows={4}
-                          className="w-full p-2 bg-black/10 border border-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                      />
-                  )
-              ) : (
-                  <span className="text-gray-700">{newText || "No data available."}</span>
-              )}
+  // Base classes for input/textarea
+  const inputBaseClasses = "w-full p-2 bg-black/5 border border-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition-all";
+  const displayBaseClasses = "w-full text-gray-700 hover:bg-black/10 rounded-md transition-all bg-black/3";
+
+  return (
+    <div 
+      className={`cursor-pointer ${className}`} 
+      onDoubleClick={handleDoubleClick}
+    >
+      {isEditing ? (
+        type === "text" ? (
+          <input
+            type="text"
+            value={newText}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            autoFocus
+            className={`${inputBaseClasses} ${inputClassName}`}
+          />
+        ) : (
+          <textarea
+            value={newText}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            autoFocus
+            rows={4}
+            className={`${inputBaseClasses} ${inputClassName}`}
+          />
+        )
+      ) : (
+        <div className={`${displayBaseClasses} ${className}`}>
+          {newText || "No data available."}
         </div>
-    );
+      )}
+    </div>
+  );
 };
     
 const Feature = ({ feature }: { feature: FeatureType }) => <li>{feature}</li>
 
 const Module = ({ module, updateModule }: { module: Module; updateModule: (updatedModule: Module) => void }) => {
-    const handleSubtopicChange = (index:number, newText:string) => {
-        const updatedSubtopics = [...module.subtopics]
-        updatedSubtopics[index] = newText
-        updateModule({ ...module, subtopics: updatedSubtopics })
-    }
+  const handleSubtopicChange = (index:number, newText:string) => {
+      const updatedSubtopics = [...module.subtopics]
+      updatedSubtopics[index] = newText
+      updateModule({ ...module, subtopics: updatedSubtopics })
+  }
 
-    return (
-        <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h4 className="text-lg font-semibold">Module</h4>
-          </div>
-
-          
-          <div className="mb-4">
-            <h5 className="text-base font-medium">Title:</h5>
-            <EditableLine 
-              text={module.name} 
-              onSave={(newName) =>
-              updateModule({ ...module, name: newName })
-              }
-            />
-          </div>
-
-          <div className="mb-4">
-            <h5 className="text-base font-medium">Duration:</h5>
-            <p className="text-sm text-gray-700">{module.duration}</p>
-          </div>
-
-          <div className="mb-4">
-            <h5 className="text-base font-medium">Subtopics:</h5>
-            <ul className="list-disc pl-5">
-              {module.subtopics.map((subtopic, index) => (
-                <li key={index} className="mb-2">
-                  <EditableLine 
-                    text={subtopic} 
-                    onSave={(newText) => handleSubtopicChange(index, newText)}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="mb-4">
-            <h5 className="text-base font-medium">Features:</h5>
-            <ul className="list-disc pl-5">
-              {module.features.map((feature, index) => (
-                <Feature key={index} feature={feature} />
-              ))}
-            </ul>
-          </div>
+  return (
+    <div className="bg-gray-250/15 shadow-xl rounded-lg p-4 ml-10 mb-4 border border-black w-full">
+      {/* Title row with duration */}
+      <div className="flex justify-between items-start gap-4 mb-3">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-xs font-semibold text-gray-500 mb-1">TITLE</h2>
+          <EditableLine 
+            text={module.name}
+            onSave={(newName) => updateModule({ ...module, name: newName })}
+            className="text-sm font-medium text-gray-900 truncate"
+          />
         </div>
-    )
+        <div className="flex-shrink-0 text-right">
+          <span className="text-xs font-semibold text-gray-500">DURATION</span>
+          <p className="text-sm text-gray-700">{module.duration}</p>
+        </div>
+      </div>
+
+      {/* Subtopics */}
+      <div className="mb-3">
+        <h5 className="text-xs font-semibold text-gray-500 mb-1">SUBTOPICS</h5>
+        <ul className="space-y-1">
+          {module.subtopics.length > 0 ? (
+            module.subtopics.map((subtopic, index) => (
+              <li key={index}>
+                <EditableLine
+                  text={subtopic}
+                  onSave={(newText) => handleSubtopicChange(index, newText)}
+                  className="text-sm"
+                  inputClassName="text-sm py-1"
+                />
+              </li>
+            ))
+          ) : (
+            <p className="text-xs text-gray-400 italic">None added</p>
+          )}
+        </ul>
+      </div>
+
+      {/* Features */}
+      <div>
+        <h5 className="text-xs font-semibold text-gray-500 mb-1">FEATURES</h5>
+        <ul className="space-y-1">
+          {module.features.length > 0 ? (
+            module.features.map((feature, index) => (
+              <Feature key={index} feature={feature} />
+            ))
+          ) : (
+            <p className="text-xs text-gray-400 italic">None added</p>
+          )}
+        </ul>
+      </div>
+    </div>
+  )
 }
 
 interface ConfirmationDialogProps {
@@ -182,7 +212,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
         onClick={onCancel}
       />
       
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+      <div className="relative bg-tertiary rounded-lg shadow-xl w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold text-gray-800">{title}</h3>
           <button
@@ -208,7 +238,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 text-sm font-medium text-white bg-button-primary-bg rounded-md hover:bg-button-hover focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {confirmText}
           </button>
@@ -256,7 +286,7 @@ const RegenerateDialog: React.FC<RegenerateDialogProps> = ({ setRegenerateDialog
       />
       
       {/* Dialog box */}
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+      <div className="relative bg-tertiary rounded-lg shadow-xl w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold text-gray-800">Regenerate Course Outline</h3>
           <button
@@ -273,9 +303,38 @@ const RegenerateDialog: React.FC<RegenerateDialogProps> = ({ setRegenerateDialog
           <label htmlFor="regenerate-notes" className="block text-sm font-medium text-gray-700 mb-2">
             Provide feedback for regeneration:
           </label>
+          
+          {/* Suggested prompts */}
+          <div className="flex flex-wrap gap-2 mb-3">
+            {[
+              "Add a new module",
+              "Re-evaluate the durations",
+              "Focus more on the practical aspects",
+              "Include more examples",
+              "Make it more concise",
+            ].map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                onClick={() => {
+                  const event = {
+                    target: {
+                      value: prompt,
+                      name: "regenerate-notes"
+                    }
+                  } as React.ChangeEvent<HTMLTextAreaElement>;
+                  handleChange(event);
+                }}
+                className="text-xs px-3 py-1 bg-black/6 hover:bg-black/15 text-gray-800 rounded-full transition-colors"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+
           <textarea
             id="regenerate-notes"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-black/2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent-3"
             rows={4}
             value={notes}
             onChange={handleChange}
@@ -295,7 +354,7 @@ const RegenerateDialog: React.FC<RegenerateDialogProps> = ({ setRegenerateDialog
           <Tooltip label="Regenerate the outline with the feedback." aria-label="Regenerate the outline with the feedback.">
             <button
               onClick={onRegenerateAction}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-white bg-button-primary-bg rounded-md hover:bg-button-hover focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               disabled={!notes.trim()}
             >
               Regenerate
@@ -321,63 +380,19 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
   const [deleteDialogPressed, setDeleteDialogPressed] = useState<boolean>(false);
   const [acceptDialogPressed, setAcceptDialogPressed] = useState<boolean>(false);
   const [newOutlineDialogPressed, setNewOutlineDialogPressed] = useState<boolean>(false);
-  const [isHovered, setIsHovered] = useState(false);
-
-  // Positions for the buttons when hovered (radial spread)
-  const hoverPositions = [
-    { top: 40, left: 20 },       // Center (main button)
-    { top: -20, left: -80 },   // Top-left
-    { top: -80, left: 0 },     // Top
-    { top: -20, left: 80 },    // Top-right
-    { top: 80, left: 60 },      // Bottom-right
-    { top: 80, left: -60 },      // Bottom-left
-  ];
 
   return (
-    <div 
-      className="fixed bottom-0 right-0 z-75"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{ 
-        width: isHovered ? '300px' : `128px`, 
-        height: isHovered ? '300px' : `128px`, 
-      }}
-    >
-      {/* Main container */}
-      <div className="relative">
-        {/* Main button that triggers the radial menu */}
-        
-        <div className="absolute" style={{ top: 100, left: 100 }}>
-          <button
-            onClick={() => !isHovered && setIsHovered(true)}
-            className={`absolute bg-indigo-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
-                ${isHovered ? "p-2 w-8 h-8" : "p-2 w-12 h-12"}`
-              }
-              style={{
-                top: isHovered ? hoverPositions[0].top : -40,
-                left: isHovered ? hoverPositions[0].left : -40,
-              }}
-          >
-            <FaEllipsisH className={`text-white
-                ${isHovered ? "w-3 h-3" : "w-6 h-6"}`
-              }/>
-          </button>
-
-        {/* Radial menu buttons */}
+    <div className="fixed top-1/2 right-0 z-50 flex items-center justify-end  transform -translate-y-1/2">
+      <div className="p-4 w-1/4">
           {/* Accept Button */}
           <Tooltip label="Accept the outline">
             <button
               onClick={() => setAcceptDialogPressed(true)}
               className={
-                `absolute bg-green-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
-                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
+                `m-2 bg-green-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out p-4 w-16 h-16 hover:w-20 hover:h-20 hover:bg-green-700`
               }
-              style={{
-                top: isHovered ? hoverPositions[1].top : 0,
-                left: isHovered ? hoverPositions[1].left : 0,
-              }}
             >
-              <FaCheck className="w-6 h-6" />
+              <FaCheck className="w-6 h-6 mx-auto" />
             </button>
           </Tooltip>
 
@@ -385,15 +400,9 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
           <Tooltip label="Start new outline">
             <button
               onClick={() => setNewOutlineDialogPressed(true)}
-              className={`absolute bg-blue-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
-                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
-              }
-              style={{
-                top: isHovered ? hoverPositions[2].top : 0,
-                left: isHovered ? hoverPositions[2].left : 0,
-              }}
+              className={`m-2 bg-blue-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out p-4 w-16 h-16 hover:w-20 hover:h-20 hover:bg-blue-700`}
             >
-              <FaPlus className="w-6 h-6" />
+              <FaPlus className="w-6 h-6 mx-auto" />
             </button>
           </Tooltip>
 
@@ -401,15 +410,9 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
           <Tooltip label="Regenerate outline">
             <button
               onClick={() => setRegenerateDialogPressed(true)}
-              className={`absolute bg-yellow-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
-                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
-              }
-              style={{
-                top: isHovered ? hoverPositions[3].top : 0,
-                left: isHovered ? hoverPositions[3].left : 0,
-              }}
+              className={`m-2 bg-yellow-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out p-4 w-16 h-16 hover:w-20 hover:h-20 hover:bg-yellow-700`}
             >
-              <FaRedo className="w-6 h-6" />
+              <FaRedo className="w-6 h-6 mx-auto" />
             </button>
           </Tooltip>
 
@@ -417,15 +420,9 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
           <Tooltip label="Save outline">
             <button
               onClick={onSave}
-              className={`absolute bg-teal-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
-                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
-              }
-              style={{
-                top: isHovered ? hoverPositions[4].top : 0,
-                left: isHovered ? hoverPositions[4].left : 0,
-              }}
+              className={`m-2 bg-teal-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out p-4 w-16 h-16 hover:w-20 hover:h-20 hover:bg-teal-700`}
             >
-              <FaSave className="w-6 h-6" />
+              <FaSave className="w-6 h-6 mx-auto" />
             </button>
           </Tooltip>
 
@@ -433,18 +430,11 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
           <Tooltip label="Delete outline">
             <button
               onClick={() => setDeleteDialogPressed(true)}
-              className={`absolute bg-red-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
-                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
-              }
-              style={{
-                top: isHovered ? hoverPositions[5].top : 0,
-                left: isHovered ? hoverPositions[5].left : 0,
-              }}
+              className={`m-2 bg-red-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out p-4 w-16 h-16 hover:w-20 hover:h-20 hover:bg-red-700`}
             >
-              <FaTrash className="w-6 h-6" />
+              <FaTrash className="w-6 h-6 mx-auto" />
             </button>
           </Tooltip>
-        </div>
       </div>
 
       {/* Regenerate Dialog */}
@@ -512,6 +502,9 @@ const OutlineEditor = () => {
     objectives: true,
     modules: true,
   });
+  const [wsStatus, setWsStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
+  const [showJson, setShowJson] = useState(false);
+  
   
   const toggleSection = (section: keyof ExpandedSections) => {
     setExpandedSections((prev) => ({
@@ -552,12 +545,16 @@ const OutlineEditor = () => {
   const isTyping = useRef(false); // Track typing activity
 
   useEffect(() => {
+    setWsStatus('connecting');
     if (ws.current) {
        ws.current.close(); // Close previous connection before reconnecting
     }
     
     ws.current = new WebSocket(`${import.meta.env.VITE_WS_BACKEND}/outline/${outId}/`);
-    ws.current.onopen = () => console.log("WebSocket Connected");
+    ws.current.onopen = () => {
+      console.log("WebSocket Connected");
+      setWsStatus('connected');
+    };
 
     ws.current.onmessage = (event) => {
       try {
@@ -575,8 +572,14 @@ const OutlineEditor = () => {
       }
     };
 
-    ws.current.onerror = (error) => console.error("WebSocket Error:", error);
-    ws.current.onclose = () => console.log("WebSocket Disconnected");
+    ws.current.onerror = (error) => {
+      console.error("WebSocket Error:", error);
+      setWsStatus('disconnected');
+    };
+    ws.current.onclose = () => {
+      console.log("WebSocket Disconnected");
+      setWsStatus('disconnected');
+    };
 
     return () => ws.current?.close();
   }, [outId]);
@@ -759,7 +762,89 @@ const OutlineEditor = () => {
   };
 
   const onDelete = async () => {
-    console.log("WOulda deleted")
+    setLoading(true);
+
+    const uuid = outlineData?.uuid
+
+    if (uuid !== null) {      
+      const csrfToken = await getCSRFToken();
+      if (!csrfToken) {
+        throw new Error('Failed to get CSRF token');
+      }
+
+      const data = {
+        "course": uuid
+      }
+  
+      const url = `${import.meta.env.VITE_BACKEND_ADDRESS}/course/course/`
+
+      try {
+        await axios.delete(url,
+        {
+          data: data,
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true,
+        });
+
+        const toastId = toast.success(
+          <div className="flex flex-col gap-1 p-1">
+            <h4 className="font-semibold text-gray-100 text-base">Course Deleted Successfully!</h4>
+            <p>Returning to Course Dashboard...</p>
+            <div className="flex justify-end mt-2">
+              <Tooltip label="Return to dashboard.">
+                <button 
+                  onClick={() => {
+                    navigate("/course-dashboard");
+                    toast.dismiss(toastId);
+                  }}
+                  className="bg-button-primary-bg hover:bg-button-hover text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-105"
+                >
+                  Continue
+                </button>
+              </Tooltip>
+            </div>
+          </div>, 
+          {
+            position: "top-right",
+            autoClose: 10000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            type: 'success',
+            theme: "colored",
+            style: {
+              background: '#059669', // emerald-600
+              borderLeft: '4px solid #10b981' // emerald-500
+            },
+            onClose: () => {
+              navigate("/course-dashboard");
+            }
+          }
+        );
+
+
+      }  catch (error) {
+        console.error("Error creating course:", error);
+        toast.error("Failed to delete course. Please try again.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      } finally {
+          
+          setLoading(false);
+      }
+
+    }
   }
 
   const removeModule = (index: number) => {
@@ -783,7 +868,6 @@ const OutlineEditor = () => {
 
   const addNewModule = () => {
     const newModule: Module = {
-      uuid: "new-uuid-123",
       name: "New Module",
       duration: "2 hours",
       subtopics: ["Subtopic 1", "Subtopic 2"],
@@ -831,7 +915,6 @@ const OutlineEditor = () => {
       <EditableLine 
         text={value ?? placeholder}
         onSave={onSave}
-        type={type}
       />
     </div>
   );
@@ -841,11 +924,13 @@ const OutlineEditor = () => {
       <div className="grid grid-cols-1 gap-6 w-full max-w-6xl p-4">
         {/* The Header */}
         <div className="flex flex-col items-center justify-center text-center mb-12">
-          <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden">
+          <div className="w-40 h-40 rounded-full mx-auto mb-6 overflow-hidden">
             <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover shadow-lg" />
           </div>
           <h2 className="text-4xl font-bold mb-6 text-tertiary">Outline Editor</h2>
-          <p className="text-lg text-tertiary-light"> This page allows you to create, edit, and organize your course outlines. You can easily update key details such as the course title, duration, summary, objectives, and modules. The interface is designed for smooth interaction, enabling you to make changes in real-time. Whether you’re starting a new course or refining an existing one, this editor provides all the tools you need to build and manage your course content efficiently.</p>
+          <p className="text-lg text-tertiary-light">
+            All the tools you need to build and manage your course content — live editing included.
+          </p>
         </div>
 
         {/* The Outline */}
@@ -868,7 +953,7 @@ const OutlineEditor = () => {
                   onSave={(newSummary) => {
                     setOutlineData((prev) => prev ? { ...prev, summary: newSummary } : prev);
                   }} 
-                  type="textbox"
+                  type="textarea"
               />
               <div className="border-b border-gray-200 pb-2 mb-4">
                 <button 
@@ -880,10 +965,11 @@ const OutlineEditor = () => {
                 </button>
                 {expandedSections.objectives && (
                   <div className="mt-4">
-                    <ul className="">
+                    <ul className="space-y-3 pl-5">
                         {outlineData?.objectives && outlineData.objectives.length  > 0 ? (
                           outlineData.objectives.map((objective, index) => (
-                            <li key={index} className="">
+                            <li key={index} className="relative group">
+                              <div className="absolute -left-5 top-2.5 w-2 h-2 bg-gray-400 rounded-full" />
                               <EditableLine 
                                       text={objective}
                                       onSave={(newObjective) => {
@@ -904,39 +990,50 @@ const OutlineEditor = () => {
                   </div>
                 )}
               </div>
-              <h3 className="block text-gray-700 text-lg font-bold mb-2">Modules:</h3>
-              <div className="space-y-4">
-                {outlineData?.modules?.length > 0 ? (
-                  outlineData.modules.map((module, index) => (
-                    <div key={module.uuid} className="relative group">
-                      <Module 
-                        module={module}
-                        updateModule={(updated) => updateModule(index, updated)}
-                      />
-                      <button 
-                        onClick={() => removeModule(index)}
-                        className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100
-                                  bg-red-500 text-white rounded-full p-1 transition-opacity"
-                      >
-                        <FaTimes size={12} />
-                      </button>
+              
+              <div className="border-b border-gray-200 pb-2 mb-4">
+                <button 
+                  onClick={() => toggleSection('modules')}
+                  className="flex items-center w-full justify-between"
+                >
+                  <h3 className="block text-gray-700 text-lg font-bold mb-2">Modules</h3>
+                  <FaChevronDown className={`transition-transform ${expandedSections.modules ? 'rotate-180' : ''}`}/>
+                </button>
+                {expandedSections.modules && (
+                <div className="space-y-4">
+                  {outlineData?.modules?.length > 0 ? (
+                    outlineData.modules.map((module, index) => (
+                      <div key={module.uuid} className="relative group max-w-1/2">
+                        <Module 
+                          module={module}
+                          updateModule={(updated) => updateModule(index, updated)}
+                        />
+                        <button 
+                          onClick={() => removeModule(index)}
+                          className="absolute -top-2 -right-12 opacity-0 group-hover:opacity-100
+                                    bg-red-500 text-white rounded-full p-1 transition-opacity"
+                        >
+                          <FaTimes size={12} />
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No modules yet. Click "Add Module" to get started.
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    No modules yet. Click "Add Module" to get started.
-                  </div>
+                  )}
+                  <button 
+                    onClick={addNewModule}
+                    className="w-full py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 
+                              rounded-lg border-2 border-dashed border-blue-300 transition-colors
+                              flex items-center justify-center gap-2"
+                  >
+                    <FaPlus />
+                    <span>Add New Module</span>
+                  </button>
+                </div>
                 )}
               </div>
-                <button 
-                  onClick={addNewModule}
-                  className="w-full py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 
-                            rounded-lg border-2 border-dashed border-blue-300 transition-colors
-                            flex items-center justify-center gap-2"
-                >
-                  <FaPlus />
-                  <span>Add New Module</span>
-                </button>
             </div>
           </div>
 
@@ -946,19 +1043,11 @@ const OutlineEditor = () => {
           </div> */}
         </div>
       </div>
-      
-      {loading && (
-        <div className="fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 bg-indigo-50/75">
-          <div className="animate-pulse" style={{ width: "50px", height: "50px" }}>
-            <img src="/minilogo.png" alt="logo" />
-          </div>
-        </div>
-      )}
       {typeof document !== 'undefined' && createPortal(
         <>
           {loading && (
-            <div className="fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 bg-indigo-50/75">
-              <div className="animate-pulse" style={{ width: "50px", height: "50px" }}>
+            <div className="fixed top-0 left-0 right-0 bottom-0 items-center justify-center flex z-50 bg-indigo-50/75">
+              <div className="animate-pulse h-1/6 w-1/8">
                 <img src="/minilogo.png" alt="logo" />
               </div>
             </div>
@@ -969,6 +1058,25 @@ const OutlineEditor = () => {
       
       {/* Toolbar */}
       <OutlineEditorMenu onNewPrompt={onNewPrompt} onRegenerate={onRegenerate} onAccept={onAccept} onSave={sendSave} onDelete={onDelete} />      
+          
+      <div className="fixed bottom-4 right-4 flex items-center gap-2 z-50 bg-white/90 rounded-md p-1">
+        <span
+          className={`h-3 w-3 rounded-full ${
+            wsStatus === 'connected'
+              ? 'bg-green-500'
+              : wsStatus === 'connecting'
+              ? 'bg-yellow-400 animate-pulse'
+              : 'bg-red-500'
+          }`}
+        ></span>
+        <span className="text-sm text-gray-700 bg-whi">
+          {wsStatus === 'connected'
+            ? 'Connected'
+            : wsStatus === 'connecting'
+            ? 'Connecting...'
+            : 'Offline'}
+        </span>
+      </div>
     </div>
   );
 };

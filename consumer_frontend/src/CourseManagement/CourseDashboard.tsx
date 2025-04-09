@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { FiEye, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
+import Tooltip from '@/components/Tooltip';
 
 enum FeatureType {
   IMAGE = "image",
@@ -37,8 +38,7 @@ interface Outline {
 const statusColors: Record<string, string> = {
   draft: 'bg-yellow-100 text-yellow-800',
   published: 'bg-green-100 text-green-800',
-  archived: 'bg-gray-100 text-gray-800',
-  in_review: 'bg-blue-100 text-blue-800',
+  temp: 'bg-gray-100 text-gray-800',
 };
 
 const CourseTable = () => {
@@ -132,16 +132,18 @@ const CourseTable = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-tertiary rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="p-6 border-b border-gray-200 flex justify-between items-center">
         <h2 className="text-2xl font-semibold text-gray-800">Course Dashboard</h2>
-        <button
-          onClick={handleCreate}
-          className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
-        >
-          <FiPlus className="mr-2" />
-          Create New Course
-        </button>
+        <Tooltip label="Create a new course">
+          <button
+            onClick={handleCreate}
+            className="flex items-center bg-button-primary-bg text-white px-4 py-2 rounded-md hover:bg-button-hover transition-colors"
+          >
+            <FiPlus className="mr-2" />
+            Create
+          </button>
+        </Tooltip>
       </div>
       
       {courses.length === 0 ? (
@@ -151,7 +153,7 @@ const CourseTable = () => {
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-tertiary-light/20">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
@@ -160,7 +162,7 @@ const CourseTable = () => {
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-tertiary-light/5 divide-y divide-gray-200">
               {courses.map((course) => (
                 <tr key={course.uuid} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -171,9 +173,16 @@ const CourseTable = () => {
                     {course.duration}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[course.status.toLowerCase()] || 'bg-gray-100 text-gray-800'}`}>
-                      {course.status}
-                    </span>
+                    <Tooltip label={
+                      (
+                        course.status == 'published' && "All employees can view this course."
+                        || course.status == 'temp' && "This course is being worked, will be removed after a period of time as passed."
+                        || course.status == 'draft' && "Only admins and the owner can view this course.")
+                    }>
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColors[course.status.toLowerCase()] || 'bg-gray-100 text-gray-800'}`}>
+                        {course.status}
+                      </span>
+                    </Tooltip>
                   </td>
                   {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {course.updated_at ? new Date(course.updated_at).toLocaleDateString() : 'N/A'}
@@ -229,11 +238,11 @@ const CourseDashboard = () => {
     <div className="flex items-center justify-center min-h-screen">
         <div className="w-full max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex flex-col items-center justify-center text-center mb-12">
-                <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden">
+                <div className="w-40 h-40 rounded-full mx-auto mb-6 overflow-hidden">
                     <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover shadow-lg" />
                 </div>
                 <h2 className="text-4xl font-bold mb-6 text-tertiary">Course Dashboard</h2>
-                <p className="text-lg text-tertiary-light">Look over dashboards, view them as an employee, make changes, delete them, or make a new course.</p>
+                <p className="text-xl text-tertiary-light">Look over dashboards, view them as an employee, make changes, delete them, or make a new course.</p>
             </div>
             <CourseTable />
         </div>

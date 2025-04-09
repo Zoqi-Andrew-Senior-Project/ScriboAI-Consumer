@@ -21,17 +21,21 @@ import EmployeeCourseDashboard from './EmployeePages/EmployeeCourseDashboard';
 import OutlineView from './CourseManagement/OutlineView';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useNavigate } from 'react-router-dom';
 
 function Navbar() {
   const [showSettings, setShowSettings] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <nav className="bg-secondary text-accent-1">
       <div className="container mx-auto flex items-center justify-between px-4 py-3">
         {/* Brand Logo */}
-        <a className="text-xl font-bold" href="#">
-          <img src="/logo.png" alt="Scribo.AI Logo" className="w-12 h-12 mr-2 inline-block" />
-          Scribo.AI
+        <a className="text-3xl font-bold cursor-pointer" 
+          onClick={() => navigate("/home")}
+        >
+          <img src="/minilogo.png" alt="Scribo.AI Logo" className="w-12 h-12 p-1 rounded-full mr-2 inline-block bg-tertiary-light" />
+          ScriboAI
         </a>
 
         {/* Mobile Menu Button */}
@@ -44,10 +48,10 @@ function Navbar() {
 
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-6">
-          <Link to="/home" className="hover:text-gray-400">Home</Link>
+          <Link to="/home" className="hover:text-gray-400 text-2xl">Home</Link>
           <button
             onClick={() => setShowSettings((prev) => !prev)}
-            className="hover:text-gray-400"
+            className="hover:text-gray-400 text-2xl cursor-pointer"
           >
             Settings
           </button>
@@ -62,14 +66,13 @@ function Navbar() {
 function Welcome() {
   return (
     <div className="flex items-center justify-center min-h-screen">
-      <div className="w-full max-w-lg text-center">
-        {/* Placeholder for circular logo */}
-        <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden">
+      <div className="w-full max-w-xl text-center">
+        <div className="w-60 h-60 rounded-full mx-auto mb-4 overflow-hidden">
           <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover" />
         </div>
 
-        <h1 className="text-3xl font-bold text-accent-2">Hello from Scribo!</h1>
-        <p className="text-accent-2 mt-2">All of your training problems solved with just a few clicks!</p>
+        <h1 className="text-6xl font-bold text-accent-2">Welcome to ScriboAI!</h1>
+        <p className="text-accent-2 mt-2 text-2xl">All of your training problems solved with just a few clicks!</p>
 
         <div className="mt-6 space-y-3">
           <Link 

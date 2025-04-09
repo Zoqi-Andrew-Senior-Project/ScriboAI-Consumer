@@ -82,7 +82,7 @@ const CourseTable = () => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-tertiary rounded-lg shadow-sm border border-gray-200 overflow-hidden">
       <div className="p-6 border-b border-gray-200">
         <h2 className="text-2xl font-semibold text-gray-800">Available Courses</h2>
         <p className="text-gray-600 mt-1">Browse and access all available training materials</p>
@@ -95,7 +95,7 @@ const CourseTable = () => {
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+            <thead className="bg-tertiary-light/20">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
@@ -104,7 +104,7 @@ const CourseTable = () => {
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-tertiary-light/5 divide-y divide-gray-200">
               {courses.map((course) => (
                 <tr key={course.uuid} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">

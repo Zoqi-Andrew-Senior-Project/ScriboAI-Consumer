@@ -11,6 +11,7 @@ consumer_backend/mysite/mysite/__pycache__
 # Allow logo.png
 !consumer_frontend/public/logo.png
 !consumer_frontend/public/minilogo.png
+!consumer_frontend/public/happylogo.png
 
 .env.dev
 

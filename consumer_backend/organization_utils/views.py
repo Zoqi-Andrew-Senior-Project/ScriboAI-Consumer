@@ -307,13 +307,13 @@ class InviteMemberView(APIView):
                 invitation_token = serializer.save()
 
                 # compost email
-                subject = "You're invited to ScriboAI!"
+                subject = member.first_name + " invited you to join " + organization.name + "on ScriboAI!"
                 body = "Congrats 😁"
 
                 context = {
                     "organization_name": organization.name,
+                    "user": member.first_name + " " + member.last_name,
                     "link": os.getenv("FRONTEND_ADDRESS") + f"/accept-invite/{invitation_token}/",
-                    "image": "http://scriboai.tech/static/media/logo.58c00fb0d1fb34fa34b4.png",
                 }
 
                 html_content = render_to_string("invite.html", context)

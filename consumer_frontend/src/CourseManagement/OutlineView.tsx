@@ -84,7 +84,7 @@ const OutlineView: React.FC = () => {
             {/* Header */}
             <h1 className="sr-only">Course Outline: {courseDetails.title}</h1>
             
-            <div className="max-w-4xl mx-auto mb-8 bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg">
+            <div className="max-w-4xl mx-auto mb-8 bg-tertiary rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg">
                 <div className="p-8">
                     <div className="flex justify-between items-start">
                         <div>
@@ -142,7 +142,7 @@ const OutlineView: React.FC = () => {
                             {courseDetails.modules.map((module) => (
                                 <div 
                                     key={module.uuid} 
-                                    className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-200"
+                                    className="bg-tertiary-light/10 border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors duration-200"
                                 >
                                     <h3 className="text-lg font-medium text-gray-900">{module.name}</h3>
                                     <p className="text-gray-600 text-sm mt-1">{module.duration}</p>
