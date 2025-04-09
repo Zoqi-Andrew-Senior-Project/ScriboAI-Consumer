@@ -378,30 +378,10 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
   const [deleteDialogPressed, setDeleteDialogPressed] = useState<boolean>(false);
   const [acceptDialogPressed, setAcceptDialogPressed] = useState<boolean>(false);
   const [newOutlineDialogPressed, setNewOutlineDialogPressed] = useState<boolean>(false);
-  const [isHovered, setIsHovered] = useState(false);
-
-  // Positions for the buttons when hovered (radial spread)
-  const hoverPositions = [
-    { top: 400, left: 200 },       // Center (main button)
-    { top: 0, left: 0 },   // Top-left
-    { top: 0, left: 0 },     // Top
-    { top: 0, left: 0 },    // Top-right
-    { top: 0, left: 0 },      // Bottom-right
-    { top: 0, left: 0 },      // Bottom-left
-  ];
 
   return (
-    <div 
-      className="fixed top-2/5 right-0 z-75 w-screen h-screen"
-      onMouseEnter={() => setIsHovered(true)}
-      // onMouseLeave={() => setIsHovered(false)}
-      style={{ 
-        width: isHovered ? '300px' : `128px`, 
-        height: isHovered ? '300px' : `128px`, 
-      }}
-    >
-      {/* Main container */}
-      <div className="relative h-full w-1/4 p-10 m-10">
+    <div className="fixed top-1/2 right-0 z-50 flex items-center justify-end  transform -translate-y-1/2">
+      <div className="p-4 w-1/4">
           {/* Accept Button */}
           <Tooltip label="Accept the outline">
             <button
@@ -520,6 +500,8 @@ const OutlineEditor = () => {
     objectives: true,
     modules: true,
   });
+  const [wsStatus, setWsStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
+  
   
   const toggleSection = (section: keyof ExpandedSections) => {
     setExpandedSections((prev) => ({
@@ -560,12 +542,16 @@ const OutlineEditor = () => {
   const isTyping = useRef(false); // Track typing activity
 
   useEffect(() => {
+    setWsStatus('connecting');
     if (ws.current) {
        ws.current.close(); // Close previous connection before reconnecting
     }
     
     ws.current = new WebSocket(`${import.meta.env.VITE_WS_BACKEND}/outline/${outId}/`);
-    ws.current.onopen = () => console.log("WebSocket Connected");
+    ws.current.onopen = () => {
+      console.log("WebSocket Connected");
+      setWsStatus('connected');
+    };
 
     ws.current.onmessage = (event) => {
       try {
@@ -583,8 +569,14 @@ const OutlineEditor = () => {
       }
     };
 
-    ws.current.onerror = (error) => console.error("WebSocket Error:", error);
-    ws.current.onclose = () => console.log("WebSocket Disconnected");
+    ws.current.onerror = (error) => {
+      console.error("WebSocket Error:", error);
+      setWsStatus('disconnected');
+    };
+    ws.current.onclose = () => {
+      console.log("WebSocket Disconnected");
+      setWsStatus('disconnected');
+    };
 
     return () => ws.current?.close();
   }, [outId]);
@@ -852,7 +844,9 @@ const OutlineEditor = () => {
             <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover shadow-lg" />
           </div>
           <h2 className="text-4xl font-bold mb-6 text-tertiary">Outline Editor</h2>
-          <p className="text-lg text-tertiary-light"> This page allows you to create, edit, and organize your course outlines. You can easily update key details such as the course title, duration, summary, objectives, and modules. The interface is designed for smooth interaction, enabling you to make changes in real-time. Whether you’re starting a new course or refining an existing one, this editor provides all the tools you need to build and manage your course content efficiently.</p>
+          <p className="text-lg text-tertiary-light">
+            All the tools you need to build and manage your course content — live editing included.
+          </p>
         </div>
 
         {/* The Outline */}
@@ -912,39 +906,50 @@ const OutlineEditor = () => {
                   </div>
                 )}
               </div>
-              <h3 className="block text-gray-700 text-lg font-bold mb-2">Modules:</h3>
-              <div className="space-y-4">
-                {outlineData?.modules?.length > 0 ? (
-                  outlineData.modules.map((module, index) => (
-                    <div key={module.uuid} className="relative group max-w-1/2">
-                      <Module 
-                        module={module}
-                        updateModule={(updated) => updateModule(index, updated)}
-                      />
-                      <button 
-                        onClick={() => removeModule(index)}
-                        className="absolute -top-2 -right-12 opacity-0 group-hover:opacity-100
-                                  bg-red-500 text-white rounded-full p-1 transition-opacity"
-                      >
-                        <FaTimes size={12} />
-                      </button>
+              
+              <div className="border-b border-gray-200 pb-2 mb-4">
+                <button 
+                  onClick={() => toggleSection('modules')}
+                  className="flex items-center w-full justify-between"
+                >
+                  <h3 className="block text-gray-700 text-lg font-bold mb-2">Modules</h3>
+                  <FaChevronDown className={`transition-transform ${expandedSections.modules ? 'rotate-180' : ''}`}/>
+                </button>
+                {expandedSections.modules && (
+                <div className="space-y-4">
+                  {outlineData?.modules?.length > 0 ? (
+                    outlineData.modules.map((module, index) => (
+                      <div key={module.uuid} className="relative group max-w-1/2">
+                        <Module 
+                          module={module}
+                          updateModule={(updated) => updateModule(index, updated)}
+                        />
+                        <button 
+                          onClick={() => removeModule(index)}
+                          className="absolute -top-2 -right-12 opacity-0 group-hover:opacity-100
+                                    bg-red-500 text-white rounded-full p-1 transition-opacity"
+                        >
+                          <FaTimes size={12} />
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-gray-500">
+                      No modules yet. Click "Add Module" to get started.
                     </div>
-                  ))
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    No modules yet. Click "Add Module" to get started.
-                  </div>
+                  )}
+                  <button 
+                    onClick={addNewModule}
+                    className="w-full py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 
+                              rounded-lg border-2 border-dashed border-blue-300 transition-colors
+                              flex items-center justify-center gap-2"
+                  >
+                    <FaPlus />
+                    <span>Add New Module</span>
+                  </button>
+                </div>
                 )}
               </div>
-                <button 
-                  onClick={addNewModule}
-                  className="w-full py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 
-                            rounded-lg border-2 border-dashed border-blue-300 transition-colors
-                            flex items-center justify-center gap-2"
-                >
-                  <FaPlus />
-                  <span>Add New Module</span>
-                </button>
             </div>
           </div>
 
@@ -977,6 +982,26 @@ const OutlineEditor = () => {
       
       {/* Toolbar */}
       <OutlineEditorMenu onNewPrompt={onNewPrompt} onRegenerate={onRegenerate} onAccept={onAccept} onSave={sendSave} onDelete={onDelete} />      
+    
+      
+      <div className="fixed bottom-4 right-4 flex items-center gap-2 z-50 bg-white/90 rounded-md p-1">
+        <span
+          className={`h-3 w-3 rounded-full ${
+            wsStatus === 'connected'
+              ? 'bg-green-500'
+              : wsStatus === 'connecting'
+              ? 'bg-yellow-400 animate-pulse'
+              : 'bg-red-500'
+          }`}
+        ></span>
+        <span className="text-sm text-gray-700 bg-whi">
+          {wsStatus === 'connected'
+            ? 'Connected'
+            : wsStatus === 'connecting'
+            ? 'Connecting...'
+            : 'Offline'}
+        </span>
+      </div>
     </div>
   );
 };

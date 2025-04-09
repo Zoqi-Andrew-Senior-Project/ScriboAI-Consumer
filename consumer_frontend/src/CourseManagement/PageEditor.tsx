@@ -68,7 +68,8 @@ const PageEditor = () => {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [savingStatus, setSavingStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isHovered, setIsHovered] = useState(false)
+  const [isHovered, setIsHovered] = useState(false);
+  const [wsStatus, setWsStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
   
   const toggleFullscreen = () => {
     const doc = document as Document;
@@ -88,12 +89,16 @@ const PageEditor = () => {
   };
 
   useEffect(() => {
+    setWsStatus('connecting');
     if (ws.current) {
        ws.current.close(); // Close previous connection before reconnecting
     }
     ws.current = new WebSocket(`${import.meta.env.VITE_WS_BACKEND}/document/${docId}/`);
 
-    ws.current.onopen = () => console.log("WebSocket Connected");
+    ws.current.onopen = () => {
+      console.log("WebSocket Connected");
+      setWsStatus('connected');
+    };
 
     ws.current.onmessage = (event) => {
       try {
@@ -110,8 +115,15 @@ const PageEditor = () => {
       }
     };
 
-    ws.current.onerror = (error) => console.error("WebSocket Error:", error);
-    ws.current.onclose = () => console.log("WebSocket Disconnected");
+    ws.current.onerror = (error) => {
+      console.error("WebSocket Error:", error);
+      setWsStatus('disconnected');
+    };
+
+    ws.current.onclose = () => {
+      console.log("WebSocket Disconnected");
+      setWsStatus('disconnected');
+    };
 
     return () => ws.current?.close();
   }, [docId]);
@@ -208,10 +220,15 @@ const PageEditor = () => {
       >      
         <div className="flex items-center justify-center gap-8 mx-auto w-2/3 bg-gray-50/75 pl-5 pr-5 rounded-full">
           {/* Left Arrow */}
-          <Tooltip label="Go to previous page.">
+          <Tooltip label={metaData?.current_order === 1 ? "You're on the first page" : "Go to previous page"}>
             <button
               onClick={debouncedAction.prev}
-              className={`text-black p-2 rounded-md hover:bg-gray-600 hover:text-white transition-all`}
+              disabled={metaData?.current_order === 1}
+              className={`text-black p-2 rounded-md transition-all ${
+                metaData?.current_order === 1 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-gray-600 hover:text-white'
+              }`}
             >
               <HiArrowLeft className="w-8 h-6" strokeWidth={3} />
             </button>
@@ -222,14 +239,23 @@ const PageEditor = () => {
             className="flex-1 bg-gray-300 rounded-lg h-6 overflow-hidden transition-all duration-300"
             style={{ pointerEvents: 'none' }}
           >
-            <Progressbar progress={((metaData?.current_order - 1) / metaData?.total) * 100} />
+            <Progressbar progress={((metaData?.current_order) / metaData?.total) * 100} />
           </div>
 
           {/* Right Arrow */}
-          <Tooltip label="Go to next page.">
+          <Tooltip label={
+            metaData?.current_order === metaData?.total 
+              ? "You're on the last page" 
+              : "Go to next page"
+          }>
             <button
               onClick={debouncedAction.next}
-              className={`text-black p-2 rounded-md hover:bg-gray-600 hover:text-white transition-all`}
+              disabled={metaData?.current_order === metaData?.total}
+              className={`text-black p-2 rounded-md transition-all ${
+                metaData?.current_order === metaData?.total
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'hover:bg-gray-600 hover:text-white'
+              }`}
             >
               <HiArrowRight className="w-8 h-6" strokeWidth={3} />
             </button>
@@ -299,7 +325,24 @@ const PageEditor = () => {
           </div>
         </div>
       </div>
-
+      <div className="fixed bottom-4 right-4 flex items-center gap-2 z-50 bg-white/90 rounded-md p-1">
+        <span
+          className={`h-3 w-3 rounded-full ${
+            wsStatus === 'connected'
+              ? 'bg-green-500'
+              : wsStatus === 'connecting'
+              ? 'bg-yellow-400 animate-pulse'
+              : 'bg-red-500'
+          }`}
+        ></span>
+        <span className="text-sm text-gray-700 bg-whi">
+          {wsStatus === 'connected'
+            ? 'Connected'
+            : wsStatus === 'connecting'
+            ? 'Connecting...'
+            : 'Offline'}
+        </span>
+      </div>
     </div>
   );
 };

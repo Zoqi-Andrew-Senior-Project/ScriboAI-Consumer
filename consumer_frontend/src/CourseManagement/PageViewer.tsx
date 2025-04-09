@@ -65,6 +65,7 @@ const PageViewer: React.FC = () => {
     const [completionButtonStyle, setCompletionButtonStyle] = useState<'celebratory' | 'compact'>('celebratory');
     const [hasFiredConfetti, setHasFiredConfetti] = useState(false);
     const [courseDetails, setCourseDetails] = useState<Course | null> (null);
+    const [wsStatus, setWsStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
 
     useEffect(() => {
       const loadCourseDetails = async () => {
@@ -184,12 +185,17 @@ const PageViewer: React.FC = () => {
     }, [metaData?.current_order]); // Trigger when page changes
     
     useEffect(() => {
+        setWsStatus('connecting');
+
         if (ws.current) {
             ws.current.close(); // Close previous connection before reconnecting
         }
         ws.current = new WebSocket(`${import.meta.env.VITE_WS_BACKEND}/document/${docId}/`);
 
-        ws.current.onopen = () => console.log("WebSocket Connected");
+        ws.current.onopen = () => {
+          console.log("WebSocket Connected");
+          setWsStatus('connected');
+        };
 
         ws.current.onmessage = (event) => {
             try {
@@ -203,8 +209,14 @@ const PageViewer: React.FC = () => {
             }
         };
 
-        ws.current.onerror = (error) => console.error("WebSocket Error:", error);
-        ws.current.onclose = () => console.log("WebSocket Disconnected");
+        ws.current.onerror = (error) =>  {
+          console.error("WebSocket Error:", error);
+          setWsStatus('disconnected');
+        };
+        ws.current.onclose = () => {
+          console.log("WebSocket Disconnected");
+          setWsStatus('disconnected');
+        };
 
         return () => ws.current?.close();
     }, [docId]);
@@ -411,7 +423,7 @@ const PageViewer: React.FC = () => {
         </div>
 
         {/* Full Screen */}
-        <div className="fixed bottom-4 right-4 z-50">
+        <div className="fixed bottom-20 right-4 z-75">
           <Tooltip label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}>
             <button
               onClick={toggleFullscreen}
@@ -425,6 +437,26 @@ const PageViewer: React.FC = () => {
               )}
             </button>
           </Tooltip>
+        </div>
+
+        
+        <div className="fixed bottom-4 right-4 flex items-center gap-2 z-50 bg-white/90 rounded-md p-1">
+          <span
+            className={`h-3 w-3 rounded-full ${
+              wsStatus === 'connected'
+                ? 'bg-green-500'
+                : wsStatus === 'connecting'
+                ? 'bg-yellow-400 animate-pulse'
+                : 'bg-red-500'
+            }`}
+          ></span>
+          <span className="text-sm text-gray-700 bg-whi">
+            {wsStatus === 'connected'
+              ? 'Connected'
+              : wsStatus === 'connecting'
+              ? 'Connecting...'
+              : 'Offline'}
+          </span>
         </div>
       </div>
     );
