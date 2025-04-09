@@ -34,125 +34,153 @@ interface Outline {
 interface EditableLineProps {
   text: string;
   onSave: (newText: string) => void;
-  type?: string;
+  type?: 'text' | 'textarea';
+  className?: string;
+  inputClassName?: string; // Optional separate className for input/textarea
 }
 
-const EditableLine: React.FC<EditableLineProps> = ({ text, onSave, type = "text" }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [newText, setNewText] = useState(text);
+const EditableLine: React.FC<EditableLineProps> = ({ 
+  text, 
+  onSave, 
+  type = 'text', 
+  className = '',
+  inputClassName = ''
+}) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [newText, setNewText] = useState(text);
 
-    useEffect(() => {
-      // Update newText when the text prop changes
-      setNewText(text);
-    }, [text]);
+  useEffect(() => {
+    setNewText(text);
+  }, [text]);
 
-    const handleDoubleClick = () => {
-      setIsEditing(true);
-    };
+  const handleDoubleClick = () => {
+    setIsEditing(true);
+  };
 
-    const handleBlur = () => {
-        // If you want to save when the input loses focus, use this
-        setIsEditing(false);
-        onSave(newText);
-    };
+  const handleBlur = () => {
+    setIsEditing(false);
+    onSave(newText);
+  };
 
-    const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement> | React.ChangeEvent<HTMLInputElement>) => {
-      setNewText(e.target.value);
-    };
+  const handleChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement> | React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setNewText(e.target.value);
+  };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement> | React.KeyboardEvent<HTMLTextAreaElement> ) => {
-      if (e.key === 'Enter') {
-        setIsEditing(false);  // Stop editing on Enter key
-        onSave(newText);      // Call the save function
-        }
-    };
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement> | React.KeyboardEvent<HTMLTextAreaElement>
+  ) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      setIsEditing(false);
+      onSave(newText);
+    }
+  };
 
-    return (
-        <div className="cursor-pointer" onDoubleClick={handleDoubleClick}>
-          {isEditing ? (
-                  type === "text" ? (
-                      <input
-                          type="text"
-                          value={newText}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          onKeyDown={handleKeyDown}
-                          autoFocus
-                          className="w-full p-2 bg-black/10 border border-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                      />
-                  ) : (
-                      <textarea
-                          value={newText}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          onKeyDown={handleKeyDown}
-                          autoFocus
-                          rows={4}
-                          className="w-full p-2 bg-black/10 border border-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                      />
-                  )
-              ) : (
-                  <span className="text-gray-700">{newText || "No data available."}</span>
-              )}
+  // Base classes for input/textarea
+  const inputBaseClasses = "w-full p-2 bg-black/5 border border-gray-800 rounded-md focus:outline-none focus:ring-2 focus:ring-primary transition-all";
+  const displayBaseClasses = "w-full text-gray-700 hover:bg-black/10 rounded-md transition-all bg-black/3";
+
+  return (
+    <div 
+      className={`cursor-pointer ${className}`} 
+      onDoubleClick={handleDoubleClick}
+    >
+      {isEditing ? (
+        type === "text" ? (
+          <input
+            type="text"
+            value={newText}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            autoFocus
+            className={`${inputBaseClasses} ${inputClassName}`}
+          />
+        ) : (
+          <textarea
+            value={newText}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            autoFocus
+            rows={4}
+            className={`${inputBaseClasses} ${inputClassName}`}
+          />
+        )
+      ) : (
+        <div className={`${displayBaseClasses} ${className}`}>
+          {newText || "No data available."}
         </div>
-    );
+      )}
+    </div>
+  );
 };
     
 const Feature = ({ feature }: { feature: FeatureType }) => <li>{feature}</li>
 
 const Module = ({ module, updateModule }: { module: Module; updateModule: (updatedModule: Module) => void }) => {
-    const handleSubtopicChange = (index:number, newText:string) => {
-        const updatedSubtopics = [...module.subtopics]
-        updatedSubtopics[index] = newText
-        updateModule({ ...module, subtopics: updatedSubtopics })
-    }
+  const handleSubtopicChange = (index:number, newText:string) => {
+      const updatedSubtopics = [...module.subtopics]
+      updatedSubtopics[index] = newText
+      updateModule({ ...module, subtopics: updatedSubtopics })
+  }
 
-    return (
-        <div className="bg-white shadow-lg rounded-lg p-6 mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <h4 className="text-lg font-semibold">Module</h4>
-          </div>
-
-          
-          <div className="mb-4">
-            <h5 className="text-base font-medium">Title:</h5>
-            <EditableLine 
-              text={module.name} 
-              onSave={(newName) =>
-              updateModule({ ...module, name: newName })
-              }
-            />
-          </div>
-
-          <div className="mb-4">
-            <h5 className="text-base font-medium">Duration:</h5>
-            <p className="text-sm text-gray-700">{module.duration}</p>
-          </div>
-
-          <div className="mb-4">
-            <h5 className="text-base font-medium">Subtopics:</h5>
-            <ul className="list-disc pl-5">
-              {module.subtopics.map((subtopic, index) => (
-                <li key={index} className="mb-2">
-                  <EditableLine 
-                    text={subtopic} 
-                    onSave={(newText) => handleSubtopicChange(index, newText)}
-                  />
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="mb-4">
-            <h5 className="text-base font-medium">Features:</h5>
-            <ul className="list-disc pl-5">
-              {module.features.map((feature, index) => (
-                <Feature key={index} feature={feature} />
-              ))}
-            </ul>
-          </div>
+  return (
+    <div className="bg-gray-250/15 shadow-xl rounded-lg p-4 ml-10 mb-4 border border-black w-full">
+      {/* Title row with duration */}
+      <div className="flex justify-between items-start gap-4 mb-3">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-xs font-semibold text-gray-500 mb-1">TITLE</h2>
+          <EditableLine 
+            text={module.name}
+            onSave={(newName) => updateModule({ ...module, name: newName })}
+            className="text-sm font-medium text-gray-900 truncate"
+          />
         </div>
-    )
+        <div className="flex-shrink-0 text-right">
+          <span className="text-xs font-semibold text-gray-500">DURATION</span>
+          <p className="text-sm text-gray-700">{module.duration} min</p>
+        </div>
+      </div>
+
+      {/* Subtopics */}
+      <div className="mb-3">
+        <h5 className="text-xs font-semibold text-gray-500 mb-1">SUBTOPICS</h5>
+        <ul className="space-y-1">
+          {module.subtopics.length > 0 ? (
+            module.subtopics.map((subtopic, index) => (
+              <li key={index}>
+                <EditableLine
+                  text={subtopic}
+                  onSave={(newText) => handleSubtopicChange(index, newText)}
+                  className="text-sm"
+                  inputClassName="text-sm py-1"
+                />
+              </li>
+            ))
+          ) : (
+            <p className="text-xs text-gray-400 italic">None added</p>
+          )}
+        </ul>
+      </div>
+
+      {/* Features */}
+      <div>
+        <h5 className="text-xs font-semibold text-gray-500 mb-1">FEATURES</h5>
+        <ul className="space-y-1">
+          {module.features.length > 0 ? (
+            module.features.map((feature, index) => (
+              <Feature key={index} feature={feature} />
+            ))
+          ) : (
+            <p className="text-xs text-gray-400 italic">None added</p>
+          )}
+        </ul>
+      </div>
+    </div>
+  )
 }
 
 interface ConfirmationDialogProps {
@@ -354,59 +382,35 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
 
   // Positions for the buttons when hovered (radial spread)
   const hoverPositions = [
-    { top: 40, left: 20 },       // Center (main button)
-    { top: -20, left: -80 },   // Top-left
-    { top: -80, left: 0 },     // Top
-    { top: -20, left: 80 },    // Top-right
-    { top: 80, left: 60 },      // Bottom-right
-    { top: 80, left: -60 },      // Bottom-left
+    { top: 400, left: 200 },       // Center (main button)
+    { top: 0, left: 0 },   // Top-left
+    { top: 0, left: 0 },     // Top
+    { top: 0, left: 0 },    // Top-right
+    { top: 0, left: 0 },      // Bottom-right
+    { top: 0, left: 0 },      // Bottom-left
   ];
 
   return (
     <div 
-      className="fixed bottom-0 right-0 z-75"
+      className="fixed top-2/5 right-0 z-75 w-screen h-screen"
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      // onMouseLeave={() => setIsHovered(false)}
       style={{ 
         width: isHovered ? '300px' : `128px`, 
         height: isHovered ? '300px' : `128px`, 
       }}
     >
       {/* Main container */}
-      <div className="relative">
-        {/* Main button that triggers the radial menu */}
-        
-        <div className="absolute" style={{ top: 100, left: 100 }}>
-          <button
-            onClick={() => !isHovered && setIsHovered(true)}
-            className={`absolute bg-indigo-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
-                ${isHovered ? "p-2 w-8 h-8" : "p-2 w-12 h-12"}`
-              }
-              style={{
-                top: isHovered ? hoverPositions[0].top : -40,
-                left: isHovered ? hoverPositions[0].left : -40,
-              }}
-          >
-            <FaEllipsisH className={`text-white
-                ${isHovered ? "w-3 h-3" : "w-6 h-6"}`
-              }/>
-          </button>
-
-        {/* Radial menu buttons */}
+      <div className="relative h-full w-1/4 p-10 m-10">
           {/* Accept Button */}
           <Tooltip label="Accept the outline">
             <button
               onClick={() => setAcceptDialogPressed(true)}
               className={
-                `absolute bg-green-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
-                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
+                `m-2 bg-green-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out p-4 w-16 h-16 hover:w-20 hover:h-20 hover:bg-green-700`
               }
-              style={{
-                top: isHovered ? hoverPositions[1].top : 0,
-                left: isHovered ? hoverPositions[1].left : 0,
-              }}
             >
-              <FaCheck className="w-6 h-6" />
+              <FaCheck className="w-6 h-6 mx-auto" />
             </button>
           </Tooltip>
 
@@ -414,15 +418,9 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
           <Tooltip label="Start new outline">
             <button
               onClick={() => setNewOutlineDialogPressed(true)}
-              className={`absolute bg-blue-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
-                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
-              }
-              style={{
-                top: isHovered ? hoverPositions[2].top : 0,
-                left: isHovered ? hoverPositions[2].left : 0,
-              }}
+              className={`m-2 bg-blue-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out p-4 w-16 h-16 hover:w-20 hover:h-20 hover:bg-blue-700`}
             >
-              <FaPlus className="w-6 h-6" />
+              <FaPlus className="w-6 h-6 mx-auto" />
             </button>
           </Tooltip>
 
@@ -430,15 +428,9 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
           <Tooltip label="Regenerate outline">
             <button
               onClick={() => setRegenerateDialogPressed(true)}
-              className={`absolute bg-yellow-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
-                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
-              }
-              style={{
-                top: isHovered ? hoverPositions[3].top : 0,
-                left: isHovered ? hoverPositions[3].left : 0,
-              }}
+              className={`m-2 bg-yellow-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out p-4 w-16 h-16 hover:w-20 hover:h-20 hover:bg-yellow-700`}
             >
-              <FaRedo className="w-6 h-6" />
+              <FaRedo className="w-6 h-6 mx-auto" />
             </button>
           </Tooltip>
 
@@ -446,15 +438,9 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
           <Tooltip label="Save outline">
             <button
               onClick={onSave}
-              className={`absolute bg-teal-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
-                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
-              }
-              style={{
-                top: isHovered ? hoverPositions[4].top : 0,
-                left: isHovered ? hoverPositions[4].left : 0,
-              }}
+              className={`m-2 bg-teal-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out p-4 w-16 h-16 hover:w-20 hover:h-20 hover:bg-teal-700`}
             >
-              <FaSave className="w-6 h-6" />
+              <FaSave className="w-6 h-6 mx-auto" />
             </button>
           </Tooltip>
 
@@ -462,18 +448,11 @@ const OutlineEditorMenu: React.FC<OutlineEditorMenuProps>= ({ onNewPrompt, onReg
           <Tooltip label="Delete outline">
             <button
               onClick={() => setDeleteDialogPressed(true)}
-              className={`absolute bg-red-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out
-                ${isHovered ? "p-4 w-16 h-16" : "opacity-0 scale-0 pointer-events-none"}`
-              }
-              style={{
-                top: isHovered ? hoverPositions[5].top : 0,
-                left: isHovered ? hoverPositions[5].left : 0,
-              }}
+              className={`m-2 bg-red-600 text-white rounded-full shadow-lg transition-all duration-300 ease-in-out p-4 w-16 h-16 hover:w-20 hover:h-20 hover:bg-red-700`}
             >
-              <FaTrash className="w-6 h-6" />
+              <FaTrash className="w-6 h-6 mx-auto" />
             </button>
           </Tooltip>
-        </div>
       </div>
 
       {/* Regenerate Dialog */}
@@ -860,7 +839,6 @@ const OutlineEditor = () => {
       <EditableLine 
         text={value ?? placeholder}
         onSave={onSave}
-        type={type}
       />
     </div>
   );
@@ -897,7 +875,7 @@ const OutlineEditor = () => {
                   onSave={(newSummary) => {
                     setOutlineData((prev) => prev ? { ...prev, summary: newSummary } : prev);
                   }} 
-                  type="textbox"
+                  type="textarea"
               />
               <div className="border-b border-gray-200 pb-2 mb-4">
                 <button 
@@ -909,10 +887,11 @@ const OutlineEditor = () => {
                 </button>
                 {expandedSections.objectives && (
                   <div className="mt-4">
-                    <ul className="">
+                    <ul className="space-y-3 pl-5">
                         {outlineData?.objectives && outlineData.objectives.length  > 0 ? (
                           outlineData.objectives.map((objective, index) => (
-                            <li key={index} className="">
+                            <li key={index} className="relative group">
+                              <div className="absolute -left-5 top-2.5 w-2 h-2 bg-gray-400 rounded-full" />
                               <EditableLine 
                                       text={objective}
                                       onSave={(newObjective) => {
@@ -937,14 +916,14 @@ const OutlineEditor = () => {
               <div className="space-y-4">
                 {outlineData?.modules?.length > 0 ? (
                   outlineData.modules.map((module, index) => (
-                    <div key={module.uuid} className="relative group">
+                    <div key={module.uuid} className="relative group max-w-1/2">
                       <Module 
                         module={module}
                         updateModule={(updated) => updateModule(index, updated)}
                       />
                       <button 
                         onClick={() => removeModule(index)}
-                        className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100
+                        className="absolute -top-2 -right-12 opacity-0 group-hover:opacity-100
                                   bg-red-500 text-white rounded-full p-1 transition-opacity"
                       >
                         <FaTimes size={12} />
