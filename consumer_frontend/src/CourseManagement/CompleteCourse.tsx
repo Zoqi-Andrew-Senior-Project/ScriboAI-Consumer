@@ -87,20 +87,15 @@ const CourseDashboard = () => {
             });
     }
 
-    return (   
-    <div className="w-full mx-auto px-4 py-6 flex flex-col items-center space-y-6">
-        <div className="max-w-2xl w-full px-8 py-12 bg-white rounded-xl shadow-lg border border-gray-100">
+    return (
+    <div className="flex items-center justify-center min-h-screen">
+        <div className="max-w-2xl w-full px-8 py-12 bg-tertiary rounded-xl shadow-lg border border-gray-100">
           {/* Celebration Header */}
           <div className="text-center mb-8">
             <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
-              <svg 
-                className="h-10 w-10 text-green-600" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+              <div className="animate-bounce" style={{ width: "50px", height: "50px" }}>
+                  <img src="/logohappy.png" alt="logo" />
+              </div>
             </div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Course Completed!</h1>
             <p className="text-lg text-gray-600">
@@ -126,7 +121,7 @@ const CourseDashboard = () => {
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <button
               onClick={onPublish}
-              className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md transition-all transform hover:scale-[1.02]"
+              className="flex-1 bg-primary hover:bg-button-hover text-white px-8 py-4 rounded-lg hover:from-blue-600 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-md transition-all transform hover:scale-[1.02]"
             >
               <span className="font-semibold text-lg">Publish Now</span>
               <svg className="ml-2 h-5 w-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">

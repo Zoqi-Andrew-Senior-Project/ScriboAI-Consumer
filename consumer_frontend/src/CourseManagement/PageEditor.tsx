@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import debounce from "lodash.debounce";
 import { useParams } from "react-router-dom";
-import { MDXEditor, MDXEditorMethods, UndoRedo, BoldItalicUnderlineToggles, toolbarPlugin, BlockTypeSelect, DiffSourceToggleWrapper } from '@mdxeditor/editor'
+import { MDXEditor, MDXEditorMethods, UndoRedo, BoldItalicUnderlineToggles, toolbarPlugin, BlockTypeSelect, DiffSourceToggleWrapper, tablePlugin, InsertTable, ListsToggle, CreateLink, linkDialogPlugin, InsertThematicBreak, thematicBreakPlugin, Separator } from '@mdxeditor/editor'
 import { headingsPlugin, diffSourcePlugin, listsPlugin } from '@mdxeditor/editor'
 import { useNavigate } from 'react-router-dom';
 import { HiArrowsPointingOut , HiArrowsPointingIn, HiArrowLeft, HiArrowRight } from "react-icons/hi2";
@@ -169,7 +169,7 @@ const PageEditor = () => {
     <div className="w-full mx-auto px-4 py-6 flex flex-col items-center space-y-6">
       {/* Header */}
       <div className="flex flex-col items-center justify-center text-center mb-12">
-        <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden">
+        <div className="w-40 h-40 rounded-full mx-auto mb-6 overflow-hidden">
           <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover shadow-lg" />
         </div>
         <h2 className="text-4xl font-bold mb-6 text-tertiary">Page Editor</h2>
@@ -199,17 +199,25 @@ const PageEditor = () => {
               toolbarClassName: 'my-classname',
               toolbarContents: () => (
                 <>
-                  <DiffSourceToggleWrapper>
-                    <UndoRedo />
-                    <BoldItalicUnderlineToggles />
-                    <BlockTypeSelect />
-                  </DiffSourceToggleWrapper>
+                  <UndoRedo />
+                  <Separator />
+                  <BoldItalicUnderlineToggles />
+                  <BlockTypeSelect />
+                  <Separator />
+                  <InsertTable />
+                  <ListsToggle />
+                  <CreateLink />
+                  <InsertThematicBreak />
                 </>
               ),
             }),
             headingsPlugin(),
             diffSourcePlugin(),
             listsPlugin(),
+            tablePlugin(),
+            linkDialogPlugin(),
+            thematicBreakPlugin(),
+
           ]}
         />
       </div>

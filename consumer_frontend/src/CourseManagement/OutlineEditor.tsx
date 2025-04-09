@@ -143,7 +143,7 @@ const Module = ({ module, updateModule }: { module: Module; updateModule: (updat
         </div>
         <div className="flex-shrink-0 text-right">
           <span className="text-xs font-semibold text-gray-500">DURATION</span>
-          <p className="text-sm text-gray-700">{module.duration} min</p>
+          <p className="text-sm text-gray-700">{module.duration}</p>
         </div>
       </div>
 
