@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import Tooltip from "@/components/Tooltip";
 import { createPortal } from 'react-dom';
 import { FaPlus, FaRedo, FaSave, FaTrash, FaCheck, FaEllipsisH, FaTimes, FaChevronDown } from 'react-icons/fa';
+import { toast } from "react-toastify";
+import { getCSRFToken } from '@/utils/csrf';
 
 enum FeatureType {
   IMAGE = "image",
@@ -210,7 +212,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
         onClick={onCancel}
       />
       
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+      <div className="relative bg-tertiary rounded-lg shadow-xl w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold text-gray-800">{title}</h3>
           <button
@@ -236,7 +238,7 @@ const ConfirmationDialog: React.FC<ConfirmationDialogProps> = ({
           </button>
           <button
             onClick={onConfirm}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-2 text-sm font-medium text-white bg-button-primary-bg rounded-md hover:bg-button-hover focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             {confirmText}
           </button>
@@ -284,7 +286,7 @@ const RegenerateDialog: React.FC<RegenerateDialogProps> = ({ setRegenerateDialog
       />
       
       {/* Dialog box */}
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+      <div className="relative bg-tertiary rounded-lg shadow-xl w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold text-gray-800">Regenerate Course Outline</h3>
           <button
@@ -323,7 +325,7 @@ const RegenerateDialog: React.FC<RegenerateDialogProps> = ({ setRegenerateDialog
                   } as React.ChangeEvent<HTMLTextAreaElement>;
                   handleChange(event);
                 }}
-                className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full transition-colors"
+                className="text-xs px-3 py-1 bg-black/6 hover:bg-black/15 text-gray-800 rounded-full transition-colors"
               >
                 {prompt}
               </button>
@@ -332,7 +334,7 @@ const RegenerateDialog: React.FC<RegenerateDialogProps> = ({ setRegenerateDialog
 
           <textarea
             id="regenerate-notes"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 bg-black/2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-accent-3"
             rows={4}
             value={notes}
             onChange={handleChange}
@@ -352,7 +354,7 @@ const RegenerateDialog: React.FC<RegenerateDialogProps> = ({ setRegenerateDialog
           <Tooltip label="Regenerate the outline with the feedback." aria-label="Regenerate the outline with the feedback.">
             <button
               onClick={onRegenerateAction}
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+              className="px-4 py-2 text-sm font-medium text-white bg-button-primary-bg rounded-md hover:bg-button-hover focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
               disabled={!notes.trim()}
             >
               Regenerate
@@ -501,6 +503,7 @@ const OutlineEditor = () => {
     modules: true,
   });
   const [wsStatus, setWsStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
+  const [showJson, setShowJson] = useState(false);
   
   
   const toggleSection = (section: keyof ExpandedSections) => {
@@ -759,7 +762,89 @@ const OutlineEditor = () => {
   };
 
   const onDelete = async () => {
-    console.log("WOulda deleted")
+    setLoading(true);
+
+    const uuid = outlineData?.uuid
+
+    if (uuid !== null) {      
+      const csrfToken = await getCSRFToken();
+      if (!csrfToken) {
+        throw new Error('Failed to get CSRF token');
+      }
+
+      const data = {
+        "course": uuid
+      }
+  
+      const url = `${import.meta.env.VITE_BACKEND_ADDRESS}/course/course/`
+
+      try {
+        await axios.delete(url,
+        {
+          data: data,
+          headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true,
+        });
+
+        const toastId = toast.success(
+          <div className="flex flex-col gap-1 p-1">
+            <h4 className="font-semibold text-gray-100 text-base">Course Deleted Successfully!</h4>
+            <p>Returning to Course Dashboard...</p>
+            <div className="flex justify-end mt-2">
+              <Tooltip label="Return to dashboard.">
+                <button 
+                  onClick={() => {
+                    navigate("/course-dashboard");
+                    toast.dismiss(toastId);
+                  }}
+                  className="bg-button-primary-bg hover:bg-button-hover text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-105"
+                >
+                  Continue
+                </button>
+              </Tooltip>
+            </div>
+          </div>, 
+          {
+            position: "top-right",
+            autoClose: 10000,
+            hideProgressBar: false,
+            closeOnClick: false,
+            pauseOnHover: true,
+            draggable: true,
+            type: 'success',
+            theme: "colored",
+            style: {
+              background: '#059669', // emerald-600
+              borderLeft: '4px solid #10b981' // emerald-500
+            },
+            onClose: () => {
+              navigate("/course-dashboard");
+            }
+          }
+        );
+
+
+      }  catch (error) {
+        console.error("Error creating course:", error);
+        toast.error("Failed to delete course. Please try again.", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "light",
+        });
+      } finally {
+          
+          setLoading(false);
+      }
+
+    }
   }
 
   const removeModule = (index: number) => {
@@ -783,7 +868,6 @@ const OutlineEditor = () => {
 
   const addNewModule = () => {
     const newModule: Module = {
-      uuid: "new-uuid-123",
       name: "New Module",
       duration: "2 hours",
       subtopics: ["Subtopic 1", "Subtopic 2"],
@@ -840,7 +924,7 @@ const OutlineEditor = () => {
       <div className="grid grid-cols-1 gap-6 w-full max-w-6xl p-4">
         {/* The Header */}
         <div className="flex flex-col items-center justify-center text-center mb-12">
-          <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden">
+          <div className="w-40 h-40 rounded-full mx-auto mb-6 overflow-hidden">
             <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover shadow-lg" />
           </div>
           <h2 className="text-4xl font-bold mb-6 text-tertiary">Outline Editor</h2>
@@ -959,19 +1043,11 @@ const OutlineEditor = () => {
           </div> */}
         </div>
       </div>
-      
-      {loading && (
-        <div className="fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 bg-indigo-50/75">
-          <div className="animate-pulse" style={{ width: "50px", height: "50px" }}>
-            <img src="/minilogo.png" alt="logo" />
-          </div>
-        </div>
-      )}
       {typeof document !== 'undefined' && createPortal(
         <>
           {loading && (
-            <div className="fixed top-0 left-0 right-0 bottom-0 flex justify-center items-center z-50 bg-indigo-50/75">
-              <div className="animate-pulse" style={{ width: "50px", height: "50px" }}>
+            <div className="fixed top-0 left-0 right-0 bottom-0 items-center justify-center flex z-50 bg-indigo-50/75">
+              <div className="animate-pulse h-1/6 w-1/8">
                 <img src="/minilogo.png" alt="logo" />
               </div>
             </div>
@@ -982,8 +1058,7 @@ const OutlineEditor = () => {
       
       {/* Toolbar */}
       <OutlineEditorMenu onNewPrompt={onNewPrompt} onRegenerate={onRegenerate} onAccept={onAccept} onSave={sendSave} onDelete={onDelete} />      
-    
-      
+          
       <div className="fixed bottom-4 right-4 flex items-center gap-2 z-50 bg-white/90 rounded-md p-1">
         <span
           className={`h-3 w-3 rounded-full ${
@@ -1002,6 +1077,20 @@ const OutlineEditor = () => {
             : 'Offline'}
         </span>
       </div>
+      {/* Button to show JSON */}
+      <button 
+        onClick={() => setShowJson(!showJson)} 
+        className="fixed top-4 left-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+      >
+        {showJson ? 'Hide Raw JSON' : 'Show Raw JSON'}
+      </button>
+
+      {/* JSON Display Section */}
+      {showJson && (
+        <pre className="bg-gray-100 text-sm p-4 mt-4 rounded-lg overflow-x-auto overflow-y-auto">
+          {JSON.stringify(outlineData, null, 2)}
+        </pre>
+      )}
     </div>
   );
 };
