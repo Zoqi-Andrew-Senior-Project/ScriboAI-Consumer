@@ -14,7 +14,7 @@ function EmployeeHome() {
         <div className="w-full max-w-4xl">
           {/* Left Column: Logo and Welcome Message */}
           <div className="flex flex-col items-center justify-center text-center mb-12">
-            <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden">
+            <div className="w-60 h-60 rounded-full mx-auto mb-4 overflow-hidden">
               <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover" />
             </div>
             <h1 className="text-3xl font-bold text-tertiary mb-2">Hello {user.first_name}!</h1>

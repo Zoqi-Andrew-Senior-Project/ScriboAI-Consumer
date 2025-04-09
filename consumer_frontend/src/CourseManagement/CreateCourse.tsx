@@ -23,17 +23,17 @@ const PromptMenu: React.FC<PromptMenuProps> = ({ promptData, handleChange, handl
     <div className="flex items-center justify-center min-h-screen p-6">
       <div className="w-full max-w-4xl">
         <div className="flex flex-col items-center justify-center text-center mb-12">
-          <div className="w-24 h-24 rounded-full mx-auto mb-6 overflow-hidden">
+          <div className="w-60 h-60 rounded-full mx-auto mb-6 overflow-hidden">
             <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover shadow-lg" />
           </div>
-          <h2 className="text-4xl font-bold mb-6 text-tertiary">Let's Build Your Course Outline!</h2>
-          <p className="text-lg text-tertiary-light">Share a few details, and we'll generate a structured outline tailored to your topic and time constraints.</p>
+          <h2 className="text-6xl font-bold mb-6 text-tertiary">Let's Build Your Course Outline!</h2>
+          <p className="text-2xl text-tertiary-light">Share a few details, and we'll generate a structured outline tailored to your topic and time constraints.</p>
         </div>
 
         <form onSubmit={handleSubmit}>
           <div className="mb-6 flex justify-center">
             <div className="w-full sm:w-2/3 md:w-1/2">
-              <label htmlFor="topic" className="block text-tertiary text-sm font-bold mb-2">Topic:</label>
+              <label htmlFor="topic" className="block text-tertiary text-2l font-bold mb-2">Topic:</label>
               <input
                 type="text"
                 id="topic"
@@ -50,7 +50,7 @@ const PromptMenu: React.FC<PromptMenuProps> = ({ promptData, handleChange, handl
 
           <div className="mb-6 flex justify-center">
             <div className="w-full sm:w-2/3 md:w-1/2">
-              <label className="block text-tertiary text-sm font-bold mb-2">Duration:</label>
+              <label className="block text-tertiary text-l font-bold mb-2">Duration:</label>
               <div className="flex items-center mb-3">
                 <input
                   type="radio"
@@ -81,15 +81,15 @@ const PromptMenu: React.FC<PromptMenuProps> = ({ promptData, handleChange, handl
             </div>
           </div>
 
-          <div className="mb-6 flex justify-center">
+          <div className="mb-6 flex justify-center items-center text-center">
             <div className="w-full sm:w-2/3 md:w-1/2">
               <button
                 onClick={handleSubmit}
-                className="bg-button-primary-bg hover:bg-button-hover text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-105"
+                className="bg-button-primary-bg hover:bg-button-hover text-white text-2xl font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-105"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <span className="flex justify-center items-center">
+                  <span className="flex justify-center items-center text-2xl">
                     Submitting...
                   </span>
                 ) : (

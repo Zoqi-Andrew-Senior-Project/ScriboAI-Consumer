@@ -61,12 +61,12 @@ function Login() {
         <div className="flex justify-center min-h-screen">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-4xl p-4">
                 {/* Left Column: Logo and Welcome Message */}
-                <div className="flex flex-col justify-center items-center p-6">
-                    <div className="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden">
+                <div className="flex flex-col justify-center text-center p-6">
+                    <div className="w-60 h-60 rounded-full mx-auto mb-4 overflow-hidden">
                         <img src="/logo.png" alt="Scribo.AI Logo" className="w-full h-full object-cover" />
                     </div>
-                    <h1 className="text-3xl font-bold text-tertiary mb-2">Welcome to Scribo!</h1>
-                    <p className="text-lg text-tertiary">Your training solutions are just a few clicks away.</p>
+                    <h1 className="text-6xl font-bold text-tertiary mb-2">Log in to Scribo</h1>
+                    <p className="text-2xl text-tertiary">Now only one click away!</p>
                 </div>
 
                 {/* Right Column: Login Form */}
