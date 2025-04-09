@@ -105,6 +105,11 @@ function Login() {
                         {message && <p className="mt-4 text-green-600">{message}</p>}
                         {error && <p className="mt-4 text-red-600">{error}</p>}
                     </div>
+                    <a className="text-xs font-bold cursor-pointer m-5 text-blue-500" 
+                        onClick={() => navigate("/create-organization")}
+                    >
+                        Don't Have An Account? Create an orgization instead!
+                    </a>
                 </div>
             </div>
         </div>
