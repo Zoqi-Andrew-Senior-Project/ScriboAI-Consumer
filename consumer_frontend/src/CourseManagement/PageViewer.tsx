@@ -9,6 +9,8 @@ import Tooltip from "@/components/Tooltip";
 import { HiArrowLeft, HiArrowRight, HiArrowsPointingIn, HiArrowsPointingOut, HiHome, HiBookOpen, HiClock, HiListBullet, HiFlag } from "react-icons/hi2";
 import confetti from "canvas-confetti";
 import { fetchCourseDetails, Course } from "@/api/course";
+import MiniOutlineView from "./MiniOutlineView";
+import { HiMenu, HiX } from "react-icons/hi";
 
 interface WebSocketAction {
   next: () => void;
@@ -66,6 +68,7 @@ const PageViewer: React.FC = () => {
     const [hasFiredConfetti, setHasFiredConfetti] = useState(false);
     const [courseDetails, setCourseDetails] = useState<Course | null> (null);
     const [wsStatus, setWsStatus] = useState<'connected' | 'disconnected' | 'connecting'>('connecting');
+    const [isMiniOutlineVisible, setIsMiniOutlineVisible] = useState(false); // New state for mini outline view visibility
 
     useEffect(() => {
       const loadCourseDetails = async () => {
@@ -90,6 +93,10 @@ const PageViewer: React.FC = () => {
         origin: { y: 0.6 },
         colors: ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff']
       });
+    };
+
+    const toggleMiniOutlineView = () => {
+      setIsMiniOutlineVisible((prevState) => !prevState);
     };
 
     // Scroll handler
@@ -270,6 +277,32 @@ const PageViewer: React.FC = () => {
   
     return (
       <div className="container mx-auto p-6">
+        {/* Hamburger Menu to Toggle Mini Outline View */}
+        <div className="fixed bottom-10 left-6 z-50">
+          <Tooltip label="View Course Details">
+            <button
+              onClick={toggleMiniOutlineView}
+              className="bg-gray-800 text-white p-3 rounded-full hover:bg-gray-700 focus:outline-none"
+            >
+              <HiMenu className="w-6 h-6" />
+            </button>
+          </Tooltip>
+        </div>
+
+        {/* Mini Outline Card */}
+        {isMiniOutlineVisible && (
+          <div className="fixed bottom-4 left-4 z-50 shadow-lg rounded-lg w-72 overflow-y-auto">
+            {/* Close Button */}
+            <button
+              onClick={toggleMiniOutlineView}
+              className="absolute top-2 right-2 text-gray-700 hover:text-gray-900 focus:outline-none"
+            >
+              <HiX className="w-6 h-6" />
+            </button>
+
+            <MiniOutlineView corId={docId} />  {/* Pass course ID to MiniOutlineView */}
+          </div>
+        )}
         {/* Initial Celebratory Button (only shows once) */}
         {showCelebratoryButton && (
           <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 animate-bounce">
