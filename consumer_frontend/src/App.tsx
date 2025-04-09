@@ -34,7 +34,7 @@ function Navbar() {
         <a className="text-3xl font-bold cursor-pointer" 
           onClick={() => navigate("/home")}
         >
-          <img src="/logo.png" alt="Scribo.AI Logo" className="w-12 h-12 mr-2 inline-block" />
+          <img src="/minilogo.png" alt="Scribo.AI Logo" className="w-12 h-12 p-1 rounded-full mr-2 inline-block bg-tertiary-light" />
           ScriboAI
         </a>
 

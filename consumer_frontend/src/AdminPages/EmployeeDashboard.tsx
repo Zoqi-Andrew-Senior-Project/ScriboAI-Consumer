@@ -7,6 +7,7 @@ import { FiEdit2, FiTrash2, FiMail, FiUserPlus, FiX, FiCheck, FiUser } from 'rea
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import Tooltip from '@/components/Tooltip';
+import { HiArrowPath } from 'react-icons/hi2';
 
 interface Member {
   first_name: string;
@@ -135,7 +136,7 @@ const MemberTable = () => {
         <Tooltip label="Delete the invite." aria-label="Delete the invite.">
             <button
             onClick={() => setIsInviteModalOpen(true)}
-            className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+            className="flex items-center bg-primary text-white px-4 py-2 rounded-md hover:bg-button-hover transition-colors"
             >
             <FiUserPlus className="mr-2" />
             Invite
@@ -420,7 +421,7 @@ const InvitationsModal: React.FC<InvitationsModalProps> = ({ isOpen, onClose }) 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl max-h-[90vh] flex flex-col">
+      <div className="bg-tertiary rounded-lg shadow-lg p-6 w-full max-w-4xl max-h-[90vh] flex flex-col">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold">Pending Invitations</h2>
           <button
@@ -434,13 +435,13 @@ const InvitationsModal: React.FC<InvitationsModalProps> = ({ isOpen, onClose }) 
         <div className="mb-4 flex justify-between items-center">
           <p className="text-gray-600">{invites.length} pending invitations</p>
           
-          <Tooltip label="Delete the invite." aria-label="Delete the invite.">
+          <Tooltip label="Send an invite." aria-label="Send the invite.">
             <button
                 onClick={() => setIsCreateFormOpen(true)}
-                className="flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+                className="flex items-center bg-primary text-white px-4 py-2 rounded-md hover:bg-button-hover transition-colors"
             >
                 <FiMail className="mr-2" />
-                New Invitation
+                Send Invitation
             </button>
           </Tooltip>
         </div>
@@ -468,14 +469,14 @@ const InvitationsModal: React.FC<InvitationsModalProps> = ({ isOpen, onClose }) 
         ) : (
           <div className="flex-1 overflow-y-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-tertiary-light/20">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sent</th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-tertiary-light/5 divide-y divide-gray-200">
                 {invites.map((invite) => (
                   <tr key={invite.email} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -492,7 +493,7 @@ const InvitationsModal: React.FC<InvitationsModalProps> = ({ isOpen, onClose }) 
                             className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
                             title="Resend"
                             >
-                            <FiMail size={18} />
+                            <HiArrowPath size={18} />
                             </button>
                         </Tooltip>
                         <Tooltip label="Delete the invite." aria-label="Delete the invite.">
@@ -573,7 +574,7 @@ const CreateInviteForm: React.FC<CreateInviteFormProps> = ({ isOpen, onClose, se
       onClick={handleClickOutside}
     >
       <div
-        className="bg-white rounded-lg p-6 w-full max-w-md shadow-lg relative"
+        className="bg-tertiary rounded-lg p-6 w-full max-w-md shadow-lg relative"
         ref={formRef}
       >
         <button
@@ -598,7 +599,7 @@ const CreateInviteForm: React.FC<CreateInviteFormProps> = ({ isOpen, onClose, se
                 setEmail(e.target.value);
                 setError('');
               }}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="member@example.com"
               required
             />
@@ -618,9 +619,9 @@ const CreateInviteForm: React.FC<CreateInviteFormProps> = ({ isOpen, onClose, se
             <Tooltip label="Send the invite." aria-label="Send the invite.">
                 <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-button-hover"
                 >
-                Send Invitation
+                Send
                 </button>
             </Tooltip>
           </div>

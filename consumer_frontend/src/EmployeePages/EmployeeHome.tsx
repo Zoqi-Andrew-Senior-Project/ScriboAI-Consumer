@@ -24,7 +24,7 @@ function EmployeeHome() {
   
           {/* Right Column: Buttons stacked on top of each other */}
           <div className="flex flex-col items-center justify-center space-y-4">
-            <Link to="/employee/course-dashboard" className="bg-button-primary-bg hover:bg-button-hover text-button-primary-txt font-bold py-3 px-6 rounded w-full md:w-3/4 text-center">
+            <Link to="/employee/course-dashboard" className="text-2xl bg-button-primary-bg hover:bg-button-hover text-white font-semibold py-4 px-8 rounded-lg shadow-md hover:shadow-lg transition-transform hover:scale-110">
               View Courses
             </Link>
           </div>
