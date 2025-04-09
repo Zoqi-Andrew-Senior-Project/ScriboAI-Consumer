@@ -1077,20 +1077,6 @@ const OutlineEditor = () => {
             : 'Offline'}
         </span>
       </div>
-      {/* Button to show JSON */}
-      <button 
-        onClick={() => setShowJson(!showJson)} 
-        className="fixed top-4 left-4 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
-      >
-        {showJson ? 'Hide Raw JSON' : 'Show Raw JSON'}
-      </button>
-
-      {/* JSON Display Section */}
-      {showJson && (
-        <pre className="bg-gray-100 text-sm p-4 mt-4 rounded-lg overflow-x-auto overflow-y-auto">
-          {JSON.stringify(outlineData, null, 2)}
-        </pre>
-      )}
     </div>
   );
 };
