@@ -6,8 +6,6 @@ from channels.auth import AuthMiddlewareStack
 from organization_utils.routing import websocket_urlpatterns
 from course_utils import routing as course_routing
 
-print("loading asgi.py")
-
 # Set environment variables for Django settings
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mysite.settings')
 
