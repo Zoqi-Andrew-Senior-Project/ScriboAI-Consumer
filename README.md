@@ -9,7 +9,7 @@
 ## 🚀 Key Features
 
 - **AI-Powered Course Generation**  
-  Instantly generate structured course outlines and detailed content using Llama and Gemma.
+  -  Instantly generate structured course outlines and detailed content using Llama and Gemma.
 
 - **Dual User Experience**
   - **Training Manager View**: Create and design courses, manage employees, and assign training modules.
@@ -27,19 +27,9 @@
 
 ScriboAI runs on a **dual-server architecture**:
 - **Frontend Application**: Manages user interactions and training workflows.
+  -  Stack: Vite/React, Django, Nginx, MongoDB, Redis, Certbot
 - **Backend LLM Server**: Handles course content generation using advanced models (Llama and Gemma).
+  -  Stack: FastAPI, Haystack
   -  Which can be found at https://huggingface.co/spaces/ZoqiAndrewSeniorProject/TrainingCourseGen
 
 This modular design ensures rapid module creation, responsive user experience, and scalable deployment.
-
-## 🎯 Use Case
-
-ScriboAI is built for organizations seeking to:
-- Reduce the cost and time associated with developing training materials  
-- Deliver engaging, interactive learning content at scale  
-- Empower training managers with AI-assisted tools  
-- Provide employees with a streamlined and modern learning experience
-
-## 💡 Why ScriboAI?
-
-By automating training content development, ScriboAI enables organizations to focus more on outcomes and less on manual content creation. Whether you're onboarding new hires or rolling out professional development programs, ScriboAI makes it faster and easier than ever.
