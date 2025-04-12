@@ -1,3 +1,7 @@
+<div align="center">
+  <img src="https://github.com/Zoqi-Andrew-Senior-Project/ScriboAI-Consumer/blob/main/consumer_frontend/public/minilogo.png?raw=true" alt="ScriboAI Logo" width="300"/>
+</div>
+
 # ScriboAI
 
 **ScriboAI** is a web-based platform that simplifies and accelerates the creation of corporate training programs through the power of artificial intelligence. Designed to overcome common challenges like cost, time constraints, and content quality, ScriboAI provides a seamless experience for both training managers and employees.
