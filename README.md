@@ -33,3 +33,21 @@ ScriboAI runs on a **dual-server architecture**:
   -  Which can be found at https://huggingface.co/spaces/ZoqiAndrewSeniorProject/TrainingCourseGen
 
 This modular design ensures rapid module creation, responsive user experience, and scalable deployment.
+
+## 🖥️ Installation
+
+Simply clone the repo and run `docker compose -f docker-compose.dev.yml --build -d` to get a locak docker set up and running!
+
+You will need to create an appropriate .env file, refer to the .example.env for reference.
+
+## 🔮 Future plans
+
+- **Enhanced AI capabilities**
+  -  Implement generative images or videos within course content
+  -  Offer text-to-speech or podcast form of viewing content
+  -  Utilize RAG to allow training managers to upload their organization's documentation to build courses
+-  **Improved log=in experience**
+  -  Instead of creating an individual account per organization, log-in using one email and have the ability to view the dashboard for any organization you're invited to.
+- **Improved Experiences**
+  -  Improve the course editor experience.
+  -  Improve the read experience.     
