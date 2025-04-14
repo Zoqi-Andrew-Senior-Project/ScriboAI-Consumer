@@ -6,6 +6,7 @@ from .models import Course, Module, StatusEnum
 import markdown
 import redis
 from django.conf import settings
+import uuid
 
 redis_client = redis.StrictRedis.from_url(
     settings.CACHES["default"]["LOCATION"], decode_responses=True
@@ -292,12 +293,15 @@ class OutlineActions:
         if modulesChanges:
             # add new module
             if "add" in modulesChanges:
+                for module in modulesChanges["add"]:
+                    module["uuid"] = str(uuid.uuid4())
                 if original["modules"]:
                     original["modules"].extend(modulesChanges["add"])
                 else:
                     original["modules"] = modulesChanges["add"]
 
             # remove module
+            print(modulesChanges)
             if "remove" in modulesChanges:
                 original["modules"] = [
                     module

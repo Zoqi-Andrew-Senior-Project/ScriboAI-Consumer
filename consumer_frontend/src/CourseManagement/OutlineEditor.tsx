@@ -625,7 +625,9 @@ const OutlineEditor = () => {
     });
 
     prevModules.forEach(mod => {
+        console.log(mod)
         if (!currModules.find(m => m.uuid === mod.uuid)) {
+            console.log("removing!")
             // Module has been removed
             moduleChanges.remove = moduleChanges.remove || [];
             moduleChanges.remove.push(mod.uuid);
@@ -1008,13 +1010,14 @@ const OutlineEditor = () => {
                           module={module}
                           updateModule={(updated) => updateModule(index, updated)}
                         />
-                        <button 
+                        {/* Broken logic for module change handling */}
+                        {/* <button 
                           onClick={() => removeModule(index)}
                           className="absolute -top-2 -right-12 opacity-0 group-hover:opacity-100
                                     bg-red-500 text-white rounded-full p-1 transition-opacity"
                         >
                           <FaTimes size={12} />
-                        </button>
+                        </button> */}
                       </div>
                     ))
                   ) : (
@@ -1022,7 +1025,9 @@ const OutlineEditor = () => {
                       No modules yet. Click "Add Module" to get started.
                     </div>
                   )}
-                  <button 
+                  
+                  {/* Broken logic for module change handling */}
+                  {/* <button 
                     onClick={addNewModule}
                     className="w-full py-3 bg-blue-50 hover:bg-blue-100 text-blue-600 
                               rounded-lg border-2 border-dashed border-blue-300 transition-colors
@@ -1030,7 +1035,7 @@ const OutlineEditor = () => {
                   >
                     <FaPlus />
                     <span>Add New Module</span>
-                  </button>
+                  </button> */}
                 </div>
                 )}
               </div>

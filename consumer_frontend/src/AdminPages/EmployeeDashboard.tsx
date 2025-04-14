@@ -133,7 +133,7 @@ const MemberTable = () => {
         <h2 className="text-2xl font-semibold text-gray-800">Team Members</h2>
 
         
-        <Tooltip label="Delete the invite." aria-label="Delete the invite.">
+        <Tooltip label="Send an invite." aria-label="Delete the invite.">
             <button
             onClick={() => setIsInviteModalOpen(true)}
             className="flex items-center bg-primary text-white px-4 py-2 rounded-md hover:bg-button-hover transition-colors"
