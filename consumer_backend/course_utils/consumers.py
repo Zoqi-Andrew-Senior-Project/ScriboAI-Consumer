@@ -301,6 +301,7 @@ class OutlineActions:
                     original["modules"] = modulesChanges["add"]
 
             # remove module
+            print(modulesChanges)
             if "remove" in modulesChanges:
                 original["modules"] = [
                     module
